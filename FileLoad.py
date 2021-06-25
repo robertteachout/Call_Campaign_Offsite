@@ -18,12 +18,11 @@ tomorrow = (today + timedelta(days = 1))#.strftime("%m/%d/%Y")
 # RAD4 = normalizeDate(RAD4)
 F_today = today.strftime("%m%d")
 
-
 F_today = str('Call_Campaign_v4_' + F_today +'*.txt')
 
 # Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/Table_Drops/Call_Campaign.txt'
-# Dpath = 'C:/Users/ARoethe/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
-Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
+Dpath = 'C:/Users/ARoethe/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
+# Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
 for file in glob.glob(Dpath):
     filename = file
 
@@ -86,8 +85,8 @@ def Final_Load():
     df = df[df['Project Due Date'] >= today]
     return df
 # print(filename)
-df = (Final_Load())
-print(df['OutreachID'].count())
+# df = (Final_Load())
+# print(df['OutreachID'].count())
 
 if __name__ == "__main__":
     print("File will load")

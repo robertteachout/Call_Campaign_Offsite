@@ -59,6 +59,9 @@ for i in Skills:
     df_skill = df_skill.sort_values('Score').reset_index(drop= True)
 # print(df_skill.groupby(['Skill'])['Score'].count())
 
+### Map categories
+
+
 ### Add Unique ORGs to Rank list 
 df5 = df_skill.append(df3)
 df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
