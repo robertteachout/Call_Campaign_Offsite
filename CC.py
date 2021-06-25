@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from datetime import date, timedelta, datetime
 import time
+import string
+
 from FileLoad import Final_Load
 # from Cluster import Clusters
 from Skills import complex_skills
@@ -31,7 +33,6 @@ df2 = df1.groupby(['PhoneNumber']).agg({'PhoneNumber':'count','Cluster':'mean','
 df2 = df2.reset_index()
 # print(df2[[21,0,15,10]].sort_values(0, ascending= False))
 
-
 ### Add info to main line and reskill
 df3 = pd.merge(df0,df2, on='PhoneNumber')
 df3 = complex_skills(df3)
@@ -43,32 +44,36 @@ df4 = df4.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
 df4['Unique Phone'] = 1
 
 ### Rank and append duplicate list
-Skills = df4['Skill'].unique()
-df_skill = pd.DataFrame()
+def Rank_Individual_skill(df):
+    df4 = df
+    Skills = df4['Skill'].unique()
+    df_skill = pd.DataFrame()
 
-def Score(df, skill):
-    df1 = df[df['Skill'] == skill].reset_index(drop= True)
-    End = len(df1)
-    Range = list(range(0, End, 1))
-    Retrieval = pd.DataFrame(Range,columns= ['Score'])
-    df1['Score'] = Retrieval['Score']
-    return df1
+    def Score(df, skill):
+        df1 = df[df['Skill'] == skill].reset_index(drop= True)
+        End = len(df1)
+        Range = list(range(0, End, 1))
+        Retrieval = pd.DataFrame(Range,columns= ['Score'])
+        df1['Score'] = Retrieval['Score']
+        return df1
 
-for i in Skills:
-    df_skill = df_skill.append(Score(df4, i))
-    df_skill = df_skill.sort_values('Score').reset_index(drop= True)
+    for i in Skills:
+        df_skill = df_skill.append(Score(df4, i))
+        df_skill = df_skill.sort_values('Score').reset_index(drop= True)
+    return df_skill
+
+df_skill = Rank_Individual_skill(df4)
 # print(df_skill.groupby(['Skill'])['Score'].count())
 
 ### Map categories
 
-
-### Add Unique ORGs to Rank list 
+## Add Unique ORGs to Rank list 
 df5 = df_skill.append(df3)
 df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
 
 ### Piped ORGs attached to phone numbers
 df6['OutreachID'] = df6['OutreachID'].astype(str)
-df6['ORG list'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x))
+df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
 
 df = df6
 # df = df[df['ORG Stat'] == 1]
@@ -78,17 +83,17 @@ df = df6
 
 def Save(Where):
     if Where == 'Work':
-        # path = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
+        path = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
         path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
     else:
         path = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
         path2 = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
 
-    # df.to_csv(path + str(tomorrow) +  '.csv', index=False)
+    df.to_csv(path + str(tomorrow) +  '.csv', index=False)
 
     df.to_csv(path2 + 'Group_Rank.csv', index=False)
 
-Save('Work')
+Save('Home')
 
 
 
