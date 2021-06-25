@@ -11,9 +11,7 @@ startTime_1 = time.time()
 today = date.today()
 tomorrow = (today + timedelta(days = 1)).strftime("%Y-%m-%d")
 
-
 ### Get data and mutate
-
 df0 = Final_Load()
 name_sort = {'Escalated':0, 'Unscheduled':1,'PNP Released':2,'Past Due':3,'Scheduled':4}
 
@@ -44,26 +42,6 @@ df4 = df3.sort_values(by = ['rm_sort', 'name_sort','age_sort', 'Unscheduled', 'C
 df4 = df4.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
 df4['Unique Phone'] = 1
 
-### Concat Column for ORGs to Unique Numbers
-Phone_List = df4[df4['OutreachID Count'] > 1]['PhoneNumber']
-df_clean = df0[['OutreachID', 'PhoneNumber']]
-df_phone = pd.DataFrame()
-new_row = pd.DataFrame()
-
-def phone(number):
-    df1 = df_clean[df_clean['PhoneNumber'] == number]['OutreachID'].tolist()
-    string_ORG = ""
-    for i in df1:
-        string_ORG = string_ORG +str(i) +'|'
-    new_row = [[number, string_ORG]]
-    return new_row
-
-for i in Phone_List:
-    df_phone = df_phone.append(phone(i), ignore_index=True)
-df_phone.columns = ['PhoneNumber', 'ORG list']
-
-df4 = df4.merge(df_phone, how='left', on='PhoneNumber')
-
 ### Rank and append duplicate list
 Skills = df4['Skill'].unique()
 df_skill = pd.DataFrame()
@@ -85,6 +63,9 @@ for i in Skills:
 df5 = df_skill.append(df3)
 df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
 
+### Piped ORGs attached to phone numbers
+df6['OutreachID'] = df6['OutreachID'].astype(str)
+df6['ORG list'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x))
 
 df = df6
 # df = df[df['ORG Stat'] == 1]
@@ -94,17 +75,17 @@ df = df6
 
 def Save(Where):
     if Where == 'Work':
-        path = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
+        # path = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
         path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
     else:
-        # path = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
+        path = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
         path2 = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
 
     # df.to_csv(path + str(tomorrow) +  '.csv', index=False)
 
     df.to_csv(path2 + 'Group_Rank.csv', index=False)
 
-Save('Home')
+Save('Work')
 
 
 
