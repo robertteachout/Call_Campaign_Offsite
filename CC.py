@@ -43,6 +43,33 @@ df4 = df3.sort_values(by = ['rm_sort', 'name_sort','age_sort', 'Unscheduled', 'C
 df4 = df4.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
 df4['Unique Phone'] = 1
 
+## Fill in Sprint and what Day your currently on
+def Map_categories(df):
+    Day = 1
+    Sprint = 10
+
+    df_len = len(df.index)
+    group_size = df_len // Sprint 
+
+    letters = list(string.ascii_uppercase)[:Sprint] * group_size
+    letters.sort()
+    Daily_Priority = pd.DataFrame(letters, columns=['Daily_Groups'])
+
+    add_back = df_len - len(Daily_Priority)
+    Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
+    
+    df = df.join(Daily_Priority)
+    ### Map and Sort
+    Sprint_schedual = list(range(0,Sprint))
+    Category = list(string.ascii_uppercase)[:Sprint]
+
+    Sprint_schedual = Sprint_schedual[Day:] + Sprint_schedual[:Day]
+    Daily_sort = dict(zip(Category,Sprint_schedual))
+
+    df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
+    return df
+print(Map_categories(df4))
+
 ### Rank and append duplicate list
 def Rank_Individual_skill(df):
     df4 = df
@@ -64,8 +91,6 @@ def Rank_Individual_skill(df):
 
 df_skill = Rank_Individual_skill(df4)
 # print(df_skill.groupby(['Skill'])['Score'].count())
-
-### Map categories
 
 ## Add Unique ORGs to Rank list 
 df5 = df_skill.append(df3)
