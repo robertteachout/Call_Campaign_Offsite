@@ -20,14 +20,13 @@ F_today = today.strftime("%m%d")
 
 F_today = str('Call_Campaign_v4_' + F_today +'*.txt')
 
-# Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/Table_Drops/Call_Campaign.txt'
-Dpath = 'C:/Users/ARoethe/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
-# Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
+# Dpath = 'C:/Users/ARoethe/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
+Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
 for file in glob.glob(Dpath):
     filename = file
 
 def Load():
-    df = pd.read_csv(filename, sep='\t', error_bad_lines=False, engine="python")
+    df = pd.read_csv(filename, sep='|', error_bad_lines=False, engine="python")
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
     df['Site Clean Id'] = pd.to_numeric(df['Site Clean Id'], errors='coerce')
     return df
