@@ -7,7 +7,8 @@ import string
 from FileLoad import Final_Load
 # from Cluster import Clusters
 from Skills import complex_skills
-# from CallCampaignRank_V10 import Call_Campaign
+from Sprint_Schedule import Daily_Maping
+
 startTime_1 = time.time()
 
 today = date.today()
@@ -15,11 +16,27 @@ tomorrow = (today + timedelta(days = 1)).strftime("%Y-%m-%d")
 
 ### Get data and mutate
 df0 = Final_Load()
-name_sort = {'Escalated':0, 'Unscheduled':1,'PNP Released':2,'Past Due':3,'Scheduled':4}
+df0['Daily_Groups'] = pd.Series(dtype=object)
+df0 = Daily_Maping(df0)
 
+### Sprint Schedulual Day
+def Map_categories(df):
+    Day = 1
+    Sprint = 10
+
+    ### Map and Sort
+    Sprint_schedual = list(range(0,Sprint))
+    Category = list(string.ascii_uppercase)[:Sprint]
+    Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
+    Daily_sort = dict(zip(Category,Sprint_schedual))
+    df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
+    return df
+df0 = Map_categories(df0)#.sort_values('Daily_Priority'))
+
+name_sort = {'Escalated':0, 'Unscheduled':1,'PNP Released':2,'Past Due':3,'Scheduled':4}
 rm_sort = {'EMR Remote': 0, 'HIH - Other': 2, 'Onsite':1,'Offsite':3}
 age_sort = {21: 0, 0: 1, 20:2, 15:3, 10:4, 5:5}
-df0['name_sort'] = df0['Outreach Status'].map(name_sort)
+df0['status_sort'] = df0['Outreach Status'].map(name_sort)
 df0['rm_sort'] = df0['Retrieval Group'].map(rm_sort)
 df0['age_sort'] = df0['Group Number'].map(age_sort)
 
@@ -28,47 +45,20 @@ df_dummy_status = pd.get_dummies(df0['Outreach Status'])
 df1 = df0.join(df_dummy_status)#.join(df_dummy_age) #,21:'sum', 0:'sum', 20:'sum', 15:'sum', 10:'sum', 5:'sum'
 df1['Unique Phone'] = 0 
 
+
 ### Unique Numbers count and status
 df2 = df1.groupby(['PhoneNumber']).agg({'PhoneNumber':'count','Cluster':'mean','Escalated':'sum','PNP Released':'sum','Past Due':'sum','Scheduled':'sum','Unscheduled':'sum',}).rename(columns={'PhoneNumber':'OutreachID Count','Cluster':'Cluster_Avg'})
 df2 = df2.reset_index()
-# print(df2[[21,0,15,10]].sort_values(0, ascending= False))
 
 ### Add info to main line and reskill
 df3 = pd.merge(df0,df2, on='PhoneNumber')
 df3 = complex_skills(df3)
 
 ### Sort Order and drop Dups
-df4 = df3.sort_values(by = ['rm_sort', 'name_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True,True, True, False, True]).reset_index(drop = True)
+df4 = df3.sort_values(by = ['Daily_Priority', 'rm_sort', 'status_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, True, False, True]).reset_index(drop = True)
 
 df4 = df4.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
 df4['Unique Phone'] = 1
-
-## Fill in Sprint and what Day your currently on
-def Map_categories(df):
-    Day = 1
-    Sprint = 10
-
-    df_len = len(df.index)
-    group_size = df_len // Sprint 
-
-    letters = list(string.ascii_uppercase)[:Sprint] * group_size
-    letters.sort()
-    Daily_Priority = pd.DataFrame(letters, columns=['Daily_Groups'])
-
-    add_back = df_len - len(Daily_Priority)
-    Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
-    
-    df = df.join(Daily_Priority)
-    ### Map and Sort
-    Sprint_schedual = list(range(0,Sprint))
-    Category = list(string.ascii_uppercase)[:Sprint]
-
-    Sprint_schedual = Sprint_schedual[Day:] + Sprint_schedual[:Day]
-    Daily_sort = dict(zip(Category,Sprint_schedual))
-
-    df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
-    return df
-print(Map_categories(df4))
 
 ### Rank and append duplicate list
 def Rank_Individual_skill(df):
@@ -90,9 +80,26 @@ def Rank_Individual_skill(df):
     return df_skill
 
 df_skill = Rank_Individual_skill(df4)
-# print(df_skill.groupby(['Skill'])['Score'].count())
 
-## Add Unique ORGs to Rank list 
+# ### Create file with assigned categories to ORG
+# def Assign_Map(df):
+#     Sprint = 10
+#     df_len = len(df.index)
+#     group_size = df_len // Sprint 
+#     letters = list(string.ascii_uppercase)[:Sprint] * group_size
+#     letters.sort()
+#     Daily_Priority = pd.DataFrame(letters, columns=['Daily_Groups'])
+#     add_back = df_len - len(Daily_Priority)
+#     Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
+#     df_join = df.join(Daily_Priority)
+#     df_key = df_join[['PhoneNumber', 'Daily_Groups']]
+
+#     path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
+#     df_key.to_csv(path2 + 'Assignment_Map.csv', index=False)
+### Re calculate ever 2 weeks
+# Assign_Map(df_skill)
+
+# Add Unique ORGs to Rank list 
 df5 = df_skill.append(df3)
 df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
 
@@ -118,7 +125,7 @@ def Save(Where):
 
     df.to_csv(path2 + 'Group_Rank.csv', index=False)
 
-Save('Home')
+Save('Work')
 
 
 
