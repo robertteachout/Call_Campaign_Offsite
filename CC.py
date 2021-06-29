@@ -16,22 +16,22 @@ tomorrow = (today + timedelta(days = 1)).strftime("%Y-%m-%d")
 
 ### Get data and mutate
 df0 = Final_Load()
-df0['Daily_Groups'] = pd.Series(dtype=object)
-df0 = Daily_Maping(df0)
+# df0['Daily_Groups'] = pd.Series(dtype=object)
+# df0 = Daily_Maping(df0)
 
 ### Sprint Schedulual Day
-def Map_categories(df):
-    Day = 1
-    Sprint = 10
+# def Map_categories(df):
+#     Day = 1
+#     Sprint = 10
 
-    ### Map and Sort
-    Sprint_schedual = list(range(0,Sprint))
-    Category = list(string.ascii_uppercase)[:Sprint]
-    Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
-    Daily_sort = dict(zip(Category,Sprint_schedual))
-    df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
-    return df
-df0 = Map_categories(df0)#.sort_values('Daily_Priority'))
+#     ### Map and Sort
+#     Sprint_schedual = list(range(0,Sprint))
+#     Category = list(string.ascii_uppercase)[:Sprint]
+#     Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
+#     Daily_sort = dict(zip(Category,Sprint_schedual))
+#     df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
+#     return df
+# df0 = Map_categories(df0)#.sort_values('Daily_Priority'))
 
 name_sort = {'Escalated':0, 'Unscheduled':1,'PNP Released':2,'Past Due':3,'Scheduled':4}
 rm_sort = {'EMR Remote': 0, 'HIH - Other': 2, 'Onsite':1,'Offsite':3}
@@ -55,7 +55,8 @@ df3 = pd.merge(df0,df2, on='PhoneNumber')
 df3 = complex_skills(df3)
 
 ### Sort Order and drop Dups
-df4 = df3.sort_values(by = ['Daily_Priority', 'rm_sort', 'status_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, True, False, True]).reset_index(drop = True)
+# df4 = df3.sort_values(by = ['Daily_Priority', 'rm_sort', 'status_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, True, False, True]).reset_index(drop = True)
+df4 = df3.sort_values(by = ['rm_sort', 'status_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
 
 df4 = df4.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
 df4['Unique Phone'] = 1
@@ -81,51 +82,56 @@ def Rank_Individual_skill(df):
 
 df_skill = Rank_Individual_skill(df4)
 
-# ### Create file with assigned categories to ORG
-# def Assign_Map(df):
-#     Sprint = 10
-#     df_len = len(df.index)
-#     group_size = df_len // Sprint 
-#     letters = list(string.ascii_uppercase)[:Sprint] * group_size
-#     letters.sort()
-#     Daily_Priority = pd.DataFrame(letters, columns=['Daily_Groups'])
-#     add_back = df_len - len(Daily_Priority)
-#     Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
-#     df_join = df.join(Daily_Priority)
-#     df_key = df_join[['PhoneNumber', 'Daily_Groups']]
-
-#     path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
-#     df_key.to_csv(path2 + 'Assignment_Map.csv', index=False)
-### Re calculate ever 2 weeks
-# Assign_Map(df_skill)
+### Create file with assigned categories to ORG
+def Assign_Map(df):
+    skills = df['Skill'].unique()
+    df_key = pd.DataFrame()
+    def assign_skill(df, sk):
+        dk_skill = df[df['Skill'] == sk].reset_index(drop = True)
+        Sprint = 10
+        df_len = len(dk_skill.index)
+        group_size = df_len // Sprint 
+        letters = list(string.ascii_uppercase)[:Sprint] * group_size
+        letters.sort()
+        Daily_Priority = pd.DataFrame(letters, columns=['Daily_Groups'])
+        add_back = df_len - len(Daily_Priority)
+        Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
+        df_join = dk_skill.join(Daily_Priority)
+        return df_join[['PhoneNumber', 'Skill','Daily_Groups']]
+    for i in skills:
+        df_key = df_key.append(assign_skill(df, i))
+    path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
+    df_key.to_csv(path2 + 'Assignment_Map2.csv', index=False)
+## Re calculate ever 2 weeks
+Assign_Map(df_skill)
 
 # Add Unique ORGs to Rank list 
-df5 = df_skill.append(df3)
-df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
+# df5 = df_skill.append(df3)
+# df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
 
-### Piped ORGs attached to phone numbers
-df6['OutreachID'] = df6['OutreachID'].astype(str)
-df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
+# ### Piped ORGs attached to phone numbers
+# df6['OutreachID'] = df6['OutreachID'].astype(str)
+# df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
 
-df = df6
-# df = df[df['ORG Stat'] == 1]
-# print(df)
-# print(df4.groupby('Skill').agg({'OutreachID Count':'count', 'TotalCharts':'sum'}).sort_values('OutreachID Count', ascending= False))
-# print(df.groupby('Skill').agg({'OutreachID Count':'count', 'TotalCharts':'sum'}).sort_values('OutreachID Count', ascending= False))
+# df = df6
+# # df = df[df['ORG Stat'] == 1]
+# # print(df)
+# # print(df4.groupby('Skill').agg({'OutreachID Count':'count', 'TotalCharts':'sum'}).sort_values('OutreachID Count', ascending= False))
+# # print(df.groupby('Skill').agg({'OutreachID Count':'count', 'TotalCharts':'sum'}).sort_values('OutreachID Count', ascending= False))
 
-def Save(Where):
-    if Where == 'Work':
-        path = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
-        path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
-    else:
-        path = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
-        path2 = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
+# def Save(Where):
+#     if Where == 'Work':
+#         path = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
+#         path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
+#     else:
+#         path = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
+#         path2 = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
 
-    df.to_csv(path + str(tomorrow) +  '.csv', index=False)
+#     df.to_csv(path + str(tomorrow) +  '.csv', index=False)
 
-    df.to_csv(path2 + 'Group_Rank.csv', index=False)
+#     df.to_csv(path2 + 'Group_Rank.csv', index=False)
 
-Save('Work')
+# Save('Work')
 
 
 
