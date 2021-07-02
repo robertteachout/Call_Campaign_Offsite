@@ -10,7 +10,7 @@ def Load_Assignment():
     Cluster = Cluster.join(pd.get_dummies(Cluster['Daily_Groups']))
     return Cluster
 
-# print(df['Daily_Groups'].head(20))
+# print(Load_Assignment().head(20))
 def sort(i):
     df = Load_Assignment()
     df0 = df[df[i] == 1]['PhoneNumber']
@@ -24,14 +24,15 @@ def Cluster(df, Add_Cluster):
 
 def Daily_Maping(df):
     f = df
-    Sprint = 10
+    Sprint = Load_Assignment().nunique()['Daily_Groups']
     letters = list(string.ascii_uppercase)[:Sprint]
     for i in letters:
         f = Cluster(f,i)
     f['Daily_Groups'] = f['Daily_Groups'].fillna(method='ffill')
     return f
 
-# print(Daily_Maping(df)['Daily_Groups'].head(20))#.groupby('Daily_Groups')['PhoneNumber'].count())
+# print(Daily_Maping(df).groupby('Daily_Groups')['PhoneNumber'].count())
+# print(Daily_Maping(df)['Daily_Groups'])
 
 if __name__ == "__main__":
     print("Clusters")
