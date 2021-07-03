@@ -39,22 +39,21 @@ tomorrow = next_business_day(today)
 
 ### Get data and mutate
 df0 = Final_Load()
-# df0['Daily_Groups'] = pd.Series(dtype=object)
-# df0 = Daily_Maping(df0)
+## Sprint Schedulual Day
+def Map_categories(df):
+    Day = 1
+    Sprint = 10
 
-# ## Sprint Schedulual Day
-# def Map_categories(df):
-#     Day = 1
-#     Sprint = 10
-
-#     ### Map and Sort
-#     Sprint_schedual = list(range(0,Sprint))
-#     Category = list(string.ascii_uppercase)[:Sprint]
-#     Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
-#     Daily_sort = dict(zip(Category,Sprint_schedual))
-#     df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
-#     return df
-# df0 = Map_categories(df0)#.sort_values('Daily_Priority'))
+    ### Map and Sort
+    df['Daily_Groups'] = pd.Series(dtype=object)
+    df = Daily_Maping(df)
+    Sprint_schedual = list(range(0,Sprint))
+    Category = list(string.ascii_uppercase)[:Sprint]
+    Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
+    Daily_sort = dict(zip(Category,Sprint_schedual))
+    df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
+    return df
+# df0 = Map_categories(df0)
 
 def Unique_Numbers(df):
     df0 = df
@@ -154,10 +153,6 @@ df6['OutreachID'] = df6['OutreachID'].astype(str)
 df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
 
 df = df6
-# df = df[df['ORG Stat'] == 1]
-# print(df)
-# print(df4.groupby('Skill').agg({'OutreachID Count':'count', 'TotalCharts':'sum'}).sort_values('OutreachID Count', ascending= False))
-# print(df.groupby('Skill').agg({'OutreachID Count':'count', 'TotalCharts':'sum'}).sort_values('OutreachID Count', ascending= False))
 
 def Save(Where):
     if Where == 'Work':
