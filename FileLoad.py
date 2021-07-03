@@ -20,8 +20,8 @@ F_today = today.strftime("%m%d")
 
 F_today = str('Call_Campaign_v4_' + F_today +'*.txt')
 
-# Dpath = 'C:/Users/ARoethe/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
-Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
+Dpath = 'C:/Users/ARoethe/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
+# Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
 for file in glob.glob(Dpath):
     filename = file
 
@@ -36,7 +36,7 @@ def Format(File):
     Format_Now['Last Call'] = pd.to_datetime(Format_Now['Last Call'], errors='coerce').dt.date.copy()
     Format_Now['Last Call'] = pd.to_datetime(Format_Now['Last Call'], errors='coerce').dt.date
     Format_Now['Recommended Schedule Date'] = pd.to_datetime(Format_Now['Recommended Schedule Date'], errors='coerce').dt.date
-    Format_Now['Project Due Date'] = pd.to_datetime(Format_Now['Project Due Date'], errors='coerce').dt.date
+    Format_Now['Project Due Date'] = pd.to_datetime(Format_Now['Project Due Date'])
     return Format_Now
 
 def Clean_Numbers(df):
@@ -81,11 +81,12 @@ def Final_Load():
     df = df.loc[df['OutreachID'].notnull()].copy()
     df['Cluster'] = 0
     df['Load Date'] = tomorrow.strftime("%Y-%m-%d")
-    df = df[df['Project Due Date'] >= today]
+    # df = df[df['Project Due Date'] >= today]
     return df
 # print(filename)
 # df = (Final_Load())
-# print(df['OutreachID'].count())
+# print(df)
+
 
 if __name__ == "__main__":
     print("File will load")
