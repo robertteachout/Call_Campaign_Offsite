@@ -4,7 +4,7 @@ from datetime import date, timedelta, datetime
 import glob
 import os
 import zipfile
-
+from Skills import complex_skills
 import csv
 csv.field_size_limit(1000)
 
@@ -81,6 +81,9 @@ def Final_Load():
     df = df.loc[df['OutreachID'].notnull()].copy()
     df['Cluster'] = 0
     df['Load Date'] = tomorrow.strftime("%Y-%m-%d")
+    
+    df['Daily_Groups'] = 0
+
     # df = df[df['Project Due Date'] >= today]
     return df
 # print(filename)
