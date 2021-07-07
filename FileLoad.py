@@ -5,6 +5,8 @@ import glob
 import os
 import zipfile
 from Skills import complex_skills
+from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath
+
 import csv
 csv.field_size_limit(1000)
 
@@ -19,14 +21,13 @@ tomorrow = (today + timedelta(days = 1))#.strftime("%m/%d/%Y")
 F_today = today.strftime("%m%d")
 
 F_today = str('Call_Campaign_v4_' + F_today +'*.txt')
+Dpath = newPath('dump','Call_Campaign\\') + F_today
 
-Dpath = 'C:/Users/ARoethe/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
-# Dpath = 'C:/Users/roeth/OneDrive - CIOX Health/Aaron/Projects/Call Campaign Automation/dump/Call_Campaign/' + F_today
 for file in glob.glob(Dpath):
     filename = file
 
 def Load():
-    df = pd.read_csv(filename, sep='|', error_bad_lines=False, engine="python")
+    df = pd.read_csv(filename, sep='\t', error_bad_lines=False, engine="python")
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
     df['Site Clean Id'] = pd.to_numeric(df['Site Clean Id'], errors='coerce')
     return df
@@ -82,7 +83,7 @@ def Final_Load():
     df['Cluster'] = 0
     df['Load Date'] = tomorrow.strftime("%Y-%m-%d")
     
-    df['Daily_Groups'] = 0
+    df['Daily_Groups'] = 0 #pd.Series()
 
     # df = df[df['Project Due Date'] >= today]
     return df

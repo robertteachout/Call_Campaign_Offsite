@@ -12,12 +12,12 @@ def next_business_day(start):
     while next_day.weekday() in holidays.WEEKEND or next_day in HOLIDAYS_US:
         next_day += ONE_DAY
     return next_day
-def Next_N_BD():
+def Next_N_BD(N):
     B10 = []
     seen = set(B10)
     i = 0
 
-    while len(B10) < 10:
+    while len(B10) < N:
         def test(day):
             d = today + timedelta(days=day)
             return next_business_day(d)
@@ -28,8 +28,6 @@ def Next_N_BD():
         i += 1
     return B10
 
-
-
 def daily_piv(df):
     df_piv = df.drop_duplicates('PhoneNumber')
     u = df_piv.pivot_table(index =['Daily_Groups','Daily_Priority'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'])
@@ -38,4 +36,15 @@ def map_piv(df):
     df_piv = df.drop_duplicates('PhoneNumber')
     u = df_piv.pivot_table(index =['Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'])
     return print(u)
-# print(Next_N_BD())
+print(Next_N_BD(10))
+
+import os
+import sys
+
+def newPath(Parent, Look):
+    absolutepath = os.path.abspath(__file__)
+    fileDirectory = os.path.dirname(absolutepath)
+    parentDirectory = os.path.dirname(fileDirectory)
+    newPath = os.path.join(parentDirectory, str(Parent) + '\\'+ str(Look))
+    return newPath
+# newPath('dump','')

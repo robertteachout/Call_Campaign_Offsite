@@ -9,11 +9,11 @@ from FileLoad import Final_Load
 # from Cluster import Clusters
 from Skills import complex_skills
 from Sprint_Schedule import Assign_Map, Map_categories
-from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv
+from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath
 
 startTime_1 = time.time()
 today = date.today()
-B10 = Next_N_BD()
+B10 = Next_N_BD(10)
 tomorrow = next_business_day(today)
 
 def Full_Campaign_File(Day, Master_List):
@@ -24,7 +24,7 @@ def Full_Campaign_File(Day, Master_List):
 
     def Number_stats(df):
         df0 = df
-        name_sort = {'Escalated':0, 'Unscheduled':1,'PNP Released':2,'Past Due':3,'Scheduled':4}
+        name_sort = {'Escalated':1, 'Unscheduled':2,'PNP Released':0,'Past Due':3,'Scheduled':4}
         rm_sort = {'EMR Remote': 0, 'HIH - Other': 2, 'Onsite':1,'Offsite':3}
         age_sort = {21: 0, 0: 1, 20:2, 15:3, 10:4, 5:5}
         df0['status_sort'] = df0['Outreach Status'].map(name_sort)
@@ -37,9 +37,9 @@ def Full_Campaign_File(Day, Master_List):
 
         col_stat = df0['Outreach Status'].unique()
         d1 = dict.fromkeys(col_stat, 'sum')
-        col = {'PhoneNumber':'count','Cluster':'mean',**d1}
+        col = {'PhoneNumber':'count','TotalCharts':'sum','Cluster':'mean',**d1}
     ### Unique Numbers count and status
-        df2 = df1.groupby(['PhoneNumber']).agg(col).rename(columns={'PhoneNumber':'OutreachID Count','Cluster':'Cluster_Avg'}).reset_index()
+        df2 = df1.groupby(['PhoneNumber']).agg(col).rename(columns={'PhoneNumber':'OutreachID Count','TotalCharts':'TotalChartsAgg','Cluster':'Cluster_Avg'}).reset_index()
     ### Add info to main line and reskill
         df3 = pd.merge(df0,df2, on='PhoneNumber')
         df3 = complex_skills(df3)
@@ -47,7 +47,7 @@ def Full_Campaign_File(Day, Master_List):
     df3 = Number_stats(df0)
 
     ### Sort Order and drop Dups
-    df4 = df3.sort_values(by = ['Daily_Priority','rm_sort', 'status_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, True, False, True]).reset_index(drop = True)
+    df4 = df3.sort_values(by = ['Daily_Priority','status_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
 
     df4 = df4.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
 
@@ -83,29 +83,23 @@ def Full_Campaign_File(Day, Master_List):
 
     df = df6
 
-    def Save(Where):
-        if Where == 'Work':
-            path = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
-            path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
-        else:
-            path = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Group_Rank\\'
-            path2 = 'C:\\Users\\roeth\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
-
+    def Save():
+        path = newPath('dump','Group_Rank')
+        path2 = newPath('Table_Drops','')
         df.to_csv(path + str(tomorrow) +  '.csv', index=False)
-
         df.to_csv(path2 + 'Group_Rank.csv', index=False)
         return daily_piv(df_skill)
 
     ### Run the File
     if Master_List == 0:
-        return Save('Work')
+        return Save()
 
     ###calculate ever 2 weeks
     if Master_List == 1:
         return Assign_Map(df_skill)
 
 ### [ What Day, Master list ]
-Full_Campaign_File(1, 0)
+Full_Campaign_File(2, 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")

@@ -5,18 +5,20 @@ import string
 from datetime import date, timedelta, datetime
 import holidays
 import time
-from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv
+from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath
 today = date.today()
 tomorrow = next_business_day(today)
+D2 = next_business_day(tomorrow)
 
 # df = Final_Load()
 
 def Load_Assignment():
-    path = "C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\"
+    path = newPath('Table_Drops','')
+    # path = "C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\"
     Cluster = pd.read_csv(path + "Assignment_Map.csv", sep=',', error_bad_lines=False, engine="python")
     Cluster = Cluster.join(pd.get_dummies(Cluster['Daily_Groups']))
     return Cluster
-# test_piv(Load_Assignment())
+# map_piv(Load_Assignment())
 def sort(i):
     df = Load_Assignment()
     df0 = df[df[i] == 1]['PhoneNumber']
@@ -34,11 +36,17 @@ def Daily_Maping(df):
     names = list(load['Daily_Groups'].unique())
     for i in names:
         f = Cluster(f,i)
+    f['Daily_Groups'] = f['Daily_Groups'].replace('0', D2.strftime('%m/%d'))
+    # print(f['Daily_Groups'].isna().sum())
+    # filter0 = f['Daily_Groups'] == 0 
+    # f['Daily_Groups'] = np.where(filter0, '07/08', f['Daily_Groups'])
+    
     # f['Daily_Groups'] = f['Daily_Groups'].fillna(method='ffill')
     return f, names
 # df1, label = Daily_Maping(df)
-# print(df1)
-B10 = Next_N_BD()
+# df1 = df1.drop_duplicates(subset = 'PhoneNumber')
+# print(df1.groupby('Daily_Groups')['PhoneNumber'].count())
+B10 = Next_N_BD(10)
 
 ### Create file with assigned categories to ORG
 def Assign_Map(df):
@@ -47,7 +55,7 @@ def Assign_Map(df):
     def assign_skill(sk):
         df_skill = df[df['Skill'] == sk].reset_index(drop = True)
         #### INPUT BY DAY ####
-        Sprint = 10
+        Sprint = 5
         ######################
         df_len = len(df_skill.index)
         group_size = df_len // Sprint 
@@ -63,8 +71,10 @@ def Assign_Map(df):
     ## Add together all skills with uniquely broken out sprints
     for i in skills:
         df_key = df_key.append(assign_skill(i))
-    path1 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Assignment_Map\\'
-    path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
+    path1 = newPath('dump','Assignment_Map')
+    path2 = newPath('Table_Drops','')
+    # path1 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\dump\\Assignment_Map\\'
+    # path2 = 'C:\\Users\\ARoethe\\OneDrive - CIOX Health\\Aaron\\Projects\\Call Campaign Automation\\Table_Drops\\'
     df_key.to_csv(path1 + str(tomorrow) +'.csv', index=False)
     df_key.to_csv(path2 + 'Assignment_Map' +  '.csv', index=False)
     return map_piv(df_key)
