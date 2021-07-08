@@ -139,7 +139,7 @@ def Re_Skill_Tier(df):
     df_local = df
     filter2 = df_local['OutreachID Count'] >=1
     filter3 = df_local['OutreachID Count'] <=4
-    filter4 = df_local['OutreachID Count'] >=5
+    filter4 = df_local['OutreachID Count'] >=5 #### ????
     
     filter5 = (df_local['Outreach Status'] == 'Unscheduled') 
     filter6 = (df_local['Outreach Team'] == 'Sub 15') 

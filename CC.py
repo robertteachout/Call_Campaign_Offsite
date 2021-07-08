@@ -13,23 +13,26 @@ from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPa
 
 startTime_1 = time.time()
 today = date.today()
-B10 = Next_N_BD(10)
+B10 = Next_N_BD(today, 10)
 tomorrow = next_business_day(today)
 
 def Full_Campaign_File(Day, Master_List):
     ### Get data and mutate
     df0 = Final_Load()
+    print(df0[df0['Last Call'].notnull()]['Last Call'].max())
     ### 1 = Sprint master
     df0 = Map_categories(df0, Day, Master_List) ### Trigger for lauching sprint schedual
 
     def Number_stats(df):
         df0 = df
+        audit_sort = {'RADV':0, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':4, 'Medicare Risk':5}
         name_sort = {'Escalated':1, 'Unscheduled':2,'PNP Released':0,'Past Due':3,'Scheduled':4}
         rm_sort = {'EMR Remote': 0, 'HIH - Other': 2, 'Onsite':1,'Offsite':3}
         age_sort = {21: 0, 0: 1, 20:2, 15:3, 10:4, 5:5}
         df0['status_sort'] = df0['Outreach Status'].map(name_sort)
         df0['rm_sort'] = df0['Retrieval Group'].map(rm_sort)
         df0['age_sort'] = df0['Group Number'].map(age_sort)
+        df0['audit_sort'] = df0['Audit Type'].map(audit_sort)
 
         df_dummy_status = pd.get_dummies(df0['Outreach Status'])
         df1 = df0.join(df_dummy_status)
@@ -45,9 +48,8 @@ def Full_Campaign_File(Day, Master_List):
         df3 = complex_skills(df3)
         return df3
     df3 = Number_stats(df0)
-
     ### Sort Order and drop Dups
-    df4 = df3.sort_values(by = ['Daily_Priority','status_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
+    df4 = df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
 
     df4 = df4.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
 
@@ -99,7 +101,7 @@ def Full_Campaign_File(Day, Master_List):
         return Assign_Map(df_skill)
 
 ### [ What Day, Master list ]
-Full_Campaign_File(2, 0)
+Full_Campaign_File(3, 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")

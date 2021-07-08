@@ -12,22 +12,16 @@ csv.field_size_limit(1000)
 
 today = date.today()
 tomorrow = (today + timedelta(days = 1))#.strftime("%m/%d/%Y")
-# RAD4 = (today + timedelta(days = 3))#.strftime("%m/%d/%Y")
-# def normalizeDate(date):
-#     date2 = date.replace("/", "-")
-#     return date2
-# tomorrow = normalizeDate(tomorrow)
-# RAD4 = normalizeDate(RAD4)
 F_today = today.strftime("%m%d")
 
 F_today = str('Call_Campaign_v4_' + F_today +'*.txt')
-Dpath = newPath('dump','Call_Campaign\\') + F_today
+Dpath = newPath('dump','Call_Campaign') + F_today
 
 for file in glob.glob(Dpath):
     filename = file
 
 def Load():
-    df = pd.read_csv(filename, sep='\t', error_bad_lines=False, engine="python")
+    df = pd.read_csv(filename, sep='|', error_bad_lines=False, engine="python")
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
     df['Site Clean Id'] = pd.to_numeric(df['Site Clean Id'], errors='coerce')
     return df
@@ -44,6 +38,7 @@ def Clean_Numbers(df):
     df1 = df.dropna(subset=['PhoneNumber'])
     df1 = df1[df1['PhoneNumber'] > 1111111111]
     return df1
+
 def Last_Call(df):
     df['Last Call'] = pd.to_datetime(df['Last Call'], errors='coerce').dt.date.copy()
     df1 = df
@@ -76,7 +71,8 @@ def Last_Call(df):
     df['Group Number'] = np.where(filter, 21, df['Group Number'])
 
     df['Age'] = df['Age'].fillna(0)
-    return df 
+    return df
+
 def Final_Load():
     df = Last_Call(Clean_Numbers(Format(Load())))
     df = df.loc[df['OutreachID'].notnull()].copy()
@@ -87,8 +83,11 @@ def Final_Load():
 
     # df = df[df['Project Due Date'] >= today]
     return df
-# print(filename)
-# df = (Final_Load())
+# # print(filename)
+df0 = (Format(Load()))
+print(df0[df0['Last Call'].notnull()]['Last Call'].max())
+print(df0[df0['Last Call'] == today]['Last Call'].count())
+
 # print(df)
 
 
