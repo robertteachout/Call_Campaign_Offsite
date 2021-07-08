@@ -1,0 +1,4 @@
+__pycache__
+Drop
+Jupyter Test.ipynb
+File.txt
