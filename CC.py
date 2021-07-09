@@ -16,12 +16,14 @@ today = date.today()
 B10 = Next_N_BD(today, 10)
 tomorrow = next_business_day(today)
 
-def Full_Campaign_File(Day, Master_List):
+def Full_Campaign_File(Day, Master_List, Precheck):
     ### Get data and mutate
-    df0 = Final_Load()
-    print(df0[df0['Last Call'].notnull()]['Last Call'].max())
-    ### 1 = Sprint master
-    df0 = Map_categories(df0, Day, Master_List) ### Trigger for lauching sprint schedual
+    df0, test = Final_Load(Precheck)
+    if test == 'Fail':
+        return print('Fail File Upload')
+    else:
+        print('Pass')
+        df0 = Map_categories(df0, Day, Master_List) ### Trigger for lauching sprint schedual
 
     def Number_stats(df):
         df0 = df
@@ -100,8 +102,8 @@ def Full_Campaign_File(Day, Master_List):
     if Master_List == 1:
         return Assign_Map(df_skill)
 
-### [ What Day, Master list ]
-Full_Campaign_File(3, 0)
+### [ What Day, Master list, test last nights file ]
+Full_Campaign_File(5, 0, 1)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")

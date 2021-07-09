@@ -10,20 +10,26 @@ today = date.today()
 tomorrow = next_business_day(today)
 D2 = next_business_day(tomorrow)
 FivDay = today + timedelta(days=7)
-
-# df = Final_Load()
+test = next_business_day(FivDay)
+# df, test = Final_Load(1)
 
 def Load_Assignment():
     path = newPath('dump','Assignment_Map')
-    Cluster = pd.read_csv(path + "Assignment_Map.csv", sep=',', error_bad_lines=False, engine="python")
+    Cluster = pd.read_csv(path + "Assignment_Map_test.csv", sep=',', error_bad_lines=False, engine="python")
+    Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%y')
+    start = Cluster[Cluster['Daily_Groups'] >= tomorrow.strftime('%m/%d/%y')]
+    end =  Cluster[Cluster['Daily_Groups'] < tomorrow.strftime('%m/%d/%y')]
+    Cluster = start.append(end).reset_index(drop=True).drop_duplicates(subset='PhoneNumber').sort_values('Daily_Groups').reset_index(drop=True)
+    Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%y').dt.date
     Cluster = Cluster.join(pd.get_dummies(Cluster['Daily_Groups']))
     return Cluster
 # map_piv(Load_Assignment())
+# print(Load_Assignment())
 def sort(i):
     df = Load_Assignment()
     df0 = df[df[i] == 1]['PhoneNumber']
     return df0
-
+# print(sort('2021-07-12'))
 def Cluster(df, Add_Cluster):
     df_local = df
     filter0 = df_local['PhoneNumber'].isin(sort(Add_Cluster).squeeze())
@@ -36,9 +42,10 @@ def Daily_Maping(df):
     names = list(load['Daily_Groups'].unique())
     for i in names:
         f = Cluster(f,i)
-    f['Daily_Groups'] = f['Daily_Groups'].replace('0', D2.strftime('%m/%d'))
+    f['Daily_Groups'] = f['Daily_Groups'].replace('0', D2.strftime('%m/%d/%y'))
     return f, names
 # df1, label = Daily_Maping(df)
+# map_piv(df1)
 # df1 = df1.drop_duplicates(subset = 'PhoneNumber')
 # print(df1.groupby('Daily_Groups')['PhoneNumber'].count())
 
@@ -80,20 +87,20 @@ def Assign_Map(df):
     for i in skills:
             df_key = df_key.append(assign_audit(i))#,ignore_index=True) #
     path1 = newPath('dump','Assignment_Map')
-    path2 = newPath('Table_Drops','')
 
     df_key.to_csv(path1 + str(tomorrow) +'.csv', index=False)
-    df_key.to_csv(path2 + 'Assignment_Map test' +  '.csv', index=False)
+    df_key.to_csv(path1 + 'Assignment_Map_test' +  '.csv', index=False)
     return map_piv(df_key)
 
     ## Sprint Schedulual Day
 def Map_categories(df, Day, test):
-    df, names = Daily_Maping(df)
     if test == 1:
         df['Daily_Priority'] = 0
         df['Daily_Groups'] = 0
         return df
     else:
+        df, names = Daily_Maping(df)
+
         Sprint = len(names)
         ### Map and Sort
         Sprint_schedual = list(range(0,Sprint))

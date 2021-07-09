@@ -23,16 +23,16 @@ def Next_N_BD(start, N):
         def test(day):
             d = start + timedelta(days=day)
             return next_business_day(d)
-        item = test(i).strftime("%m/%d")
+        item = test(i).strftime("%m/%d/%y")
         if item not in seen:
             seen.add(item)
             B10.append(item)
         i += 1
     return B10
-
+# print(Next_N_BD(today, 10))
 def daily_piv(df):
-    df_piv = df.drop_duplicates('PhoneNumber')
-    u = df_piv.pivot_table(index =['Daily_Groups','Daily_Priority'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'])
+    # df_piv = df.drop_duplicates('PhoneNumber')
+    u = df.pivot_table(index =['Daily_Groups','Daily_Priority'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'])
     return print(u.reset_index().sort_values('Daily_Priority'))
 def map_piv(df):
     # df_piv = df.drop_duplicates('PhoneNumber')
@@ -55,5 +55,5 @@ def date_list_split(ls, numSplit):
     splits = np.array_split(ls, numSplit)
     return splits
 
-num1 , num2 = date_list_split(Next_N_BD(today, 10), 2)
+# num1 , num2 = date_list_split(Next_N_BD(today, 10), 2)
 # print(num2)

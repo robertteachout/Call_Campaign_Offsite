@@ -12,8 +12,9 @@ csv.field_size_limit(1000)
 
 today = date.today()
 tomorrow = (today + timedelta(days = 1))#.strftime("%m/%d/%Y")
+yesterday = (today + timedelta(days = -1))#.strftime("%m/%d/%Y")
 F_today = today.strftime("%m%d")
-
+nxt_day = next_business_day(today)
 F_today = str('Call_Campaign_v4_' + F_today +'*.txt')
 Dpath = newPath('dump','Call_Campaign') + F_today
 
@@ -73,21 +74,28 @@ def Last_Call(df):
     df['Age'] = df['Age'].fillna(0)
     return df
 
-def Final_Load():
+def Final_Load(Precheck):
     df = Last_Call(Clean_Numbers(Format(Load())))
     df = df.loc[df['OutreachID'].notnull()].copy()
     df['Cluster'] = 0
-    df['Load Date'] = tomorrow.strftime("%Y-%m-%d")
+    df['Load Date'] = nxt_day.strftime("%Y-%m-%d")
     
-    df['Daily_Groups'] = 0 #pd.Series()
-
-    # df = df[df['Project Due Date'] >= today]
-    return df
-# # print(filename)
-df0 = (Format(Load()))
-print(df0[df0['Last Call'].notnull()]['Last Call'].max())
-print(df0[df0['Last Call'] == today]['Last Call'].count())
-
+    df['Daily_Groups'] = 0
+    # Precheck = Precheck
+    def Test_Load(df, Precheck):
+        df0 = df
+        if Precheck == 1:
+            today = yesterday
+        test = df0[df0['Last Call'] == today]['Last Call']
+        if today == test.max():
+            test_results = print('||| Pass ||| Last Call Count:\t' + str(test.count()))
+        else:
+            test_results = 'Fail'
+        return test_results
+    test = Test_Load(df, Precheck)
+    return df, test
+ # print(filename)
+# df, test = Final_Load(1)
 # print(df)
 
 
