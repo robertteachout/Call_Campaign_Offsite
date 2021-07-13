@@ -6,16 +6,14 @@ import os
 import zipfile
 from Skills import complex_skills
 from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath
-
 import csv
 csv.field_size_limit(1000)
 
 today = date.today()
 tomorrow = (today + timedelta(days = 1))#.strftime("%m/%d/%Y")
 yesterday = (today + timedelta(days = -1))#.strftime("%m/%d/%Y")
-F_today = today.strftime("%m%d")
 nxt_day = next_business_day(today)
-F_today = str('Call_Campaign_v4_' + F_today +'*.txt')
+F_today = str('Call_Campaign_v4_' + today.strftime("%m%d") +'*.txt')
 Dpath = newPath('dump','Call_Campaign') + F_today
 
 for file in glob.glob(Dpath):
@@ -29,7 +27,6 @@ def Load():
 
 def Format(File):
     Format_Now = File.copy()
-    Format_Now['Last Call'] = pd.to_datetime(Format_Now['Last Call'], errors='coerce').dt.date.copy()
     Format_Now['Last Call'] = pd.to_datetime(Format_Now['Last Call'], errors='coerce').dt.date
     Format_Now['Recommended Schedule Date'] = pd.to_datetime(Format_Now['Recommended Schedule Date'], errors='coerce').dt.date
     Format_Now['Project Due Date'] = pd.to_datetime(Format_Now['Project Due Date'])
@@ -37,11 +34,9 @@ def Format(File):
 
 def Clean_Numbers(df):
     df1 = df.dropna(subset=['PhoneNumber'])
-    df1 = df1[df1['PhoneNumber'] > 1111111111]
     return df1
 
 def Last_Call(df):
-    df['Last Call'] = pd.to_datetime(df['Last Call'], errors='coerce').dt.date.copy()
     df1 = df
     df1 = df1[df1['Last Call'].notnull()].copy()
     df1['New'] = tomorrow
@@ -53,24 +48,22 @@ def Last_Call(df):
     df['Age'] = 0
     df['Age'] = df1['Age']
     df['Group Number'] = 0
+
     filter = df['Last Call'].isna()
     df['Group Number'] = np.where(filter, 0, df['Group Number'])
-
-    filter = (df['Age'] >= 0) & (df['Age'] <= 5)
-    df['Group Number'] = np.where(filter, 5, df['Group Number'])
-
-    filter = (df['Age'] >= 6) & (df['Age'] <= 10)
-    df['Group Number'] = np.where(filter, 10, df['Group Number'])
-
-    filter = (df['Age'] >= 11) & (df['Age'] <= 15)
-    df['Group Number'] = np.where(filter, 15, df['Group Number'])
-
-    filter = (df['Age'] >= 16) & (df['Age'] <= 20)
-    df['Group Number'] = np.where(filter, 20, df['Group Number'])
-
+    
+    def flt(df0, category, start, stop):
+        df = df0
+        ft = (df['Age'] >= start) & (df['Age'] <= stop)
+        df['Group Number'] = np.where(ft, category, df['Group Number'])
+        return df
+    
+    df = flt(df,  5,  0,  5)
+    df = flt(df, 10,  6, 10)
+    df = flt(df, 15, 11, 15)
+    df = flt(df, 20, 16, 20)
     filter = (df['Age'] >= 21)
     df['Group Number'] = np.where(filter, 21, df['Group Number'])
-
     df['Age'] = df['Age'].fillna(0)
     return df
 
@@ -87,6 +80,7 @@ def Final_Load(Precheck):
         if Precheck == 1:
             today = yesterday
         test = df0[df0['Last Call'] == today]['Last Call']
+            # return test
         if today == test.max():
             test_results = print('||| Pass ||| Last Call Count:\t' + str(test.count()))
         else:
@@ -94,9 +88,10 @@ def Final_Load(Precheck):
         return test_results
     test = Test_Load(df, Precheck)
     return df, test
- # print(filename)
-# df, test = Final_Load(1)
+df, test = Final_Load(1)
+# print(test)
 # print(df)
+
 
 
 if __name__ == "__main__":
