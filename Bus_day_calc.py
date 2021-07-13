@@ -57,3 +57,29 @@ def date_list_split(ls, numSplit):
 
 # num1 , num2 = date_list_split(Next_N_BD(today, 10), 2)
 # print(num2)
+
+def create_dir(dir):
+    absolutepath = os.path.abspath(__file__)
+    fileDirectory = os.path.dirname(absolutepath)
+    parentDirectory = os.path.dirname(fileDirectory)
+    newPath = os.path.join(parentDirectory, dir)
+    if not os.path.isdir(newPath):
+        os.makedirs(newPath, mode = 0o666)
+    else:
+        print('dir already created')
+
+def full_dir():
+    create_dir("dump")
+    def sub_dir(sub):
+        subPath = newPath('dump',sub)
+        if not os.path.isdir(subPath):
+            os.makedirs(subPath, mode = 0o666)
+        else:
+            print('dir already created')
+    sub_dir('Assignment_Map')
+    sub_dir('Call_Campaign')
+    sub_dir('Group_Rank')
+    sub_dir('Project Tracking')
+    create_dir("Table_Drop")
+
+# full_dir()

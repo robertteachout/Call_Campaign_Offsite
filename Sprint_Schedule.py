@@ -42,7 +42,7 @@ def Daily_Maping(df):
     names = list(load['Daily_Groups'].unique())
     for i in names:
         f = Cluster(f,i)
-    f['Daily_Groups'] = f['Daily_Groups'].replace('0', D2.strftime('%m/%d/%y'))
+    f['Daily_Groups'] = f['Daily_Groups'].replace(0, D2)
     return f, names
 # df1, label = Daily_Maping(df)
 # map_piv(df1)
@@ -87,9 +87,10 @@ def Assign_Map(df):
     for i in skills:
             df_key = df_key.append(assign_audit(i))#,ignore_index=True) #
     path1 = newPath('dump','Assignment_Map')
+    path2 = newPath('Table_Drop','')
 
     df_key.to_csv(path1 + str(tomorrow) +'.csv', index=False)
-    df_key.to_csv(path1 + 'Assignment_Map_test' +  '.csv', index=False)
+    df_key.to_csv(path2 + 'Assignment_Map_test' +  '.csv', index=False)
     return map_piv(df_key)
 
     ## Sprint Schedulual Day

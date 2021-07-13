@@ -16,13 +16,13 @@ today = date.today()
 B10 = Next_N_BD(today, 10)
 tomorrow = next_business_day(today)
 
-def Full_Campaign_File(Day, Master_List, Precheck):
+def Full_Campaign_File(Day, Precheck, Master_List):
     ### Get data and mutate
     df0, test = Final_Load(Precheck)
     if test == 'Fail':
         return print('Fail File Upload')
     else:
-        print('Pass')
+        # print('Pass')
         df0 = Map_categories(df0, Day, Master_List) ### Trigger for lauching sprint schedual
 
     def Number_stats(df):
@@ -89,7 +89,7 @@ def Full_Campaign_File(Day, Master_List, Precheck):
 
     def Save():
         path = newPath('dump','Group_Rank')
-        path2 = newPath('Table_Drops','')
+        path2 = newPath('Table_Drop','')
         df.to_csv(path + str(tomorrow) +  '.csv', index=False)
         df.to_csv(path2 + 'Group_Rank.csv', index=False)
         return daily_piv(df_skill)
@@ -103,7 +103,7 @@ def Full_Campaign_File(Day, Master_List, Precheck):
         return Assign_Map(df_skill)
 
 ### [ What Day, Master list, test last nights file ]
-Full_Campaign_File(5, 0, 1)
+Full_Campaign_File(2, 1, 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")
