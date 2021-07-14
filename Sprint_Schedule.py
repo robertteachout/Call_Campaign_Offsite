@@ -11,7 +11,7 @@ tomorrow = next_business_day(today)
 D2 = next_business_day(tomorrow)
 FivDay = today + timedelta(days=7)
 test = next_business_day(FivDay)
-# df, test = Final_Load(1)
+# df, genpact, wellmed, test = Final_Load(1)
 
 def Load_Assignment():
     path = newPath('dump','Assignment_Map')

@@ -3,7 +3,6 @@ import numpy as np
 from datetime import date, timedelta, datetime
 import glob
 import os
-import zipfile
 from Skills import complex_skills
 from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath
 import csv
@@ -77,9 +76,10 @@ def Final_Load(Precheck):
     # Precheck = Precheck
     def Test_Load(df, Precheck):
         df0 = df
+        today = date.today()
+        test = df0[df0['Last Call'] == today]['Last Call']
         if Precheck == 1:
             today = yesterday
-        test = df0[df0['Last Call'] == today]['Last Call']
             # return test
         if today == test.max():
             test_results = print('||| Pass ||| Last Call Count:\t' + str(test.count()))
@@ -87,8 +87,31 @@ def Final_Load(Precheck):
             test_results = 'Fail'
         return test_results
     test = Test_Load(df, Precheck)
-    return df, test
-df, test = Final_Load(1)
+    
+    df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID Count'}).reset_index()
+    ### Add info to main line and reskill
+    df = pd.merge(df,df2, on='PhoneNumber')
+
+    ft1 = df['Retrieval Team'] == 'Genpact Offshore'
+    ft2 = df['OutreachID Count'] == 1
+
+    ft3 = df['Project Type'] == 'WellMed'
+
+    genpact  = df.loc[ft1 & ft2]
+    wellmed  = df.loc[ft3]
+
+    df['clean'] = np.where((ft1 & ft2) | ft3, 0, 1)
+    df = df[df['clean'] ==1].drop(columns= ['clean'])
+    return df, genpact, wellmed, test
+
+# df, genpact, wellmed, test = Final_Load(0)
+# def t(df):
+#     return df['OutreachID'].count()
+# print(t(genpact)+ t(wellmed)+ t(df))
+
+# print(t(Last_Call(Clean_Numbers(Format(Load())))))
+# print(genpact)
+# print(wellmed)
 # print(test)
 # print(df)
 

@@ -18,7 +18,7 @@ tomorrow = next_business_day(today)
 
 def Full_Campaign_File(Day, Precheck, Master_List):
     ### Get data and mutate
-    df0, test = Final_Load(Precheck)
+    df0, genpact, wellmed, test = Final_Load(Precheck)
     if test == 'Fail':
         return print('Fail File Upload')
     else:
@@ -42,22 +42,17 @@ def Full_Campaign_File(Day, Precheck, Master_List):
 
         col_stat = df0['Outreach Status'].unique()
         d1 = dict.fromkeys(col_stat, 'sum')
-        col = {'PhoneNumber':'count','TotalCharts':'sum','Cluster':'mean',**d1}
-    ### Unique Numbers count and status
-        df2 = df1.groupby(['PhoneNumber']).agg(col).rename(columns={'PhoneNumber':'OutreachID Count','TotalCharts':'TotalChartsAgg','Cluster':'Cluster_Avg'}).reset_index()
-    ### Add info to main line and reskill
+        col = {'TotalCharts':'sum','Cluster':'mean',**d1}
+        ### Unique Numbers count and status
+        df2 = df1.groupby(['PhoneNumber']).agg(col).rename(columns={'TotalCharts':'TotalChartsAgg','Cluster':'Cluster_Avg'}).reset_index()
+        ### Add info to main line and reskill
         df3 = pd.merge(df0,df2, on='PhoneNumber')
         df3 = complex_skills(df3)
-        return df3
-    df3 = Number_stats(df0)
-    ### Sort Order and drop Dups
-    df4 = df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
+        if not 'Daily_Priority' in df3.columns:
+            df3['Daily_Priority'] = 0
+        return df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
 
-    df4 = df4.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
-
-    df4['Unique Phone'] = 1
-
-    ### Rank and append duplicate list
+        ### Rank and append duplicate list
     def Rank_Individual_skill(df):
         df4 = df
         Skills = df4['Skill'].unique()
@@ -75,11 +70,24 @@ def Full_Campaign_File(Day, Precheck, Master_List):
             df_skill = df_skill.append(Score(df4, i))
         return df_skill.sort_values('Score').reset_index(drop= True)
 
-    df_skill = Rank_Individual_skill(df4)
+    def drop_dup(df):
+        df3 = Number_stats(df)
+        ### Sort Order and drop Dups
+        df4 = df3.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
+        df4['Unique Phone'] = 1
+        df_skill = Rank_Individual_skill(df4)
+        # Add Unique ORGs to Rank list 
+        df5 = df_skill.append(df3)
+        df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
+        return df6
 
-    # Add Unique ORGs to Rank list 
-    df5 = df_skill.append(df3)
-    df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
+    # df_skill = Rank_Individual_skill(df4)
+    df_main = drop_dup(df0)
+    genpact = drop_dup(genpact)
+    wellmed = drop_dup(wellmed)
+
+    df6 = df_main.append(genpact).append(wellmed)
+    
 
     ### Piped ORGs attached to phone numbers
     df6['OutreachID'] = df6['OutreachID'].astype(str)
@@ -92,6 +100,7 @@ def Full_Campaign_File(Day, Precheck, Master_List):
         path2 = newPath('Table_Drop','')
         df.to_csv(path + str(tomorrow) +  '.csv', index=False)
         df.to_csv(path2 + 'Group_Rank.csv', index=False)
+        df_skill = df[df['Unique Phone'] == 1]
         return daily_piv(df_skill)
 
     ### Run the File
@@ -100,10 +109,11 @@ def Full_Campaign_File(Day, Precheck, Master_List):
 
     ###calculate ever 2 weeks
     if Master_List == 1:
+        df_skill = df[df['Unique Phone'] == 1]
         return Assign_Map(df_skill)
 
-### [ What Day, Master list, test last nights file ]
-Full_Campaign_File(2, 1, 0)
+### [ What Day, test last nights file, Master list ]
+Full_Campaign_File(2, 0, 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")
