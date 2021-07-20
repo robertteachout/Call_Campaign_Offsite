@@ -20,10 +20,10 @@ for file in glob.glob(Dpath):
 
 def Load():
     df = pd.read_csv(filename, sep='|', error_bad_lines=False, engine="python")
-    df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
-    df['Site_Clean_Id'] = pd.to_numeric(df['Site_Clean_Id'], errors='coerce')
     df.columns = df.columns.str.replace('/ ','')
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
+    df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
+    df['Site_Clean_Id'] = pd.to_numeric(df['Site_Clean_Id'], errors='coerce')
     return df
 
 def Format(File):
@@ -79,9 +79,10 @@ def Final_Load(Precheck):
     def Test_Load(df, Precheck):
         df0 = df
         today = date.today()
-        test = df0[df0['Last_Call'] == today]['Last_Call']
+
+        test = df0['Last_Call'].notnull()
         if today == test.max():
-            test_results = print('||| Pass ||| Last_Call Count:\t' + str(test.count()))
+            test_results = 'Pass'
         else:
             test_results = 'Fail'
         return test_results
@@ -105,9 +106,6 @@ def Final_Load(Precheck):
     return df, genpact, wellmed, test
 
 # df, genpact, wellmed, test = Final_Load(0)
-# def t(df):
-#     return df['OutreachID'].count()
-# print(t(genpact)+ t(wellmed)+ t(df))
 
 # print(t(Last_Call(Clean_Numbers(Format(Load())))))
 # print(genpact)

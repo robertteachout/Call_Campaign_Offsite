@@ -7,17 +7,17 @@ import numpy as np
 def F_Status(df, Status):
     df_local = df
     if Status != 'NA':
-        filter = df_local['Outreach Status'] == Status
+        filter = df_local['Outreach_Status'] == Status
     else:
-        filter = df_local['Outreach Status'] != 'NA'
+        filter = df_local['Outreach_Status'] != 'NA'
     return filter
 
 def F_Audit(df, Audit):
     df_local = df
     if Audit != 'NA':
-        filter = df_local['Audit Type'] == Audit
+        filter = df_local['Audit_Type'] == Audit
     else:
-        filter = df_local['Outreach Status'] != 'NA'
+        filter = df_local['Outreach_Status'] != 'NA'
     return filter
 
 def F_ClientOptumCategory(df, Category):
@@ -25,14 +25,14 @@ def F_ClientOptumCategory(df, Category):
     if Category != 'NA':
         filter = df_local['Client / Optum Category'] == Category
     else:
-        filter = df_local['Outreach Status'] != 'NA'
+        filter = df_local['Outreach_Status'] != 'NA'
     return filter
 def F_Retrieval_Method(df, Method):
     df_local = df
     if Method != 'NA':
         filter = df_local['Retrieval Method'] == Method
     else:
-        filter = df_local['Outreach Status'] != 'NA'
+        filter = df_local['Outreach_Status'] != 'NA'
     return filter
 
 def F_ToGoCharts(df, Start, End):
@@ -50,7 +50,7 @@ def F_DueDate(df, DueDate):
     if DueDate != 'NA':
         filter = df_local['Project_Due_Date'] == DueDate
     else:
-        filter = df_local['Outreach Status'] != 'NA'
+        filter = df_local['Outreach_Status'] != 'NA'
     return filter
 
 def F_SchedualDate(df, SchedualDate):
@@ -58,20 +58,20 @@ def F_SchedualDate(df, SchedualDate):
     if SchedualDate != 'NA':
         filter = df_local['Recommended_Schedule_Date'] == SchedualDate
     else:
-        filter = df_local['Outreach Status'] != 'NA'
+        filter = df_local['Outreach_Status'] != 'NA'
     return filter
 
 def F_ProjectType(df, Project_Type):
     df_local = df
     if Project_Type != 'NA':
-        filter = df_local['Project Type'] == Project_Type
+        filter = df_local['Project_Type'] == Project_Type
     else:
-        filter = df_local['Outreach Status'] != 'NA'
+        filter = df_local['Outreach_Status'] != 'NA'
     return filter
 
 def F_Status_only(df):
     df_local = df
-    filter = (df_local['Project Status'] == 'Unscheduled') | (df_local['Project Status'] == 'Past Due') | (df_local['Project Status'] == 'Scheduled')
+    filter = (df_local['Project_Status'] == 'Unscheduled') | (df_local['Project_Status'] == 'Past Due') | (df_local['Project_Status'] == 'Scheduled')
     return filter
 
 def Re_Skill_Client_Category(df, Status, Category, Method, Method2, Start, End, DueDate, Skill_Name):
@@ -126,7 +126,7 @@ def Re_Skill_Agent(df):
 
 def Re_Skill_Genpact(df):
     df_local = df
-    filter3 = df_local['Retrieval Team'] == 'Genpact Offshore'
+    filter3 = df_local['Retrieval_Team'] == 'Genpact Offshore'
     df_local['Skill'] = np.where(filter3, 'Genpact', df_local['Skill'])
     return df_local
 
@@ -137,13 +137,13 @@ def Re_Skill_status(df, status, skill_name):
 
 def Re_Skill_Tier(df):
     df_local = df
-    filter2 = df_local['OutreachID Count'] >=1
-    filter3 = df_local['OutreachID Count'] <=4
-    filter4 = df_local['OutreachID Count'] >=5 #### ????
+    filter2 = df_local['OutreachID_Count'] >=1
+    filter3 = df_local['OutreachID_Count'] <=4
+    filter4 = df_local['OutreachID_Count'] >=5 #### ????
     
-    filter5 = (df_local['Outreach Status'] == 'Unscheduled') 
-    filter6 = (df_local['Outreach Team'] == 'Sub 15') 
-    filter7 = (df_local['OutreachID Count'] == 1)
+    filter5 = (df_local['Outreach_Status'] == 'Unscheduled') 
+    filter6 = (df_local['Outreach_Team'] == 'Sub 15') 
+    filter7 = (df_local['OutreachID_Count'] == 1)
 
     df_local['Skill'] = np.where(filter2 & filter3, 'CC_Tier2', df_local['Skill'])
     

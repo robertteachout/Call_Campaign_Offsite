@@ -20,10 +20,9 @@ def Full_Campaign_File(Day, Precheck, Master_List):
     ### Get data and mutate
     df0, genpact, wellmed, test = Final_Load(Precheck)
     if test == 'Fail':
-        return print('Fail File Upload')
-    else:
-        # print('Pass')
-        df0 = Map_categories(df0, Day, Master_List) ### Trigger for lauching sprint schedual
+        print('Fail File Upload')
+    
+    df0 = Map_categories(df0, Day, Master_List) ### Trigger for lauching sprint schedual
 
     def Number_stats(df):
         df0 = df
@@ -31,16 +30,16 @@ def Full_Campaign_File(Day, Precheck, Master_List):
         name_sort = {'Escalated':1, 'Unscheduled':2,'PNP Released':0,'Past Due':3,'Scheduled':4}
         rm_sort = {'EMR Remote': 0, 'HIH - Other': 2, 'Onsite':1,'Offsite':3}
         age_sort = {21: 0, 0: 1, 20:2, 15:3, 10:4, 5:5}
-        df0['status_sort'] = df0['Outreach Status'].map(name_sort)
-        df0['rm_sort'] = df0['Retrieval Group'].map(rm_sort)
+        df0['status_sort'] = df0['Outreach_Status'].map(name_sort)
+        df0['rm_sort'] = df0['Retrieval_Group'].map(rm_sort)
         df0['age_sort'] = df0['age_category'].map(age_sort)
-        df0['audit_sort'] = df0['Audit Type'].map(audit_sort)
+        df0['audit_sort'] = df0['Audit_Type'].map(audit_sort)
 
-        df_dummy_status = pd.get_dummies(df0['Outreach Status'])
+        df_dummy_status = pd.get_dummies(df0['Outreach_Status'])
         df1 = df0.join(df_dummy_status)
         df1['Unique_Phone'] = 0 
 
-        col_stat = df0['Outreach Status'].unique()
+        col_stat = df0['Outreach_Status'].unique()
         d1 = dict.fromkeys(col_stat, 'sum')
         col = {'TotalCharts':'sum','Cluster':'mean',**d1}
         ### Unique Numbers count and status
@@ -114,7 +113,7 @@ def Full_Campaign_File(Day, Precheck, Master_List):
         return Assign_Map(df_skill)
 
 ### [ What Day, test last nights file, Master list ]
-Full_Campaign_File(5, 0, 0)
+Full_Campaign_File(6, 0, 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")
