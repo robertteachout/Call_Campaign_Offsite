@@ -48,7 +48,7 @@ def F_ToGoCharts(df, Start, End):
 def F_DueDate(df, DueDate):
     df_local = df
     if DueDate != 'NA':
-        filter = df_local['Project Due Date'] == DueDate
+        filter = df_local['Project_Due_Date'] == DueDate
     else:
         filter = df_local['Outreach Status'] != 'NA'
     return filter
@@ -56,7 +56,7 @@ def F_DueDate(df, DueDate):
 def F_SchedualDate(df, SchedualDate):
     df_local = df
     if SchedualDate != 'NA':
-        filter = df_local['Recommended Schedule Date'] == SchedualDate
+        filter = df_local['Recommended_Schedule_Date'] == SchedualDate
     else:
         filter = df_local['Outreach Status'] != 'NA'
     return filter

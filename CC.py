@@ -33,12 +33,12 @@ def Full_Campaign_File(Day, Precheck, Master_List):
         age_sort = {21: 0, 0: 1, 20:2, 15:3, 10:4, 5:5}
         df0['status_sort'] = df0['Outreach Status'].map(name_sort)
         df0['rm_sort'] = df0['Retrieval Group'].map(rm_sort)
-        df0['age_sort'] = df0['Group Number'].map(age_sort)
+        df0['age_sort'] = df0['age_category'].map(age_sort)
         df0['audit_sort'] = df0['Audit Type'].map(audit_sort)
 
         df_dummy_status = pd.get_dummies(df0['Outreach Status'])
         df1 = df0.join(df_dummy_status)
-        df1['Unique Phone'] = 0 
+        df1['Unique_Phone'] = 0 
 
         col_stat = df0['Outreach Status'].unique()
         d1 = dict.fromkeys(col_stat, 'sum')
@@ -50,7 +50,8 @@ def Full_Campaign_File(Day, Precheck, Master_List):
         df3 = complex_skills(df3)
         if not 'Daily_Priority' in df3.columns:
             df3['Daily_Priority'] = 0
-        return df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
+        df3 = df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
+        return df3
 
         ### Rank and append duplicate list
     def Rank_Individual_skill(df):
@@ -74,7 +75,7 @@ def Full_Campaign_File(Day, Precheck, Master_List):
         df3 = Number_stats(df)
         ### Sort Order and drop Dups
         df4 = df3.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
-        df4['Unique Phone'] = 1
+        df4['Unique_Phone'] = 1
         df_skill = Rank_Individual_skill(df4)
         # Add Unique ORGs to Rank list 
         df5 = df_skill.append(df3)
@@ -100,7 +101,7 @@ def Full_Campaign_File(Day, Precheck, Master_List):
         path2 = newPath('Table_Drop','')
         df.to_csv(path + str(tomorrow) +  '.csv', index=False)
         df.to_csv(path2 + 'Group_Rank.csv', index=False)
-        df_skill = df[df['Unique Phone'] == 1]
+        df_skill = df[df['Unique_Phone'] == 1]
         return daily_piv(df_skill)
 
     ### Run the File
@@ -109,11 +110,11 @@ def Full_Campaign_File(Day, Precheck, Master_List):
 
     ###calculate ever 2 weeks
     if Master_List == 1:
-        df_skill = df[df['Unique Phone'] == 1]
+        df_skill = df[df['Unique_Phone'] == 1]
         return Assign_Map(df_skill)
 
 ### [ What Day, test last nights file, Master list ]
-Full_Campaign_File(2, 0, 0)
+Full_Campaign_File(5, 0, 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")
