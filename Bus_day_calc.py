@@ -33,8 +33,10 @@ def Next_N_BD(start, N):
 def daily_piv(df):
     # df_piv = df.drop_duplicates('PhoneNumber')
     df['Daily_Groups'] = pd.to_datetime(df['Daily_Groups']).dt.date
-    u = df.pivot_table(index =['Daily_Groups','Daily_Priority'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'])
-    return print(u.reset_index().sort_values('Daily_Priority'))
+    df['Daily_Priority'] = df['Daily_Priority'].astype(int)
+    df = df[df['Unique_Phone'] == 1]
+    u = df.pivot_table(index =['Daily_Groups','Daily_Priority'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
+    return print(u)#.reset_index().sort_values('Daily_Priority'))
 def map_piv(df):
     # df_piv = df.drop_duplicates('PhoneNumber')
     df['Daily_Groups'] = pd.to_datetime(df['Daily_Groups']).dt.date

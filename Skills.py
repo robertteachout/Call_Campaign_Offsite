@@ -126,8 +126,9 @@ def Re_Skill_Agent(df):
 
 def Re_Skill_Genpact(df):
     df_local = df
+    filter2 = df_local['OutreachID_Count'] == 1
     filter3 = df_local['Retrieval_Team'] == 'Genpact Offshore'
-    df_local['Skill'] = np.where(filter3, 'Genpact', df_local['Skill'])
+    df_local['Skill'] = np.where(filter2 &filter3, 'Genpact', df_local['Skill'])
     return df_local
 
 def Re_Skill_status(df, status, skill_name):
@@ -143,12 +144,11 @@ def Re_Skill_Tier(df):
     
     filter5 = (df_local['Outreach_Status'] == 'Unscheduled') 
     filter6 = (df_local['Outreach_Team'] == 'Sub 15') 
-    filter7 = (df_local['OutreachID_Count'] == 1)
+    # filter7 = (df_local['OutreachID_Count'] == 1)
 
     df_local['Skill'] = np.where(filter2 & filter3, 'CC_Tier2', df_local['Skill'])
     
-    df['Skill'] = np.where(filter5 & filter6 & filter7, 'CC_Tier3', df['Skill'])
-    df_local = df_local.copy()
+    df['Skill'] = np.where(filter5 & filter6 & filter3, 'CC_Tier3', df['Skill'])
 
     df_local['Skill'] = np.where(filter4, 'CC_Tier1', df_local['Skill'])
     
@@ -157,12 +157,10 @@ def Re_Skill_Tier(df):
 def complex_skills(df):
     f = df
     f = Re_Skill_Tier(f)
-
     f = Re_Skill_Project(f, 'Unscheduled', 'WellMed', 16, 300,'CC_Wellmed_Plus15_UNS')
     f = Re_Skill_Project(f, 'Unscheduled', 'WellMed', 1, 15,'CC_Wellmed_Sub15_UNS')
     f = Re_Skill_Project(f, 'Past Due', 'WellMed', 16, 300,'CC_Wellmed_Plus15_PD')
     f = Re_Skill_Project(f, 'Past Due', 'WellMed', 1, 15,'CC_Wellmed_Sub15_PD')
-    f = Re_Skill_Project(f, 'Scheduled', 'WellMed', 1, 300,'NotInDialer')
     f = Re_Skill_status(f, 'Escalated', 'CC_Escalation')
     f = Re_Skill_status(f, 'PNP Released', 'CC_Escalation')
     
@@ -199,8 +197,5 @@ def Final_Skill(df):
     f = Re_Skill_Genpact(f, 'Genpact')
     return f
 
-# test = Final_Skill(Final_Load())
-# print(test.groupby(['Skill']).agg({'OutreachID': 'count', 'ToGoCharts':'sum' }).sort_values(by= 'OutreachID',ascending=False))
-# print(test[test['Skill'] == 'PC_Adhoc2'])
 if __name__ == "__main__":
     print("Skills")

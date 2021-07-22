@@ -1,4 +1,4 @@
-from FileLoad import Final_Load
+# from FileLoad import Final_Load
 import pandas as pd
 import numpy as np
 import string
@@ -44,10 +44,6 @@ def Daily_Maping(df):
         f = Cluster(f,i)
     f['Daily_Groups'] = f['Daily_Groups'].replace(0, D2)
     return f, names
-# df1, label = Daily_Maping(df)
-# map_piv(df1)
-# df1 = df1.drop_duplicates(subset = 'PhoneNumber')
-# print(df1.groupby('Daily_Groups')['PhoneNumber'].count())
 
 ### Create file with assigned categories to ORG
 def Assign_Map(df):
