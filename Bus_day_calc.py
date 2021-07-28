@@ -3,6 +3,8 @@ import holidays
 import pandas as pd
 import numpy as np
 import time
+import os
+
 today = date.today() #-timedelta(days=1)
 FivDay = today + timedelta(days=7)
 ### Get Next Business day
@@ -14,6 +16,7 @@ def next_business_day(start):
     while next_day.weekday() in holidays.WEEKEND or next_day in HOLIDAYS_US:
         next_day += ONE_DAY
     return next_day
+    
 def Next_N_BD(start, N):
     B10 = []
     seen = set(B10)
@@ -31,21 +34,12 @@ def Next_N_BD(start, N):
     return B10
 # print(Next_N_BD(today, 10))
 def daily_piv(df):
-    # df_piv = df.drop_duplicates('PhoneNumber')
-    df['Daily_Groups'] = pd.to_datetime(df['Daily_Groups']).dt.date
-    df['Daily_Priority'] = df['Daily_Priority'].astype(int)
     df = df[df['Unique_Phone'] == 1]
-    u = df.pivot_table(index =['Daily_Groups','Daily_Priority'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
-    return print(u)#.reset_index().sort_values('Daily_Priority'))
+    u = df.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
+    return print(u)
 def map_piv(df):
-    # df_piv = df.drop_duplicates('PhoneNumber')
-    df['Daily_Groups'] = pd.to_datetime(df['Daily_Groups']).dt.date
     u = df.pivot_table(index =['Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'])
     return print(u)
-# print(Next_N_BD(today, 10))
-
-import os
-import sys
 
 def newPath(Parent, Look):
     absolutepath = os.path.abspath(__file__)
@@ -53,14 +47,10 @@ def newPath(Parent, Look):
     parentDirectory = os.path.dirname(fileDirectory)
     newPath = os.path.join(parentDirectory, str(Parent) + '\\'+ str(Look) +'\\')
     return newPath
-# newPath('dump','')
 
 def date_list_split(ls, numSplit):
     splits = np.array_split(ls, numSplit)
     return splits
-
-# num1 , num2 = date_list_split(Next_N_BD(today, 10), 2)
-# print(num2)
 
 def create_dir(dir):
     absolutepath = os.path.abspath(__file__)

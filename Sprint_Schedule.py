@@ -14,13 +14,15 @@ test = next_business_day(FivDay)
 # df, genpact, wellmed, test = Final_Load(1)
 
 def Load_Assignment():
-    path = newPath('dump','Assignment_Map')
-    Cluster = pd.read_csv(path + "Assignment_Map_test.csv", sep=',', error_bad_lines=False, engine="python")
-    Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%y')
-    start = Cluster[Cluster['Daily_Groups'] >= tomorrow.strftime('%m/%d/%y')]
-    end =  Cluster[Cluster['Daily_Groups'] < tomorrow.strftime('%m/%d/%y')]
+    path = newPath('Table_Drop','')
+    Cluster = pd.read_csv(path + "Assignment_Map.csv", sep=',', error_bad_lines=False, engine="python")
+    ### at the begining of new cylce remove cut this section
+    Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%Y')
+    start = Cluster[Cluster['Daily_Groups'] >= tomorrow.strftime('%m/%d/%Y')]
+    end =  Cluster[Cluster['Daily_Groups'] < tomorrow.strftime('%m/%d/%Y')]
     Cluster = start.append(end).reset_index(drop=True).drop_duplicates(subset='PhoneNumber').sort_values('Daily_Groups').reset_index(drop=True)
-    Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%y').dt.date
+    Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%Y').dt.date
+    ### end
     Cluster = Cluster.join(pd.get_dummies(Cluster['Daily_Groups']))
     return Cluster
 # map_piv(Load_Assignment())
@@ -48,11 +50,12 @@ def Daily_Maping(df):
 ### Create file with assigned categories to ORG
 def Assign_Map(df):
     skills = df['Skill'].unique()
+    df_clean = df.drop_duplicates('PhoneNumber')
     df_key = pd.DataFrame()
     B10 = Next_N_BD(today, 10)
     num1 , num2 = date_list_split(B10, 2)
     def assign_skill(sk, j, BusDay):
-        df_skill = df[df['Skill'] == sk].reset_index(drop = True)
+        df_skill = df_clean[df_clean['Skill'] == sk].reset_index(drop = True)
         if j == 5:
             df_skill = df_skill[df_skill['audit_sort'] <= 2].reset_index(drop = True)
         elif j == 10:
@@ -86,7 +89,7 @@ def Assign_Map(df):
     path2 = newPath('Table_Drop','')
 
     df_key.to_csv(path1 + str(tomorrow) +'.csv', index=False)
-    df_key.to_csv(path2 + 'Assignment_Map_test' +  '.csv', index=False)
+    df_key.to_csv(path2 + 'Assignment_Map' +  '.csv', index=False)
     return map_piv(df_key)
 
     ## Sprint Schedulual Day
