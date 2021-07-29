@@ -5,13 +5,14 @@ import string
 from datetime import date, timedelta, datetime
 import holidays
 import time
+from FileLoad import Final_Load
 from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath, date_list_split
 today = date.today()
 tomorrow = next_business_day(today)
 D2 = next_business_day(tomorrow)
 FivDay = today + timedelta(days=7)
 test = next_business_day(FivDay)
-# df, genpact, wellmed, test = Final_Load(1)
+# df, test = Final_Load()
 
 def Load_Assignment():
     path = newPath('Table_Drop','')
@@ -44,7 +45,6 @@ def Daily_Maping(df):
     names = list(load['Daily_Groups'].unique())
     for i in names:
         f = Cluster(f,i)
-    f['Daily_Groups'] = f['Daily_Groups'].replace(0, D2)
     return f, names
 
 ### Create file with assigned categories to ORG
@@ -100,7 +100,11 @@ def Map_categories(df, Day, test):
         return df
     else:
         df, names = Daily_Maping(df)
-
+        df['NewID'] = 0
+        filter1 = df['Daily_Groups'] == 0
+        df['NewID'] = np.where(filter1, 1, df['NewID'])
+        df['Daily_Groups'] = df['Daily_Groups'].replace(0, D2)
+        
         Sprint = len(names)
         ### Map and Sort
         Sprint_schedual = list(range(0,Sprint))

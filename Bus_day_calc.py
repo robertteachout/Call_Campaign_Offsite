@@ -16,7 +16,7 @@ def next_business_day(start):
     while next_day.weekday() in holidays.WEEKEND or next_day in HOLIDAYS_US:
         next_day += ONE_DAY
     return next_day
-    
+
 def Next_N_BD(start, N):
     B10 = []
     seen = set(B10)
@@ -35,7 +35,7 @@ def Next_N_BD(start, N):
 # print(Next_N_BD(today, 10))
 def daily_piv(df):
     df = df[df['Unique_Phone'] == 1]
-    u = df.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
+    u = df.pivot_table(index =['Daily_Priority', 'Daily_Groups','NewID'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
     return print(u)
 def map_piv(df):
     u = df.pivot_table(index =['Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'])

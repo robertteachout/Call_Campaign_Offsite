@@ -5,7 +5,7 @@ import glob
 import os
 from Skills import complex_skills
 from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath
-from Sprint_Schedule import Map_categories
+# from Sprint_Schedule import Map_categories
 import csv
 csv.field_size_limit(1000)
 
@@ -69,7 +69,7 @@ def Last_Call(df):
     df['Age'] = df['Age'].fillna(0)
     return df
 
-def Test_Load(df, Precheck):
+def Test_Load(df):
         df0 = df
         today = date.today()
 
@@ -80,16 +80,16 @@ def Test_Load(df, Precheck):
             test_results = 'Fail'
         return test_results
 
-def Final_Load(Precheck):
+def Final_Load():
     df = Last_Call(Clean_Numbers(Format(Load())))
     df = df.loc[df['OutreachID'].notnull()].copy()
     df['Cluster'] = 0
     df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
     
     df['Daily_Groups'] = 0
-    # Precheck = Precheck
+    df['Unique_Phone'] = 0 
     
-    test = Test_Load(df, Precheck)
+    test = Test_Load(df)
     
     df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
     ### Add info to main line and reskill
@@ -112,7 +112,6 @@ def Number_stats(df):
 
     df_dummy_status = pd.get_dummies(df0['Outreach_Status'])
     df1 = df0.join(df_dummy_status)
-    df1['Unique_Phone'] = 0 
 
     col_stat = df0['Outreach_Status'].unique()
     d1 = dict.fromkeys(col_stat, 'sum')

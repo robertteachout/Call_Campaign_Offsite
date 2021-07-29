@@ -13,9 +13,9 @@ today = date.today()
 B10 = Next_N_BD(today, 10)
 tomorrow = next_business_day(today)
 
-def Full_Campaign_File(Day, Precheck, Master_List):
+def Full_Campaign_File(Day, Master_List):
     ### Get data and mutate
-    df, test = Final_Load(Precheck)
+    df, test = Final_Load()
     if test == 'Fail':
         print('Failed Upload')
     
@@ -41,7 +41,7 @@ def Full_Campaign_File(Day, Precheck, Master_List):
             df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
             ### Convert to Child ORG
             if Master_List == 0:
-                filter_Child_ORG = df6['Unique_Phone'].isnull() 
+                filter_Child_ORG = df6['Unique_Phone'] = 0
                 df6['Skill'] = np.where(filter_Child_ORG, 'Child_ORG', df6['Skill'])
                 df6 = Re_Skill_Project(df6, 'Scheduled', 'WellMed', 1, 300,'Child_ORG')
                 return df6
@@ -74,7 +74,7 @@ def Full_Campaign_File(Day, Precheck, Master_List):
         return Assign_Map(df)
 
 ### [ What Day, test last nights file, Master list ]
-Full_Campaign_File(2, 0, 0)
+Full_Campaign_File(3, 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")
