@@ -11,10 +11,9 @@ Dpath = newPath('Table_Drop','')
 ### Load file ###
 df = pd.read_csv(Dpath + 'Group_Rank.csv', sep=',',low_memory=False)
 ### Clean ###
-df = df[['OutreachID', 'PhoneNumber', 'Last_Call', 'Score', 'Skill', 'OutreachID_Count', 'Daily_Groups']]
-df['Last_Call'] = df['Last_Call'].fillna(value= pd.to_datetime('10/10/2020'))
-df[['OutreachID', 'Score', 'PhoneNumber', 'OutreachID_Count']] = df[['OutreachID', 'Score', 'PhoneNumber', 'OutreachID_Count']].astype(np.int64)
-df[['Last_Call', 'Daily_Groups']] = df[['Last_Call', 'Daily_Groups']].astype('datetime64[ns]')
+df = df[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone']]
+df[['OutreachID', 'Score', 'PhoneNumber', 'Unique_Phone']] = df[['OutreachID', 'Score', 'PhoneNumber', 'Unique_Phone']].astype(np.int64)
+df['Daily_Groups'] = df['Daily_Groups'].astype('datetime64[ns]')
 ### Server Location ###
 servername = 'HOME\SQLSERVER2019'
 database = 'test_campaign_file'
@@ -80,9 +79,10 @@ if __name__ == '__main__':
     crsr = cnxn.cursor()
     ### Create Table ###
     # crsr.execute("""
+
     #                 CREATE TABLE Campaign (
     #                 OutreachID int, PhoneNumber BIGINT, Last_Call date, 
-    #                 Score int, Skill varchar(50), Daily_Groups date, OutreachID_Count int
+    #                 Score int, Skill varchar(50), Daily_Groups date, Unique_Phone int
     #                 )
     #                 """)
 
@@ -92,7 +92,7 @@ if __name__ == '__main__':
     ### Add today's file ###
     MyDfInsert(cnxn, """
                     INSERT INTO test_campaign_file.dbo.Campaign (
-                        OutreachID, PhoneNumber, Last_Call, Score, Skill, OutreachID_Count, Daily_Groups) 
+                        OutreachID, PhoneNumber, Last_Call, Score, Skill, Unique_Phone, Daily_Groups) 
                     """, df, rows_per_batch=275)
 
     print()
