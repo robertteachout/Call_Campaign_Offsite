@@ -92,7 +92,7 @@ if __name__ == '__main__':
     ### Add today's file ###
     MyDfInsert(cnxn, """
                     INSERT INTO test_campaign_file.dbo.Campaign (
-                        OutreachID, PhoneNumber, Last_Call, Score, Skill, Unique_Phone, Daily_Groups) 
+                        OutreachID, PhoneNumber, Score, Skill, Unique_Phone, Daily_Groups) 
                     """, df, rows_per_batch=275)
 
     print()
