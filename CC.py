@@ -41,7 +41,7 @@ def Full_Campaign_File(Day, Master_List):
             df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
             ### Convert to Child ORG
             if Master_List == 0:
-                filter_Child_ORG = df6['Unique_Phone'] = 0
+                filter_Child_ORG = df6['Unique_Phone'].isnull() 
                 df6['Skill'] = np.where(filter_Child_ORG, 'Child_ORG', df6['Skill'])
                 df6 = Re_Skill_Project(df6, 'Scheduled', 'WellMed', 1, 300,'Child_ORG')
                 return df6

@@ -87,7 +87,7 @@ def Final_Load():
     df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
     
     df['Daily_Groups'] = 0
-    df['Unique_Phone'] = 0 
+    # df['Unique_Phone'] = 0 
     
     test = Test_Load(df)
     
@@ -112,7 +112,7 @@ def Number_stats(df):
 
     df_dummy_status = pd.get_dummies(df0['Outreach_Status'])
     df1 = df0.join(df_dummy_status)
-
+    df1['Unique_Phone'] = 0
     col_stat = df0['Outreach_Status'].unique()
     d1 = dict.fromkeys(col_stat, 'sum')
     col = {'TotalCharts':'sum','Cluster':'mean',**d1}
