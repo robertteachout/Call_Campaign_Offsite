@@ -74,7 +74,8 @@ def Full_Campaign_File(Day, Master_List):
         return Assign_Map(df)
 
 ### [ What Day, test last nights file, Master list ]
-Full_Campaign_File(3, 0)
+Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH3':8,'F2':9}
+Full_Campaign_File(Date['W2'], 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")
