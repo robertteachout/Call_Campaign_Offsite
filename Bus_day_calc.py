@@ -26,7 +26,7 @@ def Next_N_BD(start, N):
         def test(day):
             d = start + timedelta(days=day)
             return next_business_day(d)
-        item = test(i).strftime("%m/%d/%y")
+        item = test(i).strftime("%m/%d/%Y")
         if item not in seen:
             seen.add(item)
             B10.append(item)

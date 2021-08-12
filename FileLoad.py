@@ -25,8 +25,9 @@ def Load():
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
     df['Site_Clean_Id'] = pd.to_numeric(df['Site_Clean_Id'], errors='coerce')
+    df = df[df['PhoneNumber'] > 1111111111]
     return df
-
+# print(len(Load()))
 def Format(File):
     Format_Now = File.copy()
     Format_Now['Last_Call'] = pd.to_datetime(Format_Now['Last_Call'], errors='coerce').dt.date

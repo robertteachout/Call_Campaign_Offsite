@@ -40,13 +40,13 @@ def Full_Campaign_File(Day, Master_List):
             df6['OutreachID'] = df6['OutreachID'].astype(str)
             df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
             ### Convert to Child ORG
-            if Master_List == 0:
-                filter_Child_ORG = df6['Unique_Phone'].isnull() 
-                df6['Skill'] = np.where(filter_Child_ORG, 'Child_ORG', df6['Skill'])
-                df6 = Re_Skill_Project(df6, 'Scheduled', 'WellMed', 1, 300,'Child_ORG')
-                return df6
-            else:
-                return df6
+            # if Master_List == 0:
+            #     filter_Child_ORG = df6['Unique_Phone'].isnull() 
+            #     df6['Skill'] = np.where(filter_Child_ORG, 'Child_ORG', df6['Skill'])
+            # df6 = Re_Skill_Project(df6, 'Scheduled', 'WellMed', 1, 300,'Child_ORG')
+            #     return df6
+            # else:
+            return df6
     
     def drop_dup(df, Master_List):
         df3 = Number_stats(df)
@@ -58,6 +58,13 @@ def Full_Campaign_File(Day, Master_List):
 
     df = drop_dup(df0, Master_List)
 
+    NewID = df[df['NewID'] == 1][['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
+    NewID['Daily_Groups'] = pd.to_datetime(NewID['Daily_Groups']).dt.strftime('%m/%d/%Y')
+    mapPath = newPath('Table_Drop','')
+    Daily_Groups = pd.read_csv(mapPath + "Assignment_Map.csv", sep=',', error_bad_lines=False, engine="python")
+    N_Daily_Groups = Daily_Groups.append(NewID)
+    N_Daily_Groups.to_csv(mapPath + 'Assignment_Map.csv', sep=',', index=False)
+    # print(N_Daily_Groups)
     def Save():
         path = newPath('dump','Group_Rank')
         path2 = newPath('Table_Drop','')
@@ -65,7 +72,7 @@ def Full_Campaign_File(Day, Master_List):
         df.to_csv(path2 + 'Group_Rank.csv', index=False)
         daily_piv(df)
 
-    ### Run the File
+    ## Run the File
     if Master_List == 0:
         return Save()
 
@@ -74,8 +81,9 @@ def Full_Campaign_File(Day, Master_List):
         return Assign_Map(df)
 
 ### [ What Day, test last nights file, Master list ]
-Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH3':8,'F2':9}
-Full_Campaign_File(Date['W2'], 0)
+Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
+
+Full_Campaign_File(Date['TH1'], 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")
