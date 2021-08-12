@@ -87,7 +87,7 @@ def Assign_Map(df):
             df_key = df_key.append(assign_audit(i))#,ignore_index=True) #
     path1 = newPath('dump','Assignment_Map')
     path2 = newPath('Table_Drop','')
-
+    df_key['NewID'] = 0
     df_key.to_csv(path1 + str(tomorrow) +'.csv', index=False)
     df_key.to_csv(path2 + 'Assignment_Map' +  '.csv', index=False)
     return map_piv(df_key)
@@ -112,6 +112,7 @@ def Map_categories(df, Day, test):
         Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
         Daily_sort = dict(zip(Category,Sprint_schedual))
         df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
+
         return df
 
 if __name__ == "__main__":
