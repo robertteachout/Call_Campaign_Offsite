@@ -11,17 +11,17 @@ today = date.today()
 # query db
 sql = """
 SELECT A.[Project Year]
-     , A.[Audit Type]
+     , A.[Audit_Type]
      , A.[Client Category]
      , A.[Client / Optum Category]
      , A.[Client Project]
      , A.[Project ID]
-     , A.[Project Type]
+     , A.[Project_Type]
      , A.[Project Start Due]
-     , A.[Project Due Date]
+     , A.[Project_Due_Date]
      , A.[SVP]
      , A.[Account Manager]
-     , A.[Project Status]
+     , A.[Project_Status]
      , A.[Total Charts]
      , A.[Net charts]
      , A.[Forecasted Netcharts]
@@ -83,11 +83,11 @@ FROM DWWorking.Prod.Project_Tracking_Report_V2 AS A
 LEFT JOIN (SELECT ProjectId, YieldType FROM DW_Operations.dbo.DimProject GROUP BY ProjectId, YieldType) AS B
 ON A.[Project ID] = B.ProjectId
 WHERE A.[Insert Date] = CAST(GETDATE() AS DATE)
-      AND [Project Status] IN ('New', 'In Process')
-      AND A.[Project Due Date] >= CAST(GETDATE() AS DATE)
+      AND [Project_Status] IN ('New', 'In Process')
+      AND A.[Project_Due_Date] >= CAST(GETDATE() AS DATE)
 	  and A.[Net Charts] > 0
 --AND [Client Category] NOT IN ( 'Optum Insight' )
---AND [Project Type] NOT IN ( 'RADV' )
+--AND [Project_Type] NOT IN ( 'RADV' )
 --AND A.[Project ID] = '2003200537_0627'
 
 """

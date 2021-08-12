@@ -12,13 +12,16 @@ Dpath = newPath('Table_Drop','')
 df = pd.read_csv(Dpath + 'Group_Rank.csv', sep=',',low_memory=False)
 ### Clean ###
 df = df[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone']]
-df[['OutreachID', 'Score', 'PhoneNumber', 'Unique_Phone']] = df[['OutreachID', 'Score', 'PhoneNumber', 'Unique_Phone']].astype(np.int64)
+df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]
+print(len(df['PhoneNumber'].max()))
+df = df.fillna(0)
+df[['OutreachID', 'Score', 'Unique_Phone']] = df[['OutreachID', 'Score', 'Unique_Phone']].astype(np.int64)
 df['Daily_Groups'] = df['Daily_Groups'].astype('datetime64[ns]')
 ### Server Location ###
-servername = 'HOME\SQLSERVER2019'
-database = 'test_campaign_file'
-# # servername = 'EUS1PCFSNAPDB01'
-# # database = 'DWWorking'
+# servername = 'HOME\SQLSERVER2019'
+# database = 'test_campaign_file'
+servername = 'EUS1PCFSNAPDB01'
+database = 'DWWorking'
 
 DB ={
     'servername': servername,
@@ -80,19 +83,23 @@ if __name__ == '__main__':
     ### Create Table ###
     # crsr.execute("""
 
-    #                 CREATE TABLE Campaign (
-    #                 OutreachID int, PhoneNumber BIGINT, Last_Call date, 
-    #                 Score int, Skill varchar(50), Daily_Groups date, Unique_Phone int
+    #                 CREATE TABLE Call_Campaign (
+    #                 OutreachID int, 
+    #                 PhoneNumber varchar(10), 
+    #                 Score int, 
+    #                 Skill varchar(50), 
+    #                 Daily_Groups date, 
+    #                 Unique_Phone int
     #                 )
     #                 """)
 
     t0 = time.time()
     ### Remove yesterday's file ###
-    crsr.execute('''DELETE FROM dbo.Campaign''')
-    ### Add today's file ###
+    crsr.execute('''DELETE FROM dbo.Call_Campaign''')
+    # ### Add today's file ###
     MyDfInsert(cnxn, """
-                    INSERT INTO test_campaign_file.dbo.Campaign (
-                        OutreachID, PhoneNumber, Score, Skill, Unique_Phone, Daily_Groups) 
+                    INSERT INTO DWWorking.dbo.Call_Campaign (
+                        OutreachID, PhoneNumber, Score, Skill, Daily_Groups, Unique_Phone) 
                     """, df, rows_per_batch=275)
 
     print()
