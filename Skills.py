@@ -155,12 +155,12 @@ def Re_Skill_Tier(df):
     return df_local
 
 def complex_skills(df):
-    f = df
+    f = df 
     f = Re_Skill_Tier(f)
-    f = Re_Skill_Project(f, 'Unscheduled', 'WellMed', 16, 300,'CC_Wellmed_Plus15_UNS')
-    f = Re_Skill_Project(f, 'Unscheduled', 'WellMed', 1, 15,'CC_Wellmed_Sub15_UNS')
-    f = Re_Skill_Project(f, 'Past Due', 'WellMed', 16, 300,'CC_Wellmed_Plus15_PD')
-    f = Re_Skill_Project(f, 'Past Due', 'WellMed', 1, 15,'CC_Wellmed_Sub15_PD')
+    # f = Re_Skill_Project(f, 'Unscheduled', 'WellMed', 16, 300,'CC_Wellmed_Plus15_UNS')
+    f = Re_Skill_Project(f, 'NA', 'WellMed', 1, 300,'CC_Wellmed_Sub15_UNS')
+    # f = Re_Skill_Project(f, 'Past Due', 'WellMed', 16, 300,'CC_Wellmed_Plus15_PD')
+    # f = Re_Skill_Project(f, 'Past Due', 'WellMed', 1, 15,'CC_Wellmed_Sub15_PD')
     f = Re_Skill_status(f, 'Escalated', 'CC_Escalation')
     f = Re_Skill_status(f, 'PNP Released', 'CC_Escalation')
     
