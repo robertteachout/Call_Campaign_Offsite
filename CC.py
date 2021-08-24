@@ -19,6 +19,9 @@ def Full_Campaign_File(Day, Master_List):
     if test == 'Fail':
         print('Failed Upload')
     
+    df0 = df[df['Skill'] != 'CC_GenpactPRV_Priority']
+    df_test = df[df['Skill'] == 'CC_GenpactPRV_Priority']
+
     df0 = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
 
     def Score(df1):
@@ -55,9 +58,9 @@ def Full_Campaign_File(Day, Master_List):
         for i in df3['Skill'].unique():
             df_score_spilt = df_score_spilt.append(spilt(df3, i, Master_List))
         return df_score_spilt
-
+    df_test = Score(df_test)
     df = drop_dup(df0, Master_List)
-
+    df = df.append(df_test)
     NewID = df[df['NewID'] == 1][['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
     NewID['Daily_Groups'] = pd.to_datetime(NewID['Daily_Groups']).dt.strftime('%m/%d/%Y')
     mapPath = newPath('Table_Drop','')
@@ -83,7 +86,7 @@ def Full_Campaign_File(Day, Master_List):
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['TH1'], 0)
+Full_Campaign_File(Date['TH2'], 0)
 
 executionTime_1 = (time.time() - startTime_1)
 print("-----------------------------------------------")

@@ -136,6 +136,15 @@ def Re_Skill_status(df, status, skill_name):
     df['Skill'] = np.where(filter1, skill_name, df['Skill'])
     return df
 
+def random_skill(df):
+    filter1 = F_Status(df, 'Unscheduled')
+    filter2 = F_ProjectType(df, 'Cigna - IFP RADV')
+    filter3 = F_ProjectType(df, 'Med Mutual of Ohio')
+    filter4 = df['Age'] > 5
+    df['Skill'] = np.where(filter1 & filter2 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
+    df['Skill'] = np.where(filter1 & filter3 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
+    return df
+
 def Re_Skill_Tier(df):
     df_local = df
     filter2 = df_local['OutreachID_Count'] >=1
@@ -151,7 +160,6 @@ def Re_Skill_Tier(df):
     df['Skill'] = np.where(filter5 & filter6 & filter3, 'CC_Tier3', df['Skill'])
 
     df_local['Skill'] = np.where(filter4, 'CC_Tier1', df_local['Skill'])
-    
     return df_local
 
 def complex_skills(df):
@@ -165,6 +173,8 @@ def complex_skills(df):
     f = Re_Skill_status(f, 'PNP Released', 'CC_Escalation')
     
     f = Re_Skill_Genpact(f)
+    f = random_skill(f)
+
     return f
 
 def Final_Skill(df):

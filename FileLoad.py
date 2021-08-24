@@ -26,6 +26,7 @@ def Load():
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
     df['Site_Clean_Id'] = pd.to_numeric(df['Site_Clean_Id'], errors='coerce')
     df = df[df['PhoneNumber'] > 1111111111]
+    df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
     return df
 # print(len(Load()))
 def Format(File):
