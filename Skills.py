@@ -128,7 +128,7 @@ def Re_Skill_Genpact(df):
     df_local = df
     filter2 = df_local['OutreachID_Count'] == 1
     filter3 = df_local['Retrieval_Team'] == 'Genpact Offshore'
-    df_local['Skill'] = np.where(filter2 &filter3, 'Genpact', df_local['Skill'])
+    df_local['Skill'] = np.where(filter2 &filter3, 'CC_Genpact_Scheduling', df_local['Skill'])
     return df_local
 
 def Re_Skill_status(df, status, skill_name):
@@ -174,7 +174,6 @@ def complex_skills(df):
     
     f = Re_Skill_Genpact(f)
     f = random_skill(f)
-
     return f
 
 def Final_Skill(df):
