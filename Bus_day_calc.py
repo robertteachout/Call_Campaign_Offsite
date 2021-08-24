@@ -17,6 +17,12 @@ def next_business_day(start):
         next_day += ONE_DAY
     return next_day
 
+def last_business_day(start):
+    next_day = start - ONE_DAY
+    while next_day.weekday() in holidays.WEEKEND or next_day in HOLIDAYS_US:
+        next_day -= ONE_DAY
+    return next_day
+
 def Next_N_BD(start, N):
     B10 = []
     seen = set(B10)
@@ -33,6 +39,13 @@ def Next_N_BD(start, N):
         i += 1
     return B10
 # print(Next_N_BD(today, 10))
+
+def time_check(start, comment):
+    executionTime_1 = (time.time() - start)
+    print("-----------------------------------------------")
+    print(comment + '\n' +'Time: ' + str(executionTime_1))
+    print("-----------------------------------------------")
+
 def daily_piv(df):
     df = df[df['Unique_Phone'] == 1]
     u = df.pivot_table(index =['Daily_Priority', 'Daily_Groups','NewID'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')

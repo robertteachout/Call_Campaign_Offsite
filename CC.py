@@ -6,7 +6,8 @@ import time
 from FileLoad import Final_Load, Number_stats
 from Skills import complex_skills, Re_Skill_Project
 from Sprint_Schedule import Assign_Map, Map_categories
-from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath
+from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath, time_check
+from missedORGs import pull_list
 
 startTime_1 = time.time()
 today = date.today()
@@ -19,10 +20,19 @@ def Full_Campaign_File(Day, Master_List):
     if test == 'Fail':
         print('Failed Upload')
     
-    df0 = df[df['Skill'] != 'CC_GenpactPRV_Priority']
-    df_test = df[df['Skill'] == 'CC_GenpactPRV_Priority']
+    time_check(startTime_1, 'File Load')
 
-    df0 = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
+    df00 = df[df['Skill'] != 'CC_GenpactPRV_Priority'].copy()
+    df_test = df[df['Skill'] == 'CC_GenpactPRV_Priority'].copy()
+
+    df0 = Map_categories(df00, Day, Master_List) ### Trigger for lauching sprint schedual
+    
+    time_check(startTime_1, 'Sprint Schedule')
+    
+    filter0 = df0['OutreachID'].isin(pull_list().squeeze())
+    df0['Daily_Groups'] = np.where(filter0, tomorrow, df0['Daily_Groups'])
+    
+    time_check(startTime_1, 'Missed ORGs')
 
     def Score(df1):
         End = len(df1)
@@ -58,37 +68,44 @@ def Full_Campaign_File(Day, Master_List):
         for i in df3['Skill'].unique():
             df_score_spilt = df_score_spilt.append(spilt(df3, i, Master_List))
         return df_score_spilt
+
     df_test = Score(df_test)
-    df = drop_dup(df0, Master_List)
-    df = df.append(df_test)
-    NewID = df[df['NewID'] == 1][['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
-    NewID['Daily_Groups'] = pd.to_datetime(NewID['Daily_Groups']).dt.strftime('%m/%d/%Y')
-    mapPath = newPath('Table_Drop','')
-    Daily_Groups = pd.read_csv(mapPath + "Assignment_Map.csv", sep=',', error_bad_lines=False, engine="python")
-    N_Daily_Groups = Daily_Groups.append(NewID)
-    N_Daily_Groups.to_csv(mapPath + 'Assignment_Map.csv', sep=',', index=False)
+    dff = drop_dup(df0, Master_List)
+    dffin = dff.append(df_test)
+    
+    time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
+
+    if 'NewID' in dffin.columns:
+        NewID = dffin[dffin['NewID'] == 1][['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
+        NewID['Daily_Groups'] = pd.to_datetime(NewID['Daily_Groups']).dt.strftime('%m/%d/%Y')
+        mapPath = newPath('Table_Drop','')
+        Daily_Groups = pd.read_csv(mapPath + "Assignment_Map.csv", sep=',', error_bad_lines=False, engine="python")
+        N_Daily_Groups = Daily_Groups.append(NewID)
+        N_Daily_Groups.to_csv(mapPath + 'Assignment_Map.csv', sep=',', index=False)
+    
+    time_check(startTime_1, 'Add NewIDs to list')
     # print(N_Daily_Groups)
     def Save():
         path = newPath('dump','Group_Rank')
         path2 = newPath('Table_Drop','')
-        df.to_csv(path + str(tomorrow) +  '.csv', index=False)
-        df.to_csv(path2 + 'Group_Rank.csv', index=False)
-        daily_piv(df)
+        # dffin.to_csv(path + str(tomorrow) +  '.csv', index=False)
+        # dffin.to_csv(path2 + 'Group_Rank.csv', index=False)
+        dffin.to_csv(path2 + 'test_transfer.csv', index=False)
+        time_check(startTime_1, 'Save files')
+
+        # daily_piv(dffin)
 
     ## Run the File
     if Master_List == 0:
         return Save()
-
+ 
     ###calculate ever 2 weeks
     if Master_List == 1:
-        return Assign_Map(df)
+        return Assign_Map(dffin)
 
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['TH2'], 0)
+Full_Campaign_File(Date['W1'], 0)
 
-executionTime_1 = (time.time() - startTime_1)
-print("-----------------------------------------------")
-print('Time: ' + str(executionTime_1))
-print("-----------------------------------------------")
+time_check(startTime_1, 'Create Pivot Table')

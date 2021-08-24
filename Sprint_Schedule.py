@@ -97,6 +97,7 @@ def Map_categories(df, Day, test):
     if test == 1:
         df['Daily_Priority'] = 0
         df['Daily_Groups'] = 0
+        df['NewID'] = 0
         return df
     else:
         df, names = Daily_Maping(df)
@@ -112,7 +113,6 @@ def Map_categories(df, Day, test):
         Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
         Daily_sort = dict(zip(Category,Sprint_schedual))
         df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
-
         return df
 
 if __name__ == "__main__":

@@ -28,7 +28,7 @@ def Load():
     df = df[df['PhoneNumber'] > 1111111111]
     df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
     return df
-# print(len(Load()))
+# print(Load().isnull().sum())
 def Format(File):
     Format_Now = File.copy()
     Format_Now['Last_Call'] = pd.to_datetime(Format_Now['Last_Call'], errors='coerce').dt.date
@@ -97,8 +97,12 @@ def Final_Load():
     ### Add info to main line and reskill
     df = pd.merge(df,df2, on='PhoneNumber')
     
+    # ### Athum random priortiztion
+    # filter1 = df['Score'].astype(str).str[0] == '1'
+    # df['test'] = 0
+    # df['test'] = np.where(filter1, 1, df['test'])
+    
     df = complex_skills(df)
-
     return df, test
 
 def Number_stats(df):
@@ -122,12 +126,13 @@ def Number_stats(df):
     df2 = df1.groupby(['PhoneNumber']).agg(col).rename(columns={'TotalCharts':'TotalChartsAgg','Cluster':'Cluster_Avg'}).reset_index()
     ### Add info to main line and reskill
     df3 = pd.merge(df0,df2, on='PhoneNumber')
+
     if not 'Daily_Priority' in df3.columns:
         df3['Daily_Priority'] = 0
     df3 = df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
     return df3
 
-# df, test = Final_Load(0)
+# df, test = Final_Load()
 # print(df)
 # print(test)
 
