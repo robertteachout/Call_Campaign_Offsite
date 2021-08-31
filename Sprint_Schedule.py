@@ -5,6 +5,7 @@ import string
 from datetime import date, timedelta, datetime
 import holidays
 import time
+from missedORGs import pull_list
 from FileLoad import Final_Load
 from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath, date_list_split
 today = date.today()
@@ -105,7 +106,10 @@ def Map_categories(df, Day, test):
         filter1 = df['Daily_Groups'] == 0
         df['NewID'] = np.where(filter1, 1, df['NewID'])
         df['Daily_Groups'] = df['Daily_Groups'].replace(0, D2)
-        
+
+        filter0 = df['OutreachID'].isin(pull_list().squeeze())
+        df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
+        ####################################
         Sprint = len(names)
         ### Map and Sort
         Sprint_schedual = list(range(0,Sprint))

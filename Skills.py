@@ -1,6 +1,11 @@
-# from numpy.lib.arraysetops import unique
 import pandas as pd
 import numpy as np
+from datetime import date, timedelta, datetime
+from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath, time_check
+
+today = date.today()
+B10 = Next_N_BD(today, 10)
+tomorrow = next_business_day(today).strftime("%x")
 # from FileLoad import Final_Load
 
 
@@ -145,6 +150,15 @@ def random_skill(df):
     df['Skill'] = np.where(filter1 & filter3 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
     return df
 
+def wellmed_schedual(df):
+    filter1 = df['Skill'] == 'CC_Wellmed_Sub15_UNS'
+    filter4 = df['Outreach_Status'] == 'Scheduled'
+
+    filter2 = df['Age'] <= 2
+    filter3 = df['Age'] > 0
+    df['Skill'] = np.where(filter1 & (filter2 | filter3) & filter4, 'Child_ORG', df['Skill'])
+    return df
+
 def Re_Skill_Tier(df):
     df_local = df
     filter2 = df_local['OutreachID_Count'] >=1
@@ -155,12 +169,16 @@ def Re_Skill_Tier(df):
     filter6 = (df_local['Outreach_Team'] == 'Sub 15') 
     # filter7 = (df_local['OutreachID_Count'] == 1)
 
-    df_local['Skill'] = np.where(filter2 & filter3, 'CC_Tier2', df_local['Skill'])
-    
-    df['Skill'] = np.where(filter5 & filter6 & filter3, 'CC_Tier3', df['Skill'])
-
     df_local['Skill'] = np.where(filter4, 'CC_Tier1', df_local['Skill'])
+    df_local['Skill'] = np.where(filter2 & filter3, 'CC_Tier2', df_local['Skill'])
+    df_local['Skill'] = np.where(filter5 & filter6 & filter3, 'CC_Tier3', df_local['Skill'])
     return df_local
+
+def Schedual_Child(df):
+    filter1 = (df['Outreach_Status'] == 'Scheduled')
+    filter2 = (df['ScheduleDate'] != tomorrow)
+    df['Skill'] = np.where(filter1 & filter2, 'Child_ORG', df['Skill'])
+    return df
 
 def complex_skills(df):
     f = df 
@@ -174,6 +192,8 @@ def complex_skills(df):
     
     f = Re_Skill_Genpact(f)
     f = random_skill(f)
+    f = wellmed_schedual(f)
+    # f = Schedual_Child(f)  #### flip with Matts aproval 
     return f
 
 def Final_Skill(df):
@@ -205,6 +225,7 @@ def Final_Skill(df):
     f = Re_Skill_Agent(f)
     f = Re_Skill_Genpact(f, 'Genpact')
     return f
+
 
 if __name__ == "__main__":
     print("Skills")
