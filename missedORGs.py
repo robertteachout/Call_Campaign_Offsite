@@ -20,8 +20,10 @@ def last_business_day(start):
     while next_day.weekday() in holidays.WEEKEND or next_day in HOLIDAYS_US:
         next_day -= ONE_DAY
     return next_day#.strftime("%x")
+
 def lbd3(start):
     return last_business_day(last_business_day(last_business_day(start))).strftime("%x")
+
 def pull_list():
     query = ('''
             SELECT
@@ -30,8 +32,9 @@ def pull_list():
             ,c.[PhoneNumber]
             ,c.[Daily_Groups]
             ,n.[Start_Date] As NIC_Last_Call
-            ,cf.[LastCallDateId] AS CF_Last_Call
+        	,CAST (od.lastcalldate AS DATE) as 'CF_Last_Call'
             ,c.[Unique_Phone]
+            ,c.[Load_Date]
 
             FROM [DWWorking].[dbo].[Call_Campaign] AS c
             LEFT JOIN [DW_Operations].[dbo].[DimOutreach] AS cf
@@ -46,22 +49,28 @@ def pull_list():
                 ) AS n
                     ON c.[PhoneNumber] = n.[Contact_Name]
                     AND c.[Skill] = n.[Skill_Name]
+            LEFT JOIN Chartfinder_Snap.dbo.OutreachDates as od
+	            ON c.OutreachID = od.OutreachID
             ''')
     
     df = Query('DWWorking', query)
-    df['CF_Last_Call'] = pd.to_datetime(df['CF_Last_Call'].astype(str), format='%Y%m%d', errors='coerce')
-    df['Daily_Groups'] = pd.to_datetime(df['Daily_Groups'], errors='coerce')
-    df['NIC_Last_Call'] = pd.to_datetime(df['NIC_Last_Call'], errors='coerce')
+    df['Load_Date'] = pd.to_datetime(df['Load_Date'])
+    df['CF_Last_Call'] = pd.to_datetime(df['CF_Last_Call'])
+    df['Daily_Groups'] = pd.to_datetime(df['Daily_Groups'])
+    df['NIC_Last_Call'] = pd.to_datetime(df['NIC_Last_Call'])
+    filter0 = (df['Load_Date'] == last_business_day(today1).strftime("%x"))
     filter1 = (df['Daily_Groups'] == last_business_day(today1).strftime("%x"))
     filter2 = (df['NIC_Last_Call'].isnull())
-    filter3 = (df['NIC_Last_Call'] <= lbd3(today1))
-    filter4 = (df['Skill'] != 'CC_Genpact_Scheduling ')
-    list_add = df[ filter1 & ( filter2 | filter3 ) & filter4]
+    filter3 = (df['NIC_Last_Call'] < lbd3(today1))
+    filter4 = (df['Skill'] != 'CC_Genpact_Scheduling')
+    list_add = df[ filter0 & filter1 & ( filter2 | filter3 ) & filter4]
     path = newPath('Table_Drop','')
-    # old_list = pd.read_csv(path + 'Missed_ORGs' +  '.csv')
-    # old_list['Daily_Groups'] = pd.to_datetime(old_list['Daily_Groups'])
-    # # new_list = old_list[old_list['Daily_Groups'] != today]
-    # new_list = old_list.append(list_add)
+    old_list = pd.read_csv(path + 'Missed_ORGs' +  '.csv')
+    old_list['Daily_Groups'] = pd.to_datetime(old_list['Daily_Groups'])
+    old_list['NIC_Last_Call'] = pd.to_datetime(old_list['NIC_Last_Call'])
+    old_list['CF_Last_Call'] = pd.to_datetime(old_list['CF_Last_Call'])
+    # new_list = old_list[old_list['Daily_Groups'] != today]
+    new_list = old_list.append(list_add)
     # new_list.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
     list_add.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
     return list_add['OutreachID']
