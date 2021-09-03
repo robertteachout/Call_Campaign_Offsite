@@ -145,9 +145,11 @@ def random_skill(df):
     filter1 = F_Status(df, 'Unscheduled')
     filter2 = F_ProjectType(df, 'Cigna - IFP RADV')
     filter3 = F_ProjectType(df, 'Med Mutual of Ohio')
-    filter4 = df['Age'] > 5
+    filter5 = F_ProjectType(df, 'Clover Health MRA')
+    filter4 = df['Age'] > 2
     df['Skill'] = np.where(filter1 & filter2 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
     df['Skill'] = np.where(filter1 & filter3 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
+    df['Skill'] = np.where(filter1 & filter5 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
     return df
 
 def wellmed_schedual(df):
