@@ -15,17 +15,18 @@ tomorrow = next_business_day(today)
 
 def Full_Campaign_File(Day, Master_List):
     ### Get data and mutate
-    df, test = Final_Load()
-    if test == 'Fail':
+    df, test0 = Final_Load()
+    if test0 == 'Fail':
         print('Failed Upload')
-    
+
     time_check(startTime_1, 'File Load')
     ####################################
     if Master_List == 0:
-        df = df[df['Skill'] != 'CC_GenpactPRV_Priority'].copy()
+        df_clean = df[df['Skill'] != 'CC_GenpactPRV_Priority'].copy()
         df_test = df[df['Skill'] == 'CC_GenpactPRV_Priority'].copy()
-
-    df0 = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
+        df0 = Map_categories(df_clean, Day, Master_List) ### Trigger for lauching sprint schedual
+    else:
+        df0 = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
     time_check(startTime_1, 'Sprint Schedule')
     ####################################
 
@@ -93,9 +94,9 @@ def Full_Campaign_File(Day, Master_List):
         ####################################
         daily_piv(dffin)
         time_check(startTime_1, 'Create Pivot Table')
-        ####################################
+        ###################################
 
-    ## Run the File
+    # Run the File
     if Master_List == 0:
         return Save()
  
@@ -106,5 +107,5 @@ def Full_Campaign_File(Day, Master_List):
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['T2'], 0)
+Full_Campaign_File(Date['F2'], 0)
 

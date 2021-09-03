@@ -25,10 +25,9 @@ def Load():
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
     df['Site_Clean_Id'] = pd.to_numeric(df['Site_Clean_Id'], errors='coerce')
-    df = df[df['PhoneNumber'] > 1111111111]
     df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
     return df
-# print(Load().isnull().sum())
+
 def Format(File):
     Format_Now = File.copy()
     Format_Now['Last_Call'] = pd.to_datetime(Format_Now['Last_Call'], errors='coerce').dt.date
@@ -37,8 +36,15 @@ def Format(File):
     return Format_Now
 
 def Clean_Numbers(df):
+    df = df[df['PhoneNumber'] > 1111111111]
     df1 = df.dropna(subset=['PhoneNumber'])
     return df1
+
+def region_col(df):
+    path = newPath('Table_Drop','')
+    lookup = pd.read_csv(path + "Region_Lookup.csv", sep=',')
+    lookup = lookup[['State', 'Region']]
+    return pd.merge(df, lookup, how="left", on=["State"])
 
 def Last_Call(df):
     df1 = df
@@ -82,29 +88,6 @@ def Test_Load(df):
             test_results = 'Fail'
         return test_results
 
-def Final_Load():
-    df = Last_Call(Clean_Numbers(Format(Load())))
-    df = df.loc[df['OutreachID'].notnull()].copy()
-    df['Cluster'] = 0
-    df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
-    
-    df['Daily_Groups'] = 0
-    # df['Unique_Phone'] = 0 
-    
-    test = Test_Load(df)
-    
-    df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
-    ### Add info to main line and reskill
-    df = pd.merge(df,df2, on='PhoneNumber')
-    
-    # ### Athum random priortiztion
-    # filter1 = df['Score'].astype(str).str[0] == '1'
-    # df['test'] = 0
-    # df['test'] = np.where(filter1, 1, df['test'])
-    
-    df = complex_skills(df)
-    return df, test
-
 def Number_stats(df):
     df0 = df
     audit_sort = {'RADV':0, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':4, 'Medicare Risk':5}
@@ -132,9 +115,41 @@ def Number_stats(df):
     df3 = df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort', 'Unscheduled', 'Cluster_Avg'], ascending= [True, True, True, False, True]).reset_index(drop = True)
     return df3
 
-# df, test = Final_Load()
-# print(df)
-# print(test)
+def Final_Load():
+    df = Last_Call(region_col(Clean_Numbers(Format(Load()))))
+    ### Region Filter
+    filter1 = df['Region'] != 'GULF'
+    filter2 = df['Region'] != 'CENTRAL'
+    filter3 = df['Region'] != 'ATLANTIC'
+    filter4 = df['Region'] != 'WEST'
+    filter5 = df['Region'] != 'MIDWEST'
+    filter6 = df['Region'] != 'NORTHEAST'
+    # df = df[filter1 & filter1]
 
+    df['Cluster'] = 0
+    df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
+    
+    df['Daily_Groups'] = 0
+    # df['Unique_Phone'] = 0 
+    test = Test_Load(df)
+    
+    df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
+    ### Add info to main line and reskill
+    df = pd.merge(df,df2, on='PhoneNumber')
+    
+    # ### Athum random priortiztion
+    # filter1 = df['Score'].astype(str).str[0] == '1'
+    df = complex_skills(df)
+    return df, test
+
+
+
+
+# df, test2 = Final_Load()
+
+# print(df['Region'].unique())
+# print(test)
+# df = df[df['Skill'] == 'CC_Wellmed_Sub15_UNS']['Age'].unique()
+# print(df)
 if __name__ == "__main__":
     print("File will load")
