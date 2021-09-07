@@ -1,8 +1,10 @@
+import zipfile
 import pandas as pd
 import numpy as np
 from datetime import date, timedelta, datetime
 import time
-
+import os
+from zipfile import ZipFile, ZipInfo
 from FileLoad import Final_Load, Number_stats
 from Skills import complex_skills, Re_Skill_Project
 from Sprint_Schedule import Assign_Map, Map_categories
@@ -21,12 +23,7 @@ def Full_Campaign_File(Day, Master_List):
 
     time_check(startTime_1, 'File Load')
     ####################################
-    if Master_List == 0:
-        df_clean = df[df['Skill'] != 'CC_GenpactPRV_Priority'].copy()
-        df_test = df[df['Skill'] == 'CC_GenpactPRV_Priority'].copy()
-        df0 = Map_categories(df_clean, Day, Master_List) ### Trigger for lauching sprint schedual
-    else:
-        df0 = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
+    df0 = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
     time_check(startTime_1, 'Sprint Schedule')
     ####################################
 
@@ -64,16 +61,9 @@ def Full_Campaign_File(Day, Master_List):
         for i in df3['Skill'].unique():
             df_score_spilt = df_score_spilt.append(spilt(df3, i, Master_List))
         return df_score_spilt
-    
-    if Master_List == 0:
-        df_test = Score(df_test)
-        dff = drop_dup(df0, Master_List)
-        dffin = dff.append(df_test)
-        time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
-        ####################################
-    else:
-        dffin = drop_dup(df0, Master_List)
-        time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
+
+    dffin = drop_dup(df0, Master_List)
+    time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
 
     if 'NewID' in dffin.columns:
         NewID = dffin[dffin['NewID'] == 1][['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
@@ -88,7 +78,14 @@ def Full_Campaign_File(Day, Master_List):
     def Save():
         path = newPath('dump','Group_Rank')
         path2 = newPath('Table_Drop','')
-        dffin.to_csv(path + str(tomorrow) +  '.csv', index=False)
+        os.chdir('../')
+        os.chdir('dump/Group_Rank')
+
+        with ZipFile(tomorrow.strftime("%Y-%m-%d") + '.zip', 'w', compression= zipfile.ZIP_DEFLATED) as zip:
+            dffin.to_csv(tomorrow.strftime("%Y-%m-%d") +  '.txt', index= False)
+            zip.write(tomorrow.strftime("%Y-%m-%d") +  '.txt')
+            os.remove(tomorrow.strftime("%Y-%m-%d") +  '.txt')
+            zip.close()
         dffin.to_csv(path2 + 'Group_Rank.csv', index=False)
         time_check(startTime_1, 'Save files')
         ####################################
@@ -107,5 +104,5 @@ def Full_Campaign_File(Day, Master_List):
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['F2'], 0)
+Full_Campaign_File(Date['T1'], 0)
 

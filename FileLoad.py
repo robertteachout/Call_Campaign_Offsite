@@ -1,8 +1,11 @@
 import pandas as pd
 import numpy as np
+from zipfile import ZipFile
+
 from datetime import date, timedelta, datetime
 import glob
 import os
+import shutil
 from Skills import complex_skills
 from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath
 # from Sprint_Schedule import Map_categories
@@ -13,14 +16,28 @@ today = date.today()
 tomorrow = (today + timedelta(days = 1))#.strftime("%m/%d/%Y")
 yesterday = (today + timedelta(days = -1))#.strftime("%m/%d/%Y")
 nxt_day = next_business_day(today)
-F_today = str('Call_Campaign_v4_' + today.strftime("%m%d") +'*.txt')
-Dpath = newPath('dump','Call_Campaign') + F_today
+
+F_today = str('Call_Campaign_v4_' + today.strftime("%m%d")) + '*.zip'
+path = newPath('dump','Call_Campaign')
+Dpath = path + F_today
+original = 'C:\\Users\\ARoethe\\Downloads\\' + F_today 
+
+if os.path.exists(original):
+    for file in glob.glob(original):
+        filename = file
+
+    if not os.path.exists(Dpath):
+        shutil.copy(filename,path)
 
 for file in glob.glob(Dpath):
     filename = file
+    filename = filename[:-3]
 
 def Load():
-    df = pd.read_csv(filename, sep='|', error_bad_lines=False, engine="python")
+    with ZipFile(filename + 'zip', 'r') as zip:
+        zip_name = ",".join(zip.namelist())
+        df = pd.read_csv(zip.extract(zip_name), sep='|', error_bad_lines=False, engine="python")
+
     df.columns = df.columns.str.replace('/ ','')
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
