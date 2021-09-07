@@ -23,6 +23,19 @@ def last_business_day(start):
         next_day -= ONE_DAY
     return next_day
 
+def x_Bus_Day_ago(N):
+    B10 = []
+    seen = set(B10)
+    i = today
+
+    while len(B10) < N:
+        item = last_business_day(i).strftime("%Y-%m-%d")
+        if item not in seen:
+            seen.add(item)
+            B10.append(item)
+        i -= timedelta(days=1)
+    return B10[-1]
+
 def Next_N_BD(start, N):
     B10 = []
     seen = set(B10)

@@ -4,7 +4,7 @@ import pyodbc
 import sys
 import numpy as np
 import time
-from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath
+from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath, x_Bus_Day_ago
 
 Dpath = newPath('Table_Drop','')
 ### Load file ###
@@ -88,7 +88,13 @@ if __name__ == '__main__':
 
     t0 = time.time()
     ### Remove yesterday's file ###
-    # crsr.execute('''DELETE FROM dbo.Call_Campaign''')
+    crsr.execute('''
+        DELETE
+        FROM [DWWorking].[dbo].[Call_Campaign]
+        WHERE Load_Date < {}
+        '''.format("'"+ x_Bus_Day_ago(4) + "'")
+        )
+
     # ### Add today's file ###
     MyDfInsert(cnxn, """
                     INSERT INTO DWWorking.dbo.Call_Campaign (
