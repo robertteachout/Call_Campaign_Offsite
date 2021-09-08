@@ -8,7 +8,7 @@ from datetime import date, timedelta, datetime
 import holidays
 import matplotlib.pylab as plt
 
-from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath, last_business_day
+from Bus_day_calc import next_business_day, x_Bus_Day_ago, Next_N_BD, map_piv, daily_piv, newPath, last_business_day
 from dbo_Query import Query
 today1 = date.today()
 today = today1.strftime("%x")
@@ -58,7 +58,7 @@ def pull_list():
     df['CF_Last_Call'] = pd.to_datetime(df['CF_Last_Call'])
     df['Daily_Groups'] = pd.to_datetime(df['Daily_Groups'])
     df['NIC_Last_Call'] = pd.to_datetime(df['NIC_Last_Call'])
-    filter0 = (df['Load_Date'] == last_business_day(today1).strftime("%x"))
+    filter0 = (df['Load_Date'] == x_Bus_Day_ago(1).strftime("%x"))
     filter1 = (df['Daily_Groups'] == last_business_day(today1).strftime("%x"))
     filter2 = (df['NIC_Last_Call'].isnull())
     filter3 = (df['NIC_Last_Call'] < lbd3(today1))
@@ -69,15 +69,13 @@ def pull_list():
     old_list['Daily_Groups'] = pd.to_datetime(old_list['Daily_Groups'])
     old_list['NIC_Last_Call'] = pd.to_datetime(old_list['NIC_Last_Call'])
     old_list['CF_Last_Call'] = pd.to_datetime(old_list['CF_Last_Call'])
-    # new_list = old_list[old_list['Daily_Groups'] != today]
     new_list = old_list.append(list_add)
-    # new_list.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
-    list_add.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
+    new_list.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
+    # list_add.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
     return list_add['OutreachID']
 
 # df = pull_list()
 # print(df)
-# print(last_business_day(today1))
 if __name__ == "__main__":
 
     executionTime_1 = (time.time() - startTime_1)

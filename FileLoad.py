@@ -3,7 +3,7 @@ import numpy as np
 from zipfile import ZipFile
 
 from datetime import date, timedelta, datetime
-import glob
+from glob import glob
 import os
 import shutil
 from Skills import complex_skills
@@ -17,26 +17,28 @@ tomorrow = (today + timedelta(days = 1))#.strftime("%m/%d/%Y")
 yesterday = (today + timedelta(days = -1))#.strftime("%m/%d/%Y")
 nxt_day = next_business_day(today)
 
-F_today = str('Call_Campaign_v4_' + today.strftime("%m%d")) + '*.zip'
+F_today = str('Call_Campaign_v4_' + today.strftime("%m%d")) + '*'
 path = newPath('dump','Call_Campaign')
 Dpath = path + F_today
 original = 'C:\\Users\\ARoethe\\Downloads\\' + F_today 
 
-if os.path.exists(original):
-    for file in glob.glob(original):
-        filename = file
+def file_exists(filename):
+    return bool(glob(filename + '*'))
 
-    if not os.path.exists(Dpath):
-        shutil.copy(filename,path)
+if file_exists(original) is True:
+    if file_exists(Dpath) is False:
+        shutil.copy(glob(original)[0],path)
+        os.remove(glob(original)[0])
+    else:
+        os.remove(glob(original)[0])
 
-for file in glob.glob(Dpath):
-    filename = file
-    filename = filename[:-3]
+filename = glob(Dpath)[0]
 
 def Load():
-    with ZipFile(filename + 'zip', 'r') as zip:
+    with ZipFile(filename, 'r') as zip:
         zip_name = ",".join(zip.namelist())
         df = pd.read_csv(zip.extract(zip_name), sep='|', error_bad_lines=False, engine="python")
+        os.remove(zip_name)
 
     df.columns = df.columns.str.replace('/ ','')
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
@@ -96,8 +98,6 @@ def Last_Call(df):
 
 def Test_Load(df):
         df0 = df
-        today = date.today()
-
         test = df0[df0['Last_Call'] == today]['Last_Call']
         if today == test.max():
             test_results = 'Pass'
@@ -134,6 +134,18 @@ def Number_stats(df):
 
 def Final_Load():
     df = Last_Call(region_col(Clean_Numbers(Format(Load()))))
+    df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
+    df['Daily_Groups'] = 0
+    df['Cluster'] = 0
+    ### Add info to main line and reskill
+    df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
+    df = pd.merge(df,df2, on='PhoneNumber')
+    df = complex_skills(df)
+    test = Test_Load(df)
+    
+    # ### Athum random priortiztion
+    # filter1 = df['Score'].astype(str).str[0] == '1'
+    
     ### Region Filter
     filter1 = df['Region'] != 'GULF'
     filter2 = df['Region'] != 'CENTRAL'
@@ -142,31 +154,11 @@ def Final_Load():
     filter5 = df['Region'] != 'MIDWEST'
     filter6 = df['Region'] != 'NORTHEAST'
     # df = df[filter1 & filter1]
-
-    df['Cluster'] = 0
-    df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
-    
-    df['Daily_Groups'] = 0
-    # df['Unique_Phone'] = 0 
-    test = Test_Load(df)
-    
-    df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
-    ### Add info to main line and reskill
-    df = pd.merge(df,df2, on='PhoneNumber')
-    
-    # ### Athum random priortiztion
-    # filter1 = df['Score'].astype(str).str[0] == '1'
-    df = complex_skills(df)
     return df, test
-
-
-
 
 # df, test2 = Final_Load()
 
+# print(df.iloc[:,-10:])
 # print(df['Region'].unique())
-# print(test)
-# df = df[df['Skill'] == 'CC_Wellmed_Sub15_UNS']['Age'].unique()
-# print(df)
 if __name__ == "__main__":
     print("File will load")

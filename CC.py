@@ -6,7 +6,7 @@ import time
 import os
 from zipfile import ZipFile, ZipInfo
 from FileLoad import Final_Load, Number_stats
-from Skills import complex_skills, Re_Skill_Project
+from Skills import complex_skills, Re_Skill_Project, convert
 from Sprint_Schedule import Assign_Map, Map_categories
 from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath, time_check
 
@@ -81,11 +81,11 @@ def Full_Campaign_File(Day, Master_List):
         os.chdir('../')
         os.chdir('dump/Group_Rank')
 
-        with ZipFile(tomorrow.strftime("%Y-%m-%d") + '.zip', 'w', compression= zipfile.ZIP_DEFLATED) as zip:
-            dffin.to_csv(tomorrow.strftime("%Y-%m-%d") +  '.txt', index= False)
-            zip.write(tomorrow.strftime("%Y-%m-%d") +  '.txt')
-            os.remove(tomorrow.strftime("%Y-%m-%d") +  '.txt')
+        with ZipFile(tomorrow.strftime("%Y-%m-%d") + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as zip:
+            dffin.to_csv(tomorrow.strftime("%Y-%m-%d") +  '.csv', index= False)
+            zip.write(tomorrow.strftime("%Y-%m-%d") +  '.csv')
             zip.close()
+            os.remove(tomorrow.strftime("%Y-%m-%d") +  '.csv')
         dffin.to_csv(path2 + 'Group_Rank.csv', index=False)
         time_check(startTime_1, 'Save files')
         ####################################
@@ -104,5 +104,5 @@ def Full_Campaign_File(Day, Master_List):
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['T1'], 0)
+Full_Campaign_File(Date['W1'], 0)
 
