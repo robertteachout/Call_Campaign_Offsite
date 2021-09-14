@@ -9,6 +9,7 @@ from FileLoad import Final_Load, Number_stats
 from Skills import complex_skills, Re_Skill_Project, convert
 from Sprint_Schedule import Assign_Map, Map_categories
 from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath, time_check
+from SQL_Table import Insert_SQL
 
 startTime_1 = time.time()
 today = date.today()
@@ -69,7 +70,7 @@ def Full_Campaign_File(Day, Master_List):
         NewID = dffin[dffin['NewID'] == 1][['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
         NewID['Daily_Groups'] = pd.to_datetime(NewID['Daily_Groups']).dt.strftime('%m/%d/%Y')
         mapPath = newPath('Table_Drop','')
-        Daily_Groups = pd.read_csv(mapPath + "Assignment_Map.csv", sep=',', error_bad_lines=False, engine="python")
+        Daily_Groups = pd.read_csv(mapPath + "Assignment_Map.csv", sep=',', on_bad_lines='skip', engine="python")
         N_Daily_Groups = Daily_Groups.append(NewID)
         N_Daily_Groups.to_csv(mapPath + 'Assignment_Map.csv', sep=',', index=False)
         time_check(startTime_1, 'Add NewIDs to list')
@@ -91,6 +92,9 @@ def Full_Campaign_File(Day, Master_List):
         ####################################
         daily_piv(dffin)
         time_check(startTime_1, 'Create Pivot Table')
+        Insert_SQL()
+        time_check(startTime_1, 'Insert_SQL')
+
         ###################################
 
     # Run the File
@@ -104,5 +108,5 @@ def Full_Campaign_File(Day, Master_List):
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['W1'], 0)
+Full_Campaign_File(Date['M2'], 0)
 

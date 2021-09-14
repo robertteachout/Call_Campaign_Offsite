@@ -17,7 +17,7 @@ test = next_business_day(FivDay)
 
 def Load_Assignment():
     path = newPath('Table_Drop','')
-    Cluster = pd.read_csv(path + "Assignment_Map.csv", sep=',', error_bad_lines=False, engine="python")
+    Cluster = pd.read_csv(path + "Assignment_Map.csv", sep=',', on_bad_lines='skip', engine="python")
     ### at the begining of new cylce remove cut this section
     Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%Y')
     start = Cluster[Cluster['Daily_Groups'] >= tomorrow.strftime('%m/%d/%Y')]

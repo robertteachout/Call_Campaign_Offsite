@@ -37,7 +37,7 @@ filename = glob(Dpath)[0]
 def Load():
     with ZipFile(filename, 'r') as zip:
         zip_name = ",".join(zip.namelist())
-        df = pd.read_csv(zip.extract(zip_name), sep='|', error_bad_lines=False, engine="python")
+        df = pd.read_csv(zip.extract(zip_name), sep='|', on_bad_lines='skip', engine="python")
         os.remove(zip_name)
 
     df.columns = df.columns.str.replace('/ ','')
