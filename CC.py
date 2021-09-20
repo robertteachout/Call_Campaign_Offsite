@@ -46,13 +46,6 @@ def Full_Campaign_File(Day, Master_List):
             ### Piped ORGs attached to phone numbers
             df6['OutreachID'] = df6['OutreachID'].astype(str)
             df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
-            ### Convert to Child ORG
-                # if Master_List == 0:
-                #     filter_Child_ORG = df6['Unique_Phone'].isnull() 
-                #     df6['Skill'] = np.where(filter_Child_ORG, 'Child_ORG', df6['Skill'])
-                # df6 = Re_Skill_Project(df6, 'Scheduled', 'WellMed', 1, 300,'Child_ORG')
-                #     return df6
-                # else:
             return df6
     
     def drop_dup(df, Master_List):
@@ -92,14 +85,14 @@ def Full_Campaign_File(Day, Master_List):
         ####################################
         daily_piv(dffin)
         time_check(startTime_1, 'Create Pivot Table')
-        Insert_SQL()
-        time_check(startTime_1, 'Insert_SQL')
-
         ###################################
 
     # Run the File
     if Master_List == 0:
-        return Save()
+        Save()
+        Insert_SQL()
+        time_check(startTime_1, 'Insert_SQL')
+
  
     ###calculate ever 2 weeks
     if Master_List == 1:
@@ -108,5 +101,5 @@ def Full_Campaign_File(Day, Master_List):
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['M2'], 0)
+Full_Campaign_File(Date['M1'], 0)
 
