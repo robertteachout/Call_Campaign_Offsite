@@ -5,9 +5,9 @@ from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPa
 
 today = date.today()
 B10 = Next_N_BD(today, 10)
-tomorrow = next_business_day(today).strftime("%x")
+tomorrow = next_business_day(today)
+D2 = next_business_day(tomorrow)
 # from FileLoad import Final_Load
-
 
 def F_Status(df, Status):
     df_local = df
@@ -143,16 +143,19 @@ def Re_Skill_status(df, status, skill_name):
 
 def random_skill(df):
     filter1 = F_Status(df, 'Unscheduled')
+    filter11 = F_Status(df, 'Past Due')
     filter2 = F_ProjectType(df, 'Cigna - IFP RADV')
     filter3 = F_ProjectType(df, 'Med Mutual of Ohio')
     filter5 = F_ProjectType(df, 'Clover Health MRA')
     filter4 = df['Age'] > 2
     filter6 = df['Age'] == 0
-    # df['Skill'] = np.where(filter1 & filter2 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
-    df['Skill'] = np.where(filter1 & filter3 & (filter4 | filter6), 'CC_GenpactPRV_Priority', df['Skill'])
-    df['Skill'] = np.where(filter1 & filter5 & (filter4 | filter6), 'CC_GenpactPRV_Priority', df['Skill'])
+    filter7 = df['CallCount'] < 5
+
+    df['Skill'] = np.where(filter1 & filter2 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
+    df['Skill'] = np.where((filter1 | filter11) & filter3 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
+    df['Skill'] = np.where((filter1 | filter11) & filter5 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
     ### Dave gave this to specical team and request to pull out tell friday
-    df['Skill'] = np.where(filter2, 'Child_ORG', df['Skill'])
+    # df['Skill'] = np.where(filter2, 'Child_ORG', df['Skill'])
     return df
 
 def wellmed_schedual(df):
@@ -166,23 +169,35 @@ def wellmed_schedual(df):
 
 def Re_Skill_Tier(df):
     df_local = df
+    filter1 = df_local['OutreachID_Count'] ==1
     filter2 = df_local['OutreachID_Count'] >=1
     filter3 = df_local['OutreachID_Count'] <=4
     filter4 = df_local['OutreachID_Count'] >=5 #### ????
     
     filter5 = (df_local['Outreach_Status'] == 'Unscheduled') 
     filter6 = (df_local['Outreach_Team'] == 'Sub 15') 
-    # filter7 = (df_local['OutreachID_Count'] == 1)
 
     df_local['Skill'] = np.where(filter4, 'CC_Tier1', df_local['Skill'])
     df_local['Skill'] = np.where(filter2 & filter3, 'CC_Tier2', df_local['Skill'])
-    df_local['Skill'] = np.where(filter5 & filter6 & filter3, 'CC_Tier3', df_local['Skill'])
+    df_local['Skill'] = np.where(filter5 & filter6 & filter1, 'CC_Tier3', df_local['Skill'])
     return df_local
 
 def Schedual_Child(df):
     filter1 = (df['Outreach_Status'] == 'Scheduled')
     filter2 = (df['ScheduleDate'] != tomorrow)
     df['Skill'] = np.where(filter1 & filter2, 'Child_ORG', df['Skill'])
+    return df
+
+def convert(df):
+    filter1 = (df['Daily_Groups'] >= tomorrow)
+    # filter2 = (df['Daily_Groups'] == D2)
+    filter3 = (df['Age'] == 0)
+    filter4 = (df['Skill'] == 'CC_Tier2')
+    filter5 = (df['Skill'] == 'CC_Tier1')
+    filter6 = (df['Unique_Phone'] != 1)
+    df['Skill'] = np.where(filter3 & (filter1) & filter4, 'Child_ORG', df['Skill'])
+    df['Skill'] = np.where(filter3 & (filter1) & filter5, 'Child_ORG', df['Skill'])
+    df['Skill'] = np.where(filter6, 'Child_ORG', df['Skill'])
     return df
 
 def complex_skills(df):
@@ -198,6 +213,7 @@ def complex_skills(df):
     f = Re_Skill_Genpact(f)
     f = random_skill(f)
     f = wellmed_schedual(f)
+    # f = convert(f)
     # f = Schedual_Child(f)  #### flip with Matts aproval 
     return f
 
