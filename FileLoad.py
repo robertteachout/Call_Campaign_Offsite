@@ -46,7 +46,8 @@ def Load():
     df['Site_Clean_Id'] = pd.to_numeric(df['Site_Clean_Id'], errors='coerce')
     df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
     return df
-
+x= Load()
+print(len(x[x['PhoneNumber'] == 9999999999]))
 def Format(File):
     Format_Now = File.copy()
     Format_Now['Last_Call'] = pd.to_datetime(Format_Now['Last_Call'], errors='coerce').dt.date
@@ -55,10 +56,12 @@ def Format(File):
     return Format_Now
 
 def Clean_Numbers(df):
-    df = df[df['PhoneNumber'] > 1111111111]
-    df1 = df.dropna(subset=['PhoneNumber'])
-    return df1
-
+    filter1 = df['PhoneNumber'] < 1111111111
+    filter2 = df['PhoneNumber'].isna()
+    df['PhoneNumber'] = np.where(filter1 | filter2, 9999999999,df['PhoneNumber'])
+    return df
+x= Clean_Numbers(Load())
+print(len(x[x['PhoneNumber'] == 9999999999]))
 def region_col(df):
     path = newPath('Table_Drop','')
     lookup = pd.read_csv(path + "Region_Lookup.csv", sep=',')

@@ -101,5 +101,5 @@ def Full_Campaign_File(Day, Master_List):
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['M1'], 0)
+Full_Campaign_File(Date['T1'], 0)
 

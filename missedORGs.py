@@ -5,12 +5,12 @@ import sys
 import numpy as np
 import time
 from datetime import date, timedelta, datetime
+today1 = date.today()
 import holidays
 import matplotlib.pylab as plt
 
 from Bus_day_calc import next_business_day, x_Bus_Day_ago, Next_N_BD, map_piv, daily_piv, newPath, last_business_day
 from dbo_Query import Query
-today1 = date.today()
 today = today1.strftime("%x")
 ONE_DAY = timedelta(days=1)
 HOLIDAYS_US = holidays.US()

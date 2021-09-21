@@ -29,7 +29,7 @@ def x_Bus_Day_ago(N):
     i = today
 
     while len(B10) < N:
-        item = last_business_day(i)#.strftime("%Y-%m-%d")
+        item = last_business_day(i)
         if item not in seen:
             seen.add(item)
             B10.append(item)
