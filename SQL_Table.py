@@ -105,4 +105,6 @@ def Insert_SQL():
     print(f'Inserts completed in {time.time() - t0:.2f} seconds.')
 
     cnxn.close()
+
+# Insert_SQL()
  

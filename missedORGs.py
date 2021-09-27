@@ -65,12 +65,12 @@ def pull_list():
     filter4 = (df['Skill'] != 'CC_Genpact_Scheduling')
     list_add = df[ filter0 & filter1 & ( filter2 | filter3 ) & filter4]
     path = newPath('Table_Drop','')
-    old_list = pd.read_csv(path + 'Missed_ORGs' +  '.csv')
-    old_list['Daily_Groups'] = pd.to_datetime(old_list['Daily_Groups'])
-    old_list['NIC_Last_Call'] = pd.to_datetime(old_list['NIC_Last_Call'])
-    old_list['CF_Last_Call'] = pd.to_datetime(old_list['CF_Last_Call'])
-    new_list = old_list.append(list_add)
-    new_list.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
+    # old_list = pd.read_csv(path + 'Missed_ORGs' +  '.csv')
+    # old_list['Daily_Groups'] = pd.to_datetime(old_list['Daily_Groups'])
+    # old_list['NIC_Last_Call'] = pd.to_datetime(old_list['NIC_Last_Call'])
+    # old_list['CF_Last_Call'] = pd.to_datetime(old_list['CF_Last_Call'])
+    # new_list = old_list.append(list_add)
+    list_add.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
     # list_add.to_csv(path + 'Missed_ORGs' +  '.csv', index=False)
     return list_add['OutreachID']
 

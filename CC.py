@@ -8,7 +8,7 @@ from zipfile import ZipFile, ZipInfo
 from FileLoad import Final_Load, Number_stats
 from Skills import complex_skills, Re_Skill_Project, convert
 from Sprint_Schedule import Assign_Map, Map_categories
-from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath, time_check
+from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath, time_check, x_Bus_Day_ago
 from SQL_Table import Insert_SQL
 
 startTime_1 = time.time()
@@ -19,13 +19,14 @@ tomorrow = next_business_day(today)
 def Full_Campaign_File(Day, Master_List):
     ### Get data and mutate
     df, test0 = Final_Load()
-    if test0 == 'Fail':
-        print('Failed Upload')
-
-    time_check(startTime_1, 'File Load')
+    time_check(startTime_1, 'File Load \t' + test0)
     ####################################
     df0 = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
     time_check(startTime_1, 'Sprint Schedule')
+    ####################################
+    # convert CF last call date to child org / child ORG's won't be affected
+    filter1 = df0['Last_Call'] >= x_Bus_Day_ago(3)
+    df0['Skill'] = np.where(filter1, 'Child_ORG', df0['Skill'])
     ####################################
 
     def Score(df1):
@@ -36,7 +37,21 @@ def Full_Campaign_File(Day, Master_List):
         return df1.sort_values('Score').reset_index(drop= True)
 
     def spilt(df, sk, Master_List):
-            df3 = df[df['Skill'] == sk]
+            df0 = df[df['Skill'] == sk]
+            
+            df_dummy_status = pd.get_dummies(df0['Outreach_Status'])
+            df1 = df0.join(df_dummy_status)
+            df1['Unique_Phone'] = 0
+            col_stat = df0['Outreach_Status'].unique()
+            d1 = dict.fromkeys(col_stat, 'sum')
+            col = {'TotalCharts':'sum','Cluster':'mean',**d1}
+            ### Unique Numbers count and status
+            df2 = df1.groupby(['PhoneNumber']).agg(col).rename(columns={'TotalCharts':'TotalChartsAgg','Cluster':'Cluster_Avg'}).reset_index()
+            ### Add info to main line and reskill
+            df3 = pd.merge(df0,df2, on='PhoneNumber')
+
+            ### put Unschedualed as parent
+            df3 = df3.sort_values(by= ['PhoneNumber', 'status_sort']).reset_index(drop = True)
             df4 = df3.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
             df4['Unique_Phone'] = 1
             df_skill = Score(df4)
@@ -46,6 +61,7 @@ def Full_Campaign_File(Day, Master_List):
             ### Piped ORGs attached to phone numbers
             df6['OutreachID'] = df6['OutreachID'].astype(str)
             df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
+            ### re-rank after breaking it with status sort
             return df6
     
     def drop_dup(df, Master_List):
@@ -101,5 +117,5 @@ def Full_Campaign_File(Day, Master_List):
 ### [ What Day, test last nights file, Master list ]
 Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
 
-Full_Campaign_File(Date['T1'], 0)
+Full_Campaign_File(Date['M2'], 0)
 
