@@ -143,7 +143,6 @@ def Re_Skill_status(df, status, skill_name):
 
 def random_skill(df):
     filter1 = F_Status(df, 'Unscheduled')
-    filter11 = F_Status(df, 'Past Due')
     filter2 = F_ProjectType(df, 'Cigna - IFP RADV')
     filter3 = F_ProjectType(df, 'Med Mutual of Ohio')
     filter5 = F_ProjectType(df, 'Clover Health MRA')
@@ -152,8 +151,8 @@ def random_skill(df):
     filter7 = df['CallCount'] < 5
 
     df['Skill'] = np.where(filter1 & filter2 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
-    df['Skill'] = np.where((filter1 | filter11) & filter3 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
-    df['Skill'] = np.where((filter1 | filter11) & filter5 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
+    df['Skill'] = np.where((filter1) & filter3 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
+    df['Skill'] = np.where((filter1) & filter5 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
     ### Dave gave this to specical team and request to pull out tell friday
     # df['Skill'] = np.where(filter2, 'Child_ORG', df['Skill'])
     return df
