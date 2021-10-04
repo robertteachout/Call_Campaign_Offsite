@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 from datetime import date, timedelta, datetime
 import time
+import shutil
 import os
 from zipfile import ZipFile, ZipInfo
 from FileLoad import Final_Load, Number_stats
@@ -53,6 +54,8 @@ def Full_Campaign_File(Day, Master_List):
             ### put Unschedualed as parent
             df3 = df3.sort_values(by= ['PhoneNumber', 'status_sort']).reset_index(drop = True)
             df4 = df3.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
+            ### re-rank after breaking it with status sort
+            df4 = df4.sort_values(by = ['Daily_Priority','audit_sort','age_sort']).reset_index(drop = True)
             df4['Unique_Phone'] = 1
             df_skill = Score(df4)
             # Add Unique ORGs to Rank list 
@@ -61,7 +64,6 @@ def Full_Campaign_File(Day, Master_List):
             ### Piped ORGs attached to phone numbers
             df6['OutreachID'] = df6['OutreachID'].astype(str)
             df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
-            ### re-rank after breaking it with status sort
             return df6
     
     def drop_dup(df, Master_List):
@@ -90,12 +92,12 @@ def Full_Campaign_File(Day, Master_List):
         path2 = newPath('Table_Drop','')
         os.chdir('../')
         os.chdir('dump/Group_Rank')
-
-        with ZipFile(tomorrow.strftime("%Y-%m-%d") + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as zip:
-            dffin.to_csv(tomorrow.strftime("%Y-%m-%d") +  '.csv', index= False)
-            zip.write(tomorrow.strftime("%Y-%m-%d") +  '.csv')
+        filename = tomorrow.strftime("%Y-%m-%d")
+        with ZipFile(filename + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as zip:
+            dffin.to_csv(filename + '.csv', index= False)
+            zip.write(filename + '.csv')
             zip.close()
-            os.remove(tomorrow.strftime("%Y-%m-%d") +  '.csv')
+            os.remove(filename + '.csv')
         dffin.to_csv(path2 + 'Group_Rank.csv', index=False)
         time_check(startTime_1, 'Save files')
         ####################################
@@ -112,10 +114,15 @@ def Full_Campaign_File(Day, Master_List):
  
     ###calculate ever 2 weeks
     if Master_List == 1:
+        dt = pd.DataFrame(
+            {'startdate':B10,
+             'Number'   :range(10)}
+            )
+        dt.to_csv('start.csv', index= False)
         return Assign_Map(dffin)
 
 ### [ What Day, test last nights file, Master list ]
-Date = {'M1':0,'T1':1,'W1':2,'TH1':3,'F1':4,'M2':5,'T2':6,'W2':7,'TH2':8,'F2':9}
-
-Full_Campaign_File(Date['M2'], 0)
+dt = pd.read_csv('start.csv')
+dt = dt[dt['startdate'] == next_business_day(today).strftime('%m/%d/%Y')]['Number'][0]
+Full_Campaign_File(dt, 0)
 
