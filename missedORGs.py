@@ -51,9 +51,10 @@ def pull_list():
                     AND c.[Skill] = n.[Skill_Name]
             LEFT JOIN Chartfinder_Snap.dbo.OutreachDates as od
 	            ON c.OutreachID = od.OutreachID
+            WHERE c.[Daily_Groups] = CAST(DATEADD(day, -1, GETDATE()) AS DATE)
             ''')
     
-    df = Query('DWWorking', query)
+    df = Query('DWWorking', query, 'Last Call Check')
     df['Load_Date'] = pd.to_datetime(df['Load_Date'])
     df['CF_Last_Call'] = pd.to_datetime(df['CF_Last_Call'])
     df['Daily_Groups'] = pd.to_datetime(df['Daily_Groups'])
