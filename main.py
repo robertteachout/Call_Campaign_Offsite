@@ -10,7 +10,7 @@ from FileLoad import Final_Load, Number_stats
 from Skills import complex_skills, Re_Skill_Project, convert
 from Sprint_Schedule import Assign_Map, Map_categories
 from Bus_day_calc import next_business_day, Next_N_BD, daily_piv, map_piv, newPath, time_check, x_Bus_Day_ago
-from SQL_Table import Insert_SQL
+from dbo_insert import Insert_SQL
 
 startTime_1 = time.time()
 today = date.today()
