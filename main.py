@@ -86,12 +86,9 @@ def Full_Campaign_File(Day, Master_List):
         N_Daily_Groups.to_csv(mapPath + 'Assignment_Map.csv', sep=',', index=False)
         time_check(startTime_1, 'Add NewIDs to list')
         ####################################
-
+    path2 = newPath('Table_Drop','')
     def Save():
-        path = newPath('dump','Group_Rank')
-        path2 = newPath('Table_Drop','')
-        os.chdir('../')
-        os.chdir('dump/Group_Rank')
+        os.chdir('dump/Load')
         filename = tomorrow.strftime("%Y-%m-%d")
         with ZipFile(filename + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as zip:
             dffin.to_csv(filename + '.csv', index= False)
@@ -118,11 +115,15 @@ def Full_Campaign_File(Day, Master_List):
             {'startdate':B10,
              'Number'   :range(10)}
             )
-        dt.to_csv('start.csv', index= False)
+        dt['startdate'] = pd.to_datetime(dt['startdate'])
+        path2 = newPath('Table_Drop','')
+        dt.to_csv(path2 + 'start.csv', index= False)
         return Assign_Map(dffin)
 
 ### [ What Day, test last nights file, Master list ]
-dt = pd.read_csv('start.csv')
-dt = dt[dt['startdate'] == next_business_day(today).strftime('%m/%d/%Y')]['Number'][0]
+path2 = newPath('Table_Drop','')
+dt = pd.read_csv(path2 + 'start.csv')
+
+dt = dt[dt['startdate'] == next_business_day(today).strftime('%Y-%m-%d')]['Number'].to_list()[0]
 Full_Campaign_File(dt, 0)
 

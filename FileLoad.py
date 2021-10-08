@@ -18,7 +18,7 @@ yesterday = (today + timedelta(days = -1))#.strftime("%m/%d/%Y")
 nxt_day = next_business_day(today)
 
 F_today = str('Call_Campaign_v4_' + today.strftime("%m%d")) + '*'
-path = newPath('dump','Call_Campaign')
+path = newPath('dump','Extract')
 Dpath = path + F_today
 original = 'C:\\Users\\ARoethe\\Downloads\\' + F_today 
 

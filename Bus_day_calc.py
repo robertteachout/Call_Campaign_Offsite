@@ -67,11 +67,10 @@ def map_piv(df):
     u = df.pivot_table(index =['Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'])
     return print(u)
 
-def newPath(Parent, Look):
+def newPath(Subdir, Subdir2):
     absolutepath = os.path.abspath(__file__)
     fileDirectory = os.path.dirname(absolutepath)
-    parentDirectory = os.path.dirname(fileDirectory)
-    newPath = os.path.join(parentDirectory, str(Parent) + '\\'+ str(Look) +'\\')
+    newPath = os.path.join(fileDirectory +'\\'+ str(Subdir) +'\\'+ str(Subdir2) +'\\')
     return newPath
 
 def date_list_split(ls, numSplit):

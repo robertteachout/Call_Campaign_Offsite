@@ -107,8 +107,8 @@ def Map_categories(df, Day, test):
         df['NewID'] = np.where(filter1, 1, df['NewID'])
         df['Daily_Groups'] = df['Daily_Groups'].replace(0, D2)
         df['OutreachID'] = df['OutreachID'].astype(int)
-        # filter0 = df['OutreachID'].isin(pull_list().squeeze())
-        # df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
+        filter0 = df['OutreachID'].isin(pull_list().squeeze())
+        df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
         ####################################
         Sprint = len(names)
         ### Map and Sort
