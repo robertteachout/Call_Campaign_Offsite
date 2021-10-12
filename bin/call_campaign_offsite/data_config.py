@@ -1,0 +1,48 @@
+from pathlib import Path
+from glob import glob
+import pandas as pd
+import os
+from zipfile import ZipFile
+import zipfile
+import shutil
+
+### Add Custom Region ###
+def Region():
+    table_path = Path("data/table_drop")
+    return pd.read_csv(table_path / "Region_Lookup.csv", sep=',')
+
+### Input/output static tables ###
+def table_drops(push_pull, table, name):
+    table_path = Path("data/table_drop")
+    if push_pull == 'push':
+        table.to_csv(table_path / name, sep=',',index=False)
+    else:
+        return pd.read_csv(table_path / name, sep=',',low_memory=False)
+
+def assignment_map(push_pull, table, name):
+    table_path = Path("data/assignment_map")
+    if push_pull == 'push':
+        table.to_csv(table_path / name, sep=',',index=False)
+    else:
+        return pd.read_csv(table_path / name, sep=',')
+
+### push_pull zip file ###
+def zipfiles(push_pull, df, filename):
+    if push_pull == 'pull':
+        Extract_path = Path("data/extract")
+        file = (list(Extract_path.glob(filename))[0])
+        with ZipFile(file, 'r') as zip:
+                zip_name = ",".join(zip.namelist())
+                Extract = pd.read_csv(zip.extract(zip_name), sep='|', on_bad_lines='skip', engine="python")
+                os.remove(zip_name)
+                return Extract
+    else:
+        with ZipFile(filename + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as zip:
+                path = str(filename + '.csv')
+                df.to_csv(path, sep=',',index=False)
+                zip.write(path)
+                zip.close()
+                os.remove(path)
+                shutil.move(str(filename + '.zip'), Path("data/load"))
+
+

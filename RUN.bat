@@ -1,4 +1,6 @@
+
 set venv=offsite
+set project_name=call_campaign_offsite
 :: -------------------------------------------------------------------------
 :: Open anaconda & activate env
 :: -------------------------------------------------------------------------
@@ -11,6 +13,6 @@ cd %~dp0
 :: -------------------------------------------------------------------------
 :: Run script at this location
 :: -------------------------------------------------------------------------
-call %USERPROFILE%/Anaconda3/envs/%venv%/python.exe "%~dp0\main.py"
+call %USERPROFILE%/Anaconda3/envs/%venv%/python.exe "%~dp0\bin\%project_name%\main.py"
 PAUSE
 

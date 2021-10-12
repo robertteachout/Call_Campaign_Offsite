@@ -1,23 +1,31 @@
 # from FileLoad import Final_Load
 import pandas as pd
 import numpy as np
-import string
 from datetime import date, timedelta, datetime
-import holidays
-import time
-from missedORGs import pull_list
-from FileLoad import Final_Load
-from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath, date_list_split
+from pipeline_check_missing import pull_list
+from etc_function import next_business_day, Next_N_BD, date_list_split, daily_piv
+from data_config import table_drops, assignment_map
+
 today = date.today()
 tomorrow = next_business_day(today)
 D2 = next_business_day(tomorrow)
+B10 = Next_N_BD(today, 10)
+
 FivDay = today + timedelta(days=7)
 test = next_business_day(FivDay)
 # df, test = Final_Load()
 
+
+### Create static two week sprint ###
+def static_schedual():
+    dt = pd.DataFrame(
+            {'startdate'    :B10,
+                'Number'    :range(10)} )
+    dt['startdate'] = pd.to_datetime(dt['startdate']) 
+    return dt
+
 def Load_Assignment():
-    path = newPath('Table_Drop','')
-    Cluster = pd.read_csv(path + "Assignment_Map.csv", sep=',', on_bad_lines='skip', engine="python")
+    Cluster = table_drops('pull', 'NA','Assignment_Map.csv' )
     ### at the begining of new cylce remove cut this section
     Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%Y')
     start = Cluster[Cluster['Daily_Groups'] >= tomorrow.strftime('%m/%d/%Y')]
@@ -27,13 +35,12 @@ def Load_Assignment():
     ### end
     Cluster = Cluster.join(pd.get_dummies(Cluster['Daily_Groups']))
     return Cluster
-# map_piv(Load_Assignment())
-# print(Load_Assignment())
+
 def sort(i):
     df = Load_Assignment()
     df0 = df[df[i] == 1]['PhoneNumber']
     return df0
-# print(sort('2021-07-12'))
+
 def Cluster(df, Add_Cluster):
     df_local = df
     filter0 = df_local['PhoneNumber'].isin(sort(Add_Cluster).squeeze())
@@ -85,13 +92,11 @@ def Assign_Map(df):
         return final
     ## Add together all skills with uniquely broken out sprints
     for i in skills:
-            df_key = df_key.append(assign_audit(i))#,ignore_index=True) #
-    path1 = newPath('dump','Assignment_Map')
-    path2 = newPath('Table_Drop','')
+            df_key = df_key.append(assign_audit(i))
     df_key['NewID'] = 0
-    df_key.to_csv(path1 + str(tomorrow) +'.csv', index=False)
-    df_key.to_csv(path2 + 'Assignment_Map' +  '.csv', index=False)
-    return map_piv(df_key)
+    assignment_map('push', df_key, str(tomorrow + '.csv'))
+    table_drops('push', df_key, 'Assignment_Map.csv')
+    return daily_piv(df_key)
 
     ## Sprint Schedulual Day
 def Map_categories(df, Day, test):

@@ -1,51 +1,26 @@
 import pandas as pd
 import numpy as np
-from zipfile import ZipFile
-
 from datetime import date, timedelta, datetime
-from glob import glob
-import os
-import shutil
-from Skills import complex_skills
-from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath
-# from Sprint_Schedule import Map_categories
-import csv
-csv.field_size_limit(1000)
+from pipeline_skills import complex_skills
+from etc_function import next_business_day
+from data_config import zipfiles, Region
 
 today = date.today()
-tomorrow = (today + timedelta(days = 1))#.strftime("%m/%d/%Y")
-yesterday = (today + timedelta(days = -1))#.strftime("%m/%d/%Y")
+tomorrow = (today + timedelta(days = 1))
+yesterday = (today + timedelta(days = -1))
 nxt_day = next_business_day(today)
 
-F_today = str('Call_Campaign_v4_' + today.strftime("%m%d")) + '*'
-path = newPath('dump','Extract')
-Dpath = path + F_today
-original = 'C:\\Users\\ARoethe\\Downloads\\' + F_today 
-
-def file_exists(filename):
-    return bool(glob(filename + '*'))
-
-if file_exists(original) is True:
-    if file_exists(Dpath) is False:
-        shutil.copy(glob(original)[0],path)
-        os.remove(glob(original)[0])
-    else:
-        os.remove(glob(original)[0])
-
-filename = glob(Dpath)[0]
-
 def Load():
-    with ZipFile(filename, 'r') as zip:
-        zip_name = ",".join(zip.namelist())
-        df = pd.read_csv(zip.extract(zip_name), sep='|', on_bad_lines='skip', engine="python")
-        os.remove(zip_name)
-
+    ### Load from data config ###
+    filename = str('Call_Campaign_v4_' + today.strftime("%m%d") + '*')
+    df = zipfiles('pull', 'NA', filename)
     df.columns = df.columns.str.replace('/ ','')
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
     df['Site_Clean_Id'] = pd.to_numeric(df['Site_Clean_Id'], errors='coerce')
     df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
     return df
+
 def Format(File):
     Format_Now = File.copy()
     Format_Now['Last_Call'] = pd.to_datetime(Format_Now['Last_Call'], errors='coerce').dt.date
@@ -58,9 +33,9 @@ def Clean_Numbers(df):
     filter2 = df['PhoneNumber'].isna()
     df['PhoneNumber'] = np.where(filter1 | filter2, 9999999999,df['PhoneNumber'])
     return df
+
 def region_col(df):
-    path = newPath('Table_Drop','')
-    lookup = pd.read_csv(path + "Region_Lookup.csv", sep=',')
+    lookup = Region()
     lookup = lookup[['State', 'Region']]
     return pd.merge(df, lookup, how="left", on=["State"])
 
@@ -130,25 +105,10 @@ def Final_Load():
     df = pd.merge(df,df2, on='PhoneNumber')
     df = complex_skills(df)
     test = Test_Load(df)
-    
-    # ### Athum random priortiztion
-    # filter1 = df['Score'].astype(str).str[0] == '1'
-    
-    ### Region Filter
-    filter1 = df['Region'] != 'GULF'
-    filter2 = df['Region'] != 'CENTRAL'
-    filter3 = df['Region'] != 'ATLANTIC'
-    filter4 = df['Region'] != 'WEST'
-    filter5 = df['Region'] != 'MIDWEST'
-    filter6 = df['Region'] != 'NORTHEAST'
-    # df = df[filter1 & filter1]
     return df, test
 
-# df, test2 = Final_Load()
-
-# print(df.iloc[:,-10:])
-# print(df['Region'].unique())
 if __name__ == "__main__":
     print("File will load")
-    # df, test2 = Final_Load()
-    # print(df)
+    df, test2 = Final_Load()
+    print(df)
+    print(test2)

@@ -1,10 +1,10 @@
 from datetime import datetime
 import pandas as pd
 import pyodbc
-import sys
 import numpy as np
 import time
-from Bus_day_calc import next_business_day, Next_N_BD, map_piv, daily_piv, newPath, x_Bus_Day_ago
+from etc_function import x_Bus_Day_ago
+from data_config import table_drops
 
 class MyDfInsert:
     def __init__(self, cnxn, sql_stub, data_frame, rows_per_batch=1000):
@@ -53,59 +53,48 @@ class MyDfInsert:
             crsr.execute(self._sql, params)
 
 def Insert_SQL():
-    Dpath = newPath('Table_Drop','')
+    ### Remove yesterday's file ###
+    remove = '''
+        DELETE
+        FROM [DWWorking].[dbo].[Call_Campaign]
+        WHERE Load_Date < {}
+        '''.format("'"+ x_Bus_Day_ago(4).strftime("%Y-%m-%d") + "'")
+    add =  """
+        INSERT INTO DWWorking.dbo.Call_Campaign (
+            OutreachID, PhoneNumber, Score, Skill, Daily_Groups, Unique_Phone, Load_Date) 
+        """
     ### Load file ###
-    df = pd.read_csv(Dpath + 'Group_Rank.csv', sep=',',low_memory=False)
+    df = table_drops('pull', 'NA', 'Group_Rank.csv')
     ### Clean ###
     df = df[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date']]
     df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]
     # print(len(df['PhoneNumber'].max()))
     df = df[df['Daily_Groups'] != '0'] ### remove skill that are out of daily proccess
-    # df['Daily_Groups'] = df['Daily_Groups'].replace('0', '2021-08-20')
-    # print(df)
-
     df = df.fillna(0)
-
     df[['OutreachID', 'Score', 'Unique_Phone']] = df[['OutreachID', 'Score', 'Unique_Phone']].astype(np.int64)
     df['Daily_Groups'] = df['Daily_Groups'].astype('datetime64[ns]')
     df['Load_Date'] = df['Load_Date'].astype('datetime64[ns]')
-    # print(df)
-
 
     ### Server Location ###
     servername = 'EUS1PCFSNAPDB01'
     database = 'DWWorking'
-    DB ={
-        'servername': servername,
-        'database'  : database
-        }
-
-    conn_str = (
-        'DRIVER={SQL Server}; SERVER=' + DB['servername'] + '; DATABASE=' + DB['database'] + '; Trusted_Connection=yes'
-    )
+    DB ={   'servername': servername,
+            'database'  : database      }
+    conn_str = ('DRIVER={SQL Server}; SERVER=' + DB['servername'] + '; DATABASE=' + DB['database'] + '; Trusted_Connection=yes')
     cnxn = pyodbc.connect(conn_str, autocommit=True)
     crsr = cnxn.cursor()
-    ### Create Table ###
+    ### Remove yesterday's file ###
+    crsr.execute(remove)
 
     t0 = time.time()
-    ### Remove yesterday's file ###
-    crsr.execute('''
-        DELETE
-        FROM [DWWorking].[dbo].[Call_Campaign]
-        WHERE Load_Date < {}
-        '''.format("'"+ x_Bus_Day_ago(4).strftime("%Y-%m-%d") + "'")
-        )
-
-    # ### Add today's file ###
-    MyDfInsert(cnxn, """
-                    INSERT INTO DWWorking.dbo.Call_Campaign (
-                        OutreachID, PhoneNumber, Score, Skill, Daily_Groups, Unique_Phone, Load_Date) 
-                    """, df, rows_per_batch=250)
+    ### Add today's file ###
+    MyDfInsert(cnxn, add, df, rows_per_batch=250
+                    )
 
     print()
     print(f'Inserts completed in {time.time() - t0:.2f} seconds.')
 
     cnxn.close()
 
-# Insert_SQL()
+Insert_SQL()
  
