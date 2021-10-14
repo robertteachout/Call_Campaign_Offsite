@@ -105,4 +105,9 @@ def full_campaign_file(Master_List):
 
 ### 1 -> create new two 2 sprint schedual
 ### 0 -> run daily campaign
-full_campaign_file(0)    
+if __name__ == "__main__":
+    full_campaign_file(
+    input("""
+           0 -> Daily call campaign
+           1 -> New sprint schedual  
+    enter: """))

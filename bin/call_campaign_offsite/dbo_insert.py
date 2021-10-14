@@ -53,7 +53,10 @@ class MyDfInsert:
             crsr.execute(self._sql, params)
 
 def Insert_SQL():
-    if input('Insert into the server: ') == 'y':
+    if input("""
+           y -> Insert
+           n -> Exit 
+    enter: """) == 'y':
         pass
     else:
         raise SystemExit
@@ -92,12 +95,13 @@ def Insert_SQL():
 
     t0 = time.time()
     ### Add today's file ###
-    # MyDfInsert(cnxn, add, df, rows_per_batch=250)
+    MyDfInsert(cnxn, add, df, rows_per_batch=250)
 
     print()
     print(f'Inserts completed in {time.time() - t0:.2f} seconds.')
 
     cnxn.close()
 
-# Insert_SQL()
+if __name__ == "__main__":
+    Insert_SQL()
  
