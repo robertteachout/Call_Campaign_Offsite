@@ -4,7 +4,8 @@ import numpy as np
 from datetime import date, timedelta, datetime
 from pipeline_check_missing import pull_list
 from etc_function import next_business_day, Next_N_BD, date_list_split, daily_piv
-from data_config import table_drops, assignment_map
+from data_config import tables, assignment_map
+import pipeline_clean
 
 today = date.today()
 tomorrow = next_business_day(today)
@@ -13,8 +14,6 @@ B10 = Next_N_BD(today, 10)
 
 FivDay = today + timedelta(days=7)
 test = next_business_day(FivDay)
-# df, test = Final_Load()
-
 
 ### Create static two week sprint ###
 def static_schedual():
@@ -25,26 +24,26 @@ def static_schedual():
     return dt
 
 def Load_Assignment():
-    Cluster = table_drops('pull', 'NA','Assignment_Map.csv' )
+    assignment = tables('pull', 'NA','Assignment_Map.csv' )
     ### at the begining of new cylce remove cut this section
-    Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%Y')
-    start = Cluster[Cluster['Daily_Groups'] >= tomorrow.strftime('%m/%d/%Y')]
-    end =  Cluster[Cluster['Daily_Groups'] < tomorrow.strftime('%m/%d/%Y')]
-    Cluster = start.append(end).reset_index(drop=True).drop_duplicates(subset='PhoneNumber').sort_values('Daily_Groups').reset_index(drop=True)
-    Cluster['Daily_Groups'] = pd.to_datetime(Cluster['Daily_Groups'], format='%m/%d/%Y').dt.date
+    assignment['Daily_Groups'] = pd.to_datetime(assignment['Daily_Groups'], format='%Y-%m-%d')
+    start = assignment[assignment['Daily_Groups'] >= tomorrow.strftime('%Y-%m-%d')]
+    end =  assignment[assignment['Daily_Groups'] < tomorrow.strftime('%Y-%m-%d')]
+    assignment = start.append(end).reset_index(drop=True).drop_duplicates(subset='PhoneNumber').sort_values('Daily_Groups').reset_index(drop=True)
+    assignment['Daily_Groups'] = pd.to_datetime(assignment['Daily_Groups'], format='%Y-%m-%d').dt.date
     ### end
-    Cluster = Cluster.join(pd.get_dummies(Cluster['Daily_Groups']))
-    return Cluster
+    assignment = assignment.join(pd.get_dummies(assignment['Daily_Groups']))
+    return assignment
 
 def sort(i):
     df = Load_Assignment()
     df0 = df[df[i] == 1]['PhoneNumber']
     return df0
 
-def Cluster(df, Add_Cluster):
+def assignment(df, Add_assignment):
     df_local = df
-    filter0 = df_local['PhoneNumber'].isin(sort(Add_Cluster).squeeze())
-    df_local['Daily_Groups'] = np.where(filter0, Add_Cluster, df_local['Daily_Groups'])
+    filter0 = df_local['PhoneNumber'].isin(sort(Add_assignment).squeeze())
+    df_local['Daily_Groups'] = np.where(filter0, Add_assignment, df_local['Daily_Groups'])
     return df_local
 
 def Daily_Maping(df):
@@ -52,7 +51,7 @@ def Daily_Maping(df):
     load = Load_Assignment()
     names = list(load['Daily_Groups'].unique())
     for i in names:
-        f = Cluster(f,i)
+        f = assignment(f,i)
     return f, names
 
 ### Create file with assigned categories to ORG
@@ -73,7 +72,7 @@ def Assign_Map(df):
         #### INPUT BY DAY ####
         Sprint = j
         ######################
-        df_len = len(df_skill.index)
+        df_len = len(df_skill)
         group_size = df_len // Sprint 
         ## What day for what number ##
         listDay = BusDay * group_size
@@ -95,7 +94,7 @@ def Assign_Map(df):
             df_key = df_key.append(assign_audit(i))
     df_key['NewID'] = 0
     assignment_map('push', df_key, str(tomorrow + '.csv'))
-    table_drops('push', df_key, 'Assignment_Map.csv')
+    tables('push', df_key, 'Assignment_Map.csv')
     return daily_piv(df_key)
 
     ## Sprint Schedulual Day
@@ -110,8 +109,11 @@ def Map_categories(df, Day, test):
         df['NewID'] = 0
         filter1 = df['Daily_Groups'] == 0
         df['NewID'] = np.where(filter1, 1, df['NewID'])
-        df['Daily_Groups'] = df['Daily_Groups'].replace(0, D2)
+        ### Add dynamic daily group based on remaining sprint ###
+        df = NewID_sprint_load_balance(df)
+        # df['Daily_Groups'] = df['Daily_Groups'].replace(0, D2)
         df['OutreachID'] = df['OutreachID'].astype(int)
+        ### Add yesterdays daily group that was missed
         filter0 = df['OutreachID'].isin(pull_list().squeeze())
         df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
         ####################################
@@ -124,5 +126,21 @@ def Map_categories(df, Day, test):
         df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
         return df
 
+def NewID_sprint_load_balance(df):
+    df_new = df[df['NewID'] == 1].reset_index()
+    ### get remaining days in sprint schedual ###
+    dt = tables('pull', 'NA', 'start.csv')
+    dt['startdate'] = pd.to_datetime(dt['startdate']).dt.date
+    BusDay = dt[dt['startdate'] >= next_business_day(today)]['startdate'].to_list()
+    ### split total NewIds into groups ###
+    group_size = len(df_new) // len(BusDay) 
+    Daily_Priority = pd.DataFrame(BusDay * group_size, columns=['Daily_Groups'])
+    add_back = len(df_new) - len(Daily_Priority)
+    Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
+    df_new['Daily_Groups']  = Daily_Priority['Daily_Groups'].reset_index(drop=True)
+    p = df_new.append(df).drop_duplicates(['OutreachID']).reset_index(drop= True)
+    p['Daily_Groups'] = pd.to_datetime(p['Daily_Groups']).dt.date
+    return p
+
 if __name__ == "__main__":
-    print("Clusters")
+    df, test2 = pipeline_clean.Final_Load()

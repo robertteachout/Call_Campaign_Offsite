@@ -108,7 +108,5 @@ def Final_Load():
     return df, test
 
 if __name__ == "__main__":
-    print("File will load")
     df, test2 = Final_Load()
     print(df)
-    print(test2)

@@ -5,7 +5,7 @@ import time
 from etc_function import daily_piv, time_check, next_business_day, Next_N_BD, x_Bus_Day_ago 
 from pipeline_clean import Final_Load, Number_stats
 from pipeline_schedual import Assign_Map, Map_categories, static_schedual
-from data_config import table_drops, zipfiles
+from data_config import tables, zipfiles
 from dbo_insert import Insert_SQL
 
 startTime_1 = time.time()
@@ -15,7 +15,7 @@ tomorrow = next_business_day(today)
 
 def full_campaign_file(Master_List):
     ### [ What Day, test last nights file, Master list ]
-    dt = table_drops('pull', 'NA', 'start.csv')
+    dt = tables('pull', 'NA', 'start.csv')
     Day = dt[dt['startdate'] == next_business_day(today).strftime('%Y-%m-%d')]['Number'].to_list()[0]
     ### Get data and mutate
     df, test0 = Final_Load()
@@ -33,7 +33,7 @@ def full_campaign_file(Master_List):
         df1['Score'] = range(0,len(df1))
         return df1
 
-    def spilt(df, sk):
+    def split(df, sk):
             df0 = df[df['Skill'] == sk]
             
             df1 = df0.join(pd.get_dummies(df0['Outreach_Status']))
@@ -62,29 +62,28 @@ def full_campaign_file(Master_List):
     
     def drop_dup(df, Master_List):
         df3 = Number_stats(df)
-        df_score_spilt = pd.DataFrame()
+        df_score_split = pd.DataFrame()
         ### Sort Order and drop Dups
         for i in df3['Skill'].unique():
-            df_score_spilt = df_score_spilt.append(spilt(df3, i))
-        return df_score_spilt
+            df_score_split = df_score_split.append(split(df3, i))
+        return df_score_split
 
     df_p_c = drop_dup(df0, Master_List)
     time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
-
     if 'NewID' in df_p_c.columns:
         NewID = df_p_c[df_p_c['NewID'] == 1]
         NewID = NewID[['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
-        NewID['Daily_Groups'] = pd.to_datetime(NewID['Daily_Groups']).dt.strftime('%m/%d/%Y')
-        Daily_Groups = table_drops('pull','NA',"Assignment_Map.csv")
+        NewID['Daily_Groups'] = pd.to_datetime(NewID['Daily_Groups']).dt.strftime('%Y-%m-%d')
+        Daily_Groups = tables('pull','NA',"Assignment_Map.csv")
         N_Daily_Groups = Daily_Groups.append(NewID)
-        table_drops('push',N_Daily_Groups,"Assignment_Map.csv")
         time_check(startTime_1, 'Add NewIDs to list')
         ####################################
 
     def Save():
         filename = tomorrow.strftime("%Y-%m-%d")
-        table_drops('push', df_p_c,'Group_Rank.csv')
         zipfiles('push', df_p_c, filename)
+        tables('push', df_p_c,'Group_Rank.csv')
+        tables('push',N_Daily_Groups,"Assignment_Map.csv")
         time_check(startTime_1, 'Save files')
         ####################################
         daily_piv(df_p_c)
@@ -100,14 +99,14 @@ def full_campaign_file(Master_List):
     ###calculate ever 2 weeks
     if Master_List == 1:
         dt = static_schedual()
-        table_drops('push', dt, 'start.csv')
+        tables('push', dt, 'start.csv')
         return Assign_Map(df_p_c)
 
 ### 1 -> create new two 2 sprint schedual
 ### 0 -> run daily campaign
 if __name__ == "__main__":
     full_campaign_file(
-    input("""
-           0 -> Daily call campaign
-           1 -> New sprint schedual  
-    enter: """))
+    int(input("""
+        0 -> Daily call campaign
+        1 -> New sprint schedual  
+    enter: """)))

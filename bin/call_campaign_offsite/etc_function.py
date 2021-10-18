@@ -11,9 +11,12 @@ def time_check(start, comment):
     print("-----------------------------------------------")
 
 def daily_piv(df):
-    df = df[df['Unique_Phone'] == 1]
-    u = df.pivot_table(index =['Daily_Priority', 'Daily_Groups','NewID'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
-    return print(u)
+    u = df[df['Unique_Phone'] == 1]
+    nu = df[df['NewID'] == 1]
+    u = u.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
+    nu = nu.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
+    print(u)
+    print(nu)
     
 def date_list_split(ls, numSplit):
     splits = np.array_split(ls, numSplit)
@@ -63,7 +66,7 @@ def Next_N_BD(start, N):
         def test(day):
             d = start + timedelta(days=day)
             return next_business_day(d)
-        item = test(i).strftime("%m/%d/%Y")
+        item = test(i).strftime("%Y-%m-%d")
         if item not in seen:
             seen.add(item)
             B10.append(item)

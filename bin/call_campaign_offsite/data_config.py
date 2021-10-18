@@ -12,7 +12,7 @@ def Region():
     return pd.read_csv(table_path / "Region_Lookup.csv", sep=',')
 
 ### Input/output static tables ###
-def table_drops(push_pull, table, name):
+def tables(push_pull, table, name):
     table_path = Path("data/table_drop")
     if push_pull == 'push':
         table.to_csv(table_path / name, sep=',',index=False)
@@ -43,6 +43,12 @@ def zipfiles(push_pull, df, filename):
                 zip.write(path)
                 zip.close()
                 os.remove(path)
-                shutil.move(str(filename + '.zip'), Path("data/load"))
+                pathfile = Path("data/load") / str(filename + '.zip')
+                if os.path.exists(pathfile):
+                    os.remove(pathfile)
+                    shutil.move(str(filename + '.zip'), Path("data/load"))
+                else:
+                    shutil.move(str(filename + '.zip'), Path("data/load"))
+                
 
 

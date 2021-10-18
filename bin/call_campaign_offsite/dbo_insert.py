@@ -4,7 +4,7 @@ import pyodbc
 import numpy as np
 import time
 from etc_function import x_Bus_Day_ago
-from data_config import table_drops
+from data_config import tables
 
 class MyDfInsert:
     def __init__(self, cnxn, sql_stub, data_frame, rows_per_batch=1000):
@@ -71,7 +71,7 @@ def Insert_SQL():
             OutreachID, PhoneNumber, Score, Skill, Daily_Groups, Unique_Phone, Load_Date) 
         """
     ### Load file ###
-    df = table_drops('pull', 'NA', 'Group_Rank.csv')
+    df = tables('pull', 'NA', 'Group_Rank.csv')
     ### Clean ###
     df = df[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date']]
     df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]
