@@ -9,7 +9,7 @@ def Query(database, sql, query_name):
       try:
             conn = pyodbc.connect('DRIVER={SQL Server};SERVER=' + DB['servername'] + ';DATABASE=' + DB['database'] + ';Trusted_Connection=yes') 
       except pyodbc.OperationalError:
-            print("""Didn\'t connect to they server""")
+            print("""Not connected to server""")
             sys.exit(1)
       print('''Connected to Server \t {}'''.format(query_name))
       df = pd.read_sql(sql, conn)

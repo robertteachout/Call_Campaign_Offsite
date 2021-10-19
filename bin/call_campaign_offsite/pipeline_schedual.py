@@ -93,9 +93,8 @@ def Assign_Map(df):
     for i in skills:
             df_key = df_key.append(assign_audit(i))
     df_key['NewID'] = 0
-    assignment_map('push', df_key, str(tomorrow + '.csv'))
+    assignment_map('push', df_key, str(tomorrow.strftime('%Y-%m-%d') + '.csv'))
     tables('push', df_key, 'Assignment_Map.csv')
-    return daily_piv(df_key)
 
     ## Sprint Schedulual Day
 def Map_categories(df, Day, test):
@@ -127,14 +126,15 @@ def Map_categories(df, Day, test):
         return df
 
 def NewID_sprint_load_balance(df):
+    df = df.reset_index(drop= True)
     df_new = df[df['NewID'] == 1].reset_index()
     ### get remaining days in sprint schedual ###
     dt = tables('pull', 'NA', 'start.csv')
     dt['startdate'] = pd.to_datetime(dt['startdate']).dt.date
     BusDay = dt[dt['startdate'] >= next_business_day(today)]['startdate'].to_list()
     ### split total NewIds into groups ###
-    group_size = len(df_new) // len(BusDay) 
-    Daily_Priority = pd.DataFrame(BusDay * group_size, columns=['Daily_Groups'])
+    group_size = len(df_new) // len(BusDay) * BusDay
+    Daily_Priority = pd.DataFrame(group_size, columns=['Daily_Groups'])
     add_back = len(df_new) - len(Daily_Priority)
     Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
     df_new['Daily_Groups']  = Daily_Priority['Daily_Groups'].reset_index(drop=True)
