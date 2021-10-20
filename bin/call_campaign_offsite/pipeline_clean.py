@@ -3,7 +3,7 @@ import numpy as np
 from datetime import date, timedelta, datetime
 from pipeline_skills import complex_skills
 from etc_function import next_business_day
-from data_config import zipfiles, Region
+from data_config import zipfiles, tables
 
 today = date.today()
 tomorrow = (today + timedelta(days = 1))
@@ -35,7 +35,7 @@ def Clean_Numbers(df):
     return df
 
 def region_col(df):
-    lookup = Region()
+    lookup = tables('pull', 'NA', 'Region_Lookup.csv')
     lookup = lookup[['State', 'Region']]
     return pd.merge(df, lookup, how="left", on=["State"])
 

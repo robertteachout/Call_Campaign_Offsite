@@ -4,7 +4,7 @@ import numpy as np
 from datetime import date, timedelta, datetime
 from pipeline_check_missing import pull_list
 from etc_function import next_business_day, Next_N_BD, date_list_split, daily_piv
-from data_config import tables, assignment_map
+from data_config import tables
 import pipeline_clean
 
 today = date.today()
@@ -93,7 +93,7 @@ def Assign_Map(df):
     for i in skills:
             df_key = df_key.append(assign_audit(i))
     df_key['NewID'] = 0
-    assignment_map('push', df_key, str(tomorrow.strftime('%Y-%m-%d') + '.csv'))
+    tables('push', df_key, str('../assignment_map/' + tomorrow.strftime('%Y-%m-%d') + '.csv'))
     tables('push', df_key, 'Assignment_Map.csv')
 
     ## Sprint Schedulual Day
@@ -113,7 +113,8 @@ def Map_categories(df, Day, test):
         # df['Daily_Groups'] = df['Daily_Groups'].replace(0, D2)
         df['OutreachID'] = df['OutreachID'].astype(int)
         ### Add yesterdays daily group that was missed
-        filter0 = df['OutreachID'].isin(pull_list().squeeze())
+        list_add = pull_list()
+        filter0 = df['OutreachID'].isin(list_add['OutreachID'].squeeze())
         df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
         ####################################
         Sprint = len(names)
@@ -123,7 +124,7 @@ def Map_categories(df, Day, test):
         Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
         Daily_sort = dict(zip(Category,Sprint_schedual))
         df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
-        return df
+        return df, list_add
 
 def NewID_sprint_load_balance(df):
     df = df.reset_index(drop= True)
