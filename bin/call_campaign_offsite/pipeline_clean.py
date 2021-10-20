@@ -4,6 +4,7 @@ from datetime import date, timedelta, datetime
 from pipeline_skills import complex_skills
 from etc_function import next_business_day
 from data_config import zipfiles, tables
+import dbo_query
 
 today = date.today()
 tomorrow = (today + timedelta(days = 1))
@@ -13,7 +14,10 @@ nxt_day = next_business_day(today)
 def Load():
     ### Load from data config ###
     filename = str('Call_Campaign_v4_' + today.strftime("%m%d") + '*')
-    df = zipfiles('pull', 'NA', filename)
+    df0 = zipfiles('pull', 'NA', filename)
+    df2 = dbo_query.reSchedule()
+    df = df0.append(df2, ignore_index = True)
+    
     df.columns = df.columns.str.replace('/ ','')
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
