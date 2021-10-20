@@ -6,25 +6,13 @@ from zipfile import ZipFile
 import zipfile
 import shutil
 
-### Add Custom Region ###
-def Region():
-    table_path = Path("data/table_drop")
-    return pd.read_csv(table_path / "Region_Lookup.csv", sep=',')
-
 ### Input/output static tables ###
 def tables(push_pull, table, name):
-    table_path = Path("data/table_drop")
+    table_path = Path("data/table_drop/")
     if push_pull == 'push':
         table.to_csv(table_path / name, sep=',',index=False)
     else:
         return pd.read_csv(table_path / name, sep=',',low_memory=False)
-
-def assignment_map(push_pull, table, name):
-    table_path = Path("data/assignment_map")
-    if push_pull == 'push':
-        table.to_csv(table_path / name, sep=',',index=False)
-    else:
-        return pd.read_csv(table_path / name, sep=',')
 
 ### push_pull zip file ###
 def zipfiles(push_pull, df, filename):
