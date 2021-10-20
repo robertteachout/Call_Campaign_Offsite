@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import date
 import time
-from etc_function import daily_piv, time_check, next_business_day, Next_N_BD, x_Bus_Day_ago 
+from etc_function import daily_piv, time_check, next_business_day, Next_N_BD, x_Bus_Day_ago
 from pipeline_clean import Final_Load, Number_stats
 from pipeline_schedual import Assign_Map, Map_categories, static_schedual
 from data_config import tables, zipfiles
@@ -13,15 +13,23 @@ today = date.today()
 B10 = Next_N_BD(today, 10)
 tomorrow = next_business_day(today)
 
-def full_campaign_file(Master_List):
+def full_campaign_file():
     ### [ What Day, test last nights file, Master list ]
+    ### 1 -> create new two 2 sprint schedual
+    ### 0 -> run daily campaign
     dt = tables('pull', 'NA', 'start.csv')
-    Day = dt[dt['startdate'] == next_business_day(today).strftime('%Y-%m-%d')]['Number'].to_list()[0]
+    try:
+        Day = dt[dt['startdate'] == next_business_day(today).strftime('%Y-%m-%d')]['Number'].to_list()[0]
+        Master_List = 0
+    except IndexError:
+        Day = 1
+        Master_List = 1
+    print('Day: ' + str(Day) + ', Master List: '+ str(Master_List))
     ### Get data and mutate
     df, test0 = Final_Load()
     time_check(startTime_1, 'File Load \t' + test0)
     ####################################
-    df0 = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
+    df0, list_add = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
     time_check(startTime_1, 'Sprint Schedule')
     ####################################
     # convert CF last call date to child org / child ORG's won't be affected
@@ -70,6 +78,7 @@ def full_campaign_file(Master_List):
 
     df_p_c = drop_dup(df0, Master_List)
     time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
+
     if 'NewID' in df_p_c.columns:
         NewID = df_p_c[df_p_c['NewID'] == 1]
         NewID = NewID[['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
@@ -84,6 +93,7 @@ def full_campaign_file(Master_List):
         zipfiles('push', df_p_c, filename)
         tables('push', df_p_c,'Group_Rank.csv')
         tables('push',N_Daily_Groups,"Assignment_Map.csv")
+        tables('push', list_add, 'Missed_ORGs.csv')
         time_check(startTime_1, 'Save files')
         ####################################
         daily_piv(df_p_c)
@@ -98,15 +108,10 @@ def full_campaign_file(Master_List):
  
     ###calculate ever 2 weeks
     if Master_List == 1:
+        Assign_Map(df_p_c)
         dt = static_schedual()
         tables('push', dt, 'start.csv')
-        return Assign_Map(df_p_c)
+        full_campaign_file()
 
-### 1 -> create new two 2 sprint schedual
-### 0 -> run daily campaign
 if __name__ == "__main__":
-    full_campaign_file(
-    int(input("""
-        0 -> Daily call campaign
-        1 -> New sprint schedual  
-    enter: """)))
+    full_campaign_file()
