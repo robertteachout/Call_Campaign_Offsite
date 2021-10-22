@@ -5,19 +5,34 @@ from pipeline_skills import complex_skills
 from etc_function import next_business_day
 from data_config import zipfiles, tables
 import dbo_query
-
+import time
 today = date.today()
 tomorrow = (today + timedelta(days = 1))
 yesterday = (today + timedelta(days = -1))
 nxt_day = next_business_day(today)
 
+def checkfile():
+    filename = str('Call_Campaign_v4_' + today.strftime("%m%d") + '*')
+    try:
+        df0 = zipfiles('pull', 'NA', filename)
+    except IndexError:
+        print('Check file -> data/extract')
+        time.sleep(3)
+        checkfile()
+    ### if exception -> recurse otherwise return none
+    else:
+        return None
+
 def Load():
     ### Load from data config ###
+    if checkfile() == None:
+        pass
     filename = str('Call_Campaign_v4_' + today.strftime("%m%d") + '*')
     df0 = zipfiles('pull', 'NA', filename)
     df2 = dbo_query.reSchedule()
+    ### Add to query
     df = df0.append(df2, ignore_index = True)
-    
+    ###
     df.columns = df.columns.str.replace('/ ','')
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
     df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
