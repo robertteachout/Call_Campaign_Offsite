@@ -11,12 +11,14 @@ def time_check(start, comment):
     print("-----------------------------------------------")
 
 def daily_piv(df):
-    u = df[df['Unique_Phone'] == 1]
-    nu = df[df['NewID'] == 1]
-    u = u.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
-    nu = nu.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL')
-    print(u)
-    print(nu)
+    try:
+        u = df[df['Unique_Phone'] == 1]
+        nu = df[df['NewID'] == 1]
+        print(u.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
+        print(nu.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
+    except:
+        print(df.pivot_table(index =['Skill'], values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
+
     
 def date_list_split(ls, numSplit):
     splits = np.array_split(ls, numSplit)
