@@ -61,21 +61,21 @@ def Insert_SQL():
     else:
         raise SystemExit
     ### Remove yesterday's file ###
-    remove = '''
-        DELETE
-        FROM [DWWorking].[dbo].[Call_Campaign]
-        WHERE Load_Date < {}
-        '''.format("'"+ x_Bus_Day_ago(4).strftime("%Y-%m-%d") + "'")
-    add =  """
-        INSERT INTO DWWorking.dbo.Call_Campaign (
+    remove=f'''
+            DELETE
+            FROM [DWWorking].[dbo].[Call_Campaign]
+            WHERE Load_Date < '{x_Bus_Day_ago(4).strftime("%Y-%m-%d")}'
+            '''
+    add =   """
+            INSERT INTO DWWorking.dbo.Call_Campaign (
             OutreachID, PhoneNumber, Score, Skill, Daily_Groups, Unique_Phone, Load_Date) 
-        """
+            """
     ### Load file ###
     df = tables('pull', 'NA', 'Group_Rank.csv')
     ### Clean ###
     df = df[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date']]
     df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]
-    # print(len(df['PhoneNumber'].max()))
+
     df = df[df['Daily_Groups'] != '0'] ### remove skill that are out of daily proccess
     df = df.fillna(0)
     df[['OutreachID', 'Score', 'Unique_Phone']] = df[['OutreachID', 'Score', 'Unique_Phone']].astype(np.int64)
@@ -104,4 +104,3 @@ def Insert_SQL():
 
 if __name__ == "__main__":
     Insert_SQL()
- 
