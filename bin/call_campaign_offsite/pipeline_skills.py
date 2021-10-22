@@ -16,13 +16,6 @@ def F_Audit(df, Audit):
         filter = df_local['Outreach_Status'] != 'NA'
     return filter
 
-def F_ClientOptumCategory(df, Category):
-    df_local = df
-    if Category != 'NA':
-        filter = df_local['Client / Optum Category'] == Category
-    else:
-        filter = df_local['Outreach_Status'] != 'NA'
-    return filter
 def F_Retrieval_Method(df, Method):
     df_local = df
     if Method != 'NA':
@@ -41,33 +34,12 @@ def F_ToGoCharts(df, Start, End):
         filter2 = df_local['TotalCharts'] != 'NA'
     return filter1, filter2 
 
-def F_DueDate(df, DueDate):
-    df_local = df
-    if DueDate != 'NA':
-        filter = df_local['Project_Due_Date'] == DueDate
-    else:
-        filter = df_local['Outreach_Status'] != 'NA'
-    return filter
-
-def F_SchedualDate(df, SchedualDate):
-    df_local = df
-    if SchedualDate != 'NA':
-        filter = df_local['Recommended_Schedule_Date'] == SchedualDate
-    else:
-        filter = df_local['Outreach_Status'] != 'NA'
-    return filter
-
 def F_ProjectType(df, Project_Type):
     df_local = df
     if Project_Type != 'NA':
         filter = df_local['Project_Type'] == Project_Type
     else:
         filter = df_local['Outreach_Status'] != 'NA'
-    return filter
-
-def F_Status_only(df):
-    df_local = df
-    filter = (df_local['Project_Status'] == 'Unscheduled') | (df_local['Project_Status'] == 'Past Due') | (df_local['Project_Status'] == 'Scheduled')
     return filter
 
 def Re_Skill_Project(df, Status, Project_Type, Start, End,Skill_Name):
@@ -121,6 +93,17 @@ def Re_Skill_status(df, status, skill_name):
     df['Skill'] = np.where(filter1, skill_name, df['Skill'])
     return df
 
+def fire_flag(df, skill_name):
+    filer1 = df['Score'].str[:1]
+    df['Skill'] = np.where(filer1, skill_name, df['Skill'])
+    return df
+
+def CC_Pend_Eligible(df):
+    filter1 = df['CallCount'] >= 15
+    filter2 = df['Outreach_Status'] == 'Unscheduled'
+    df['Skill'] = np.where(filter1 & filter2, 'CC_Pend_Eligible', df['Skill'])
+    return df
+
 def random_skill(df):
     filter1 = F_Status(df, 'Unscheduled')
     filter2 = F_ProjectType(df, 'Cigna - IFP RADV')
@@ -171,6 +154,7 @@ def complex_skills(df):
     f = Re_Skill_Genpact(f)
     f = random_skill(f)
     f = wellmed_schedual(f)
+    f = CC_Pend_Eligible(f)
     return f
 
 
