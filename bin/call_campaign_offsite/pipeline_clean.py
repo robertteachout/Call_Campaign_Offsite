@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from datetime import date, timedelta, datetime
 from pipeline_skills import complex_skills
-from etc_function import next_business_day
+from etc_function import next_business_day, daily_piv
 from data_config import zipfiles, tables
 import dbo_query
 import time
@@ -114,6 +114,12 @@ def Number_stats(df):
     df3 = df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort']).reset_index(drop = True)
     return df3
 
+### Covert fire flag with specific client project to a 5 day cycle _> add to RADV
+def fire_flag(df, skill_name):
+    filer1 = df['Score'].str[:1].isin(1,2,3)
+    df['Outreach_Status'] = np.where(filer1, skill_name, df['Outreach_Status'])
+    return df
+
 def Final_Load():
     df = Last_Call(region_col(Clean_Numbers(Format(Load()))))
     df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
@@ -128,4 +134,4 @@ def Final_Load():
 
 if __name__ == "__main__":
     df, test2 = Final_Load()
-    print(df)
+    daily_piv(df)
