@@ -4,7 +4,7 @@ import pyodbc
 import numpy as np
 import time
 from etc_function import x_Bus_Day_ago
-from data_config import tables
+from data_config import tables, zipfiles
 
 class MyDfInsert:
     def __init__(self, cnxn, sql_stub, data_frame, rows_per_batch=1000):

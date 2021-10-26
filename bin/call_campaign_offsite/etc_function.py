@@ -16,6 +16,7 @@ def daily_piv(df):
         nu = df[df['NewID'] == 1]
         print(u.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
         print(nu.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
+        pass
     except:
         print(df.pivot_table(index =['Skill'], values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
 

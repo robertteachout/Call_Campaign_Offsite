@@ -18,7 +18,7 @@ def Query(database, sql, query_name):
       return df
 
 def lc_org_search():
-      return Query('DWWorking', query_lc_org_search.sql, 'Last Call Check')
+      return Query('DWWorking', query_lc_org_search.sql(), 'Last Call Check')
       
 def reSchedule():
-      return Query('DWWorking', query_reschedule.sql , 'Add reschedules')
+      return Query('DWWorking', query_reschedule.sql(), 'Add reschedules')
