@@ -4,7 +4,7 @@ from datetime import date
 import time
 from etc_function import daily_piv, time_check, next_business_day, Next_N_BD, x_Bus_Day_ago
 from pipeline_clean import Final_Load, Number_stats
-from pipeline_schedual import Assign_Map, Map_categories, static_schedual
+from pipeline_schedule import Assign_Map, Map_categories, static_schedule
 from data_config import tables, zipfiles
 from dbo_insert import Insert_SQL
 
@@ -14,7 +14,7 @@ B10 = Next_N_BD(today, 10)
 tomorrow = next_business_day(today)
 
 def full_campaign_file():
-    ### 1 -> create new two 2 sprint schedual
+    ### 1 -> create new two 2 sprint schedule
     ### 0 -> run daily campaign
     dt = tables('pull', 'NA', 'start.csv')
     try:
@@ -29,7 +29,7 @@ def full_campaign_file():
     df, test0 = Final_Load()
     time_check(startTime_1, f'File Load \t{test0}')
 
-    df0, list_add = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
+    df0, list_add = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedule
     time_check(startTime_1, 'Sprint Schedule')
 
     def Score(df1):
@@ -48,7 +48,7 @@ def full_campaign_file():
             ### Add info to main line and reskill
             df3 = pd.merge(df0,df2, on='PhoneNumber')
 
-            ### put Unschedualed as parent
+            ### put Unscheduleed as parent
             df3 = df3.sort_values(by= ['PhoneNumber', 'status_sort']).reset_index(drop = True)
             df4 = df3.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
             ### re-rank after breaking it with status sort
@@ -97,14 +97,14 @@ def full_campaign_file():
 
     # Run the File
     if Master_List == 0:
-        Save()
+        # Save()
         Insert_SQL()
         time_check(startTime_1, 'Insert_SQL')
  
     ###calculate ever 2 weeks
     if Master_List == 1:
         Assign_Map(df_p_c)
-        dt = static_schedual()
+        dt = static_schedule()
         tables('push', dt, 'start.csv')
         full_campaign_file()
 
