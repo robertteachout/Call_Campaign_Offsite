@@ -16,7 +16,7 @@ FivDay = today + timedelta(days=7)
 test = next_business_day(FivDay)
 
 ### Create static two week sprint ###
-def static_schedual():
+def static_schedule():
     dt = pd.DataFrame(
             {'startdate'    :B10,
                 'Number'    :range(10)} )
@@ -102,7 +102,8 @@ def Map_categories(df, Day, test):
         df['Daily_Priority'] = 0
         df['Daily_Groups'] = 0
         df['NewID'] = 0
-        return df
+        list_add = pd.DataFrame()
+        return df, list_add
     else:
         df, names = Daily_Maping(df)
         df['NewID'] = 0
@@ -110,31 +111,40 @@ def Map_categories(df, Day, test):
         df['NewID'] = np.where(filter1, 1, df['NewID'])
         ### Add dynamic daily group based on remaining sprint ###
         df = NewID_sprint_load_balance(df)
-        # df['Daily_Groups'] = df['Daily_Groups'].replace(0, D2)
         df['OutreachID'] = df['OutreachID'].astype(int)
-        ### Add yesterdays daily group that was missed
-        list_add = pull_list()
-        filter0 = df['OutreachID'].isin(list_add['OutreachID'].squeeze())
-        df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
-        ####################################
+        if Day != 0:
+            ### Add yesterdays daily group that was missed
+            list_add = pull_list()
+            filter0 = df['OutreachID'].isin(list_add['OutreachID'].squeeze())
+            df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
+        else:
+            list_add = pd.DataFrame()
         Sprint = len(names)
         ### Map and Sort
-        Sprint_schedual = list(range(0,Sprint))
+        Sprint_schedule = list(range(0,Sprint))
         Category = names
-        Sprint_schedual = Sprint_schedual[-Day:] + Sprint_schedual
-        Daily_sort = dict(zip(Category,Sprint_schedual))
+        Sprint_schedule = Sprint_schedule[-Day:] + Sprint_schedule
+        Daily_sort = dict(zip(Category,Sprint_schedule))
         df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
         return df, list_add
 
 def NewID_sprint_load_balance(df):
+    if any(df['NewID'] == 1):
+        pass
+    else:
+        return df
     df = df.reset_index(drop= True)
     df_new = df[df['NewID'] == 1].reset_index()
-    ### get remaining days in sprint schedual ###
+    if len(df_new) <= 10:
+        df_new['Daily_Groups'] = tomorrow.strftime('%Y-%m-%d')
+        p = df_new.append(df).drop_duplicates(['OutreachID']).reset_index(drop= True)
+        return p
+    ### get remaining days in sprint schedule ###
     dt = tables('pull', 'NA', 'start.csv')
     dt['startdate'] = pd.to_datetime(dt['startdate']).dt.date
     BusDay = dt[dt['startdate'] >= next_business_day(today)]['startdate'].to_list()
     ### split total NewIds into groups ###
-    group_size = len(df_new) // len(BusDay) * BusDay
+    group_size = ( len(df_new) // len(BusDay) ) * BusDay
     Daily_Priority = pd.DataFrame(group_size, columns=['Daily_Groups'])
     add_back = len(df_new) - len(Daily_Priority)
     Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
@@ -145,3 +155,5 @@ def NewID_sprint_load_balance(df):
 
 if __name__ == "__main__":
     df, test2 = pipeline_clean.Final_Load()
+    df2,test = Map_categories(df, 2, 0)
+    print(df2[df2['NewID'] == 1])
