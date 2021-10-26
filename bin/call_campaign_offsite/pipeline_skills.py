@@ -1,4 +1,6 @@
 import numpy as np
+import pandas as pd
+from etc_function import x_Bus_Day_ago
 
 def F_Status(df, Status):
     df_local = df
@@ -129,6 +131,14 @@ def wellmed_schedual(df):
     df['Skill'] = np.where(filter1 & (filter2 | filter3) & filter4, 'Child_ORG', df['Skill'])
     return df
 
+def last_call(df):
+    # convert CF last call date to child org / child ORG's won't be affected
+    df['Last_Call'] = pd.to_datetime(df['Last_Call']).dt.date
+    filter1 = df['Last_Call'] >= x_Bus_Day_ago(3)
+    filter2 = df['Skill'] != 'CC_Pend_Eligible'
+    df['Skill'] = np.where(filter1 & filter2, 'Child_ORG', df['Skill'])
+    return df
+
 def Re_Skill_Tier(df):
     df_local = df
     filter1 = df_local['OutreachID_Count'] ==1
@@ -154,6 +164,7 @@ def complex_skills(df):
     f = Re_Skill_Genpact(f)
     f = random_skill(f)
     f = wellmed_schedual(f)
+    f = last_call(f)
     f = CC_Pend_Eligible(f)
     return f
 

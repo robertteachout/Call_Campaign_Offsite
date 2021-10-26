@@ -14,7 +14,6 @@ B10 = Next_N_BD(today, 10)
 tomorrow = next_business_day(today)
 
 def full_campaign_file():
-    ### [ What Day, test last nights file, Master list ]
     ### 1 -> create new two 2 sprint schedual
     ### 0 -> run daily campaign
     dt = tables('pull', 'NA', 'start.csv')
@@ -24,18 +23,14 @@ def full_campaign_file():
     except IndexError:
         Day = 1
         Master_List = 1
-    print('Day: ' + str(Day) + ', Master List: '+ str(Master_List))
+    
+    print(f'Day: {Day}, Master List: {Master_List}')
     ### Get data and mutate
     df, test0 = Final_Load()
-    time_check(startTime_1, 'File Load \t' + test0)
-    ####################################
+    time_check(startTime_1, f'File Load \t{test0}')
+
     df0, list_add = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedual
     time_check(startTime_1, 'Sprint Schedule')
-    ####################################
-    # convert CF last call date to child org / child ORG's won't be affected
-    filter1 = df0['Last_Call'] >= x_Bus_Day_ago(3)
-    df0['Skill'] = np.where(filter1, 'Child_ORG', df0['Skill'])
-    ####################################
 
     def Score(df1):
         df1['Score'] = range(0,len(df1))
