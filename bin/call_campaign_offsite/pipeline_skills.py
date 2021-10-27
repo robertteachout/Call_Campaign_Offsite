@@ -122,7 +122,7 @@ def random_skill(df):
     # df['Skill'] = np.where(filter2, 'Child_ORG', df['Skill'])
     return df
 
-def wellmed_schedual(df):
+def wellmed_schedule(df):
     filter1 = df['Skill'] == 'CC_Wellmed_Sub15_UNS'
     filter4 = df['Outreach_Status'] == 'Scheduled'
 
@@ -163,7 +163,7 @@ def complex_skills(df):
     
     f = Re_Skill_Genpact(f)
     f = random_skill(f)
-    f = wellmed_schedual(f)
+    f = wellmed_schedule(f)
     f = last_call(f)
     f = CC_Pend_Eligible(f)
     return f
