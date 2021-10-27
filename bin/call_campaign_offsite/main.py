@@ -5,7 +5,7 @@ import time
 from etc_function import daily_piv, time_check, next_business_day, Next_N_BD, x_Bus_Day_ago
 from pipeline_clean import Final_Load, Number_stats
 from pipeline_schedule import Assign_Map, Map_categories, static_schedule
-from data_config import tables, zipfiles
+from data_config import tables, zipfiles, count_phone
 from dbo_insert import Insert_SQL
 
 startTime_1 = time.time()
@@ -85,10 +85,11 @@ def full_campaign_file():
 
     def Save():
         filename = tomorrow.strftime("%Y-%m-%d")
-        zipfiles('push', df_p_c, filename)
-        tables('push', df_p_c,'Group_Rank.csv')
-        tables('push',N_Daily_Groups,"Assignment_Map.csv")
-        tables('push', list_add, 'Missed_ORGs.csv')
+        zipfiles('push',df_p_c, filename)
+        tables('push',  df_p_c,             'Group_Rank.csv')
+        tables('push',  N_Daily_Groups,     'Assignment_Map.csv')
+        tables('push',  list_add,           'Missed_ORGs.csv')
+        tables('push',  count_phone(df_p_c),'unique_phone_count.csv')
         time_check(startTime_1, 'Save files')
         ####################################
         daily_piv(df_p_c)
@@ -97,7 +98,7 @@ def full_campaign_file():
 
     # Run the File
     if Master_List == 0:
-        # Save()
+        Save()
         Insert_SQL()
         time_check(startTime_1, 'Insert_SQL')
  

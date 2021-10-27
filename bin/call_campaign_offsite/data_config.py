@@ -37,6 +37,13 @@ def zipfiles(push_pull, df, filename):
                     shutil.move(str(filename + '.zip'), Path("data/load"))
                 else:
                     shutil.move(str(filename + '.zip'), Path("data/load"))
-                
+
+def count_phone(df):
+    df0 = tables('pull', 'NA', 'unique_phone_count.csv')
+    gb = df.groupby(['Load_Date'])['Unique_Phone'].count().reset_index()
+    gb['Total'] = len(df)
+    gb['%'] = round(gb['Unique_Phone'] / gb['Total'], 2)
+    return df0.append(gb, ignore_index=True)
+
 
 
