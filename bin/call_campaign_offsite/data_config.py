@@ -17,26 +17,13 @@ def tables(push_pull, table, name):
 ### push_pull zip file ###
 def zipfiles(push_pull, df, filename):
     if push_pull == 'pull':
-        Extract_path = Path("data/extract")
-        file = (list(Extract_path.glob(filename))[0])
-        with ZipFile(file, 'r') as zip:
-                zip_name = ",".join(zip.namelist())
-                Extract = pd.read_csv(zip.extract(zip_name), sep='|', on_bad_lines='skip', engine="python")
-                os.remove(zip_name)
-                return Extract
+        path = Path("data/extract")
+        Extract_path = list(path.glob(filename))[0]
+        return pd.read_csv(Extract_path, sep='|', on_bad_lines='warn',engine="python",quoting=3)
     else:
-        with ZipFile(filename + '.zip', 'w', compression=zipfile.ZIP_DEFLATED) as zip:
-                path = str(filename + '.csv')
-                df.to_csv(path, sep=',',index=False)
-                zip.write(path)
-                zip.close()
-                os.remove(path)
-                pathfile = Path("data/load") / str(filename + '.zip')
-                if os.path.exists(pathfile):
-                    os.remove(pathfile)
-                    shutil.move(str(filename + '.zip'), Path("data/load"))
-                else:
-                    shutil.move(str(filename + '.zip'), Path("data/load"))
+        compression_options = dict(method='zip', archive_name=f'{filename}.csv')
+        p = Path("data/load")
+        df.to_csv(p / f'{filename}.zip', compression=compression_options, sep=',',index=False)
 
 def count_phone(df):
     df0 = tables('pull', 'NA', 'unique_phone_count.csv')
