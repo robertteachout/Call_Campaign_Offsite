@@ -1,4 +1,4 @@
 holidays
 pandas
 pyodbc
-ipykernel #python -m ipykernel install --user --name venv --display-name 'venv'
+ipykernel #python -m ipykernel install --user --name venv --display-name venv
