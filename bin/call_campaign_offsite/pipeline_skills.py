@@ -101,7 +101,7 @@ def fire_flag(df, skill_name):
     return df
 
 def CC_Pend_Eligible(df):
-    filter1 = df['CallCount'] >= 15
+    filter1 = df['CallCount'] >= 10
     filter2 = df['Outreach_Status'] == 'Unscheduled'
     df['Skill'] = np.where(filter1 & filter2, 'CC_Pend_Eligible', df['Skill'])
     return df
