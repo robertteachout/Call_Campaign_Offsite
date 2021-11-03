@@ -16,7 +16,11 @@ def daily_piv(df):
     nu = df[df['NewID'] == 1]
 
     def piv(name, df0):
-        print(f'_-_-_-_-_-_-_-_-_-_- {name} -_-_-_-_-_-_-_-_-_-_-_-')
+        print(f"""
+
+        _-_-_-_-_-_-_-_-_-_- {name} -_-_-_-_-_-_-_-_-_-_-_
+        
+        """)
         try:
             df1 = df0[df0[str(name)] == 1]
             if name != 'rolled':

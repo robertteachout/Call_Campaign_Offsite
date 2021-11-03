@@ -48,9 +48,9 @@ def full_campaign_file():
             df3 = df3.sort_values(by= ['PhoneNumber', 'status_sort']).reset_index(drop = True)
             df4 = df3.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
             ### re-rank after breaking it with status sort
-            if not 'rolled' in df3.columns:
-                df3['Daily_Priority'] = 0
-            df4 = df4.sort_values(by = ['Daily_Priority','rolled','audit_sort','age_sort']).reset_index(drop = True)
+            if not 'rolled' in df4.columns:
+                df4['rolled'] = 0
+            df4 = df4.sort_values(by = ['Daily_Priority','rolled','audit_sort','age_sort'], ascending=[True, False, True, True]).reset_index(drop = True)
             df4['Unique_Phone'] = 1
             ### add score column
             df_skill = df4
