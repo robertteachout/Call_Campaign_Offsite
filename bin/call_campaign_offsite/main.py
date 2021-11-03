@@ -32,10 +32,6 @@ def full_campaign_file():
     df0, list_add = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedule
     time_check(startTime_1, 'Sprint Schedule')
 
-    def Score(df1):
-        df1['Score'] = range(0,len(df1))
-        return df1
-
     def split(df, sk):
             df0 = df[df['Skill'] == sk]
             
@@ -52,9 +48,13 @@ def full_campaign_file():
             df3 = df3.sort_values(by= ['PhoneNumber', 'status_sort']).reset_index(drop = True)
             df4 = df3.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
             ### re-rank after breaking it with status sort
-            df4 = df4.sort_values(by = ['Daily_Priority','audit_sort','age_sort']).reset_index(drop = True)
+            if not 'rolled' in df3.columns:
+                df3['Daily_Priority'] = 0
+            df4 = df4.sort_values(by = ['Daily_Priority','rolled','audit_sort','age_sort']).reset_index(drop = True)
             df4['Unique_Phone'] = 1
-            df_skill = Score(df4)
+            ### add score column
+            df_skill = df4
+            df_skill['Score'] = range(0,len(df_skill))
             # Add Unique ORGs to Rank list 
             df5 = df_skill.append(df3)
             df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
@@ -91,15 +91,18 @@ def full_campaign_file():
         tables('push',  list_add,           'Missed_ORGs.csv')
         tables('push',  count_phone(df_p_c),'unique_phone_count.csv')
         time_check(startTime_1, 'Save files')
-        ####################################
-        daily_piv(df_p_c)
-        time_check(startTime_1, 'Create Pivot Table')
         ###################################
 
     # Run the File
     if Master_List == 0:
-        Save()
-        Insert_SQL()
+        daily_piv(df_p_c)
+        time_check(startTime_1, 'Create Pivot Table')
+        ####################################
+        if test0 == 'Fail':
+            pass
+        else:
+            Save()
+            Insert_SQL()
         time_check(startTime_1, 'Insert_SQL')
  
     ###calculate ever 2 weeks

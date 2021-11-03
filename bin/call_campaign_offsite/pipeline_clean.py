@@ -111,7 +111,6 @@ def Number_stats(df):
     df3 = df0
     if not 'Daily_Priority' in df3.columns:
         df3['Daily_Priority'] = 0
-    df3 = df3.sort_values(by = ['Daily_Priority','audit_sort','age_sort']).reset_index(drop = True)
     return df3
 
 ### Covert fire flag with specific client project to a 5 day cycle _> add to RADV

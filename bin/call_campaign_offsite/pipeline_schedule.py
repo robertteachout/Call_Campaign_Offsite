@@ -5,6 +5,7 @@ from datetime import date, timedelta, datetime
 from pipeline_check_missing import pull_list
 from etc_function import next_business_day, Next_N_BD, date_list_split, daily_piv
 from data_config import tables
+from dbo_query import lc_search
 import pipeline_clean
 
 today = date.today()
@@ -114,9 +115,10 @@ def Map_categories(df, Day, test):
         df['OutreachID'] = df['OutreachID'].astype(int)
         if Day != 0:
             ### Add yesterdays daily group that was missed
-            list_add = pull_list()
+            list_add = lc_search(CF=3, NIC=Day)
             filter0 = df['OutreachID'].isin(list_add['OutreachID'].squeeze())
             df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
+            df['rolled'] = np.where(filter0, 1, 0)
         else:
             list_add = pd.DataFrame()
         Sprint = len(names)
@@ -133,8 +135,7 @@ def NewID_sprint_load_balance(df):
         pass
     else:
         return df
-    df = df.reset_index(drop= True)
-    df_new = df[df['NewID'] == 1].reset_index()
+    df_new = df[df['NewID'] == 1].reset_index(drop= True)
     if len(df_new) <= 10:
         df_new['Daily_Groups'] = tomorrow.strftime('%Y-%m-%d')
         p = df_new.append(df).drop_duplicates(['OutreachID']).reset_index(drop= True)
@@ -155,5 +156,6 @@ def NewID_sprint_load_balance(df):
 
 if __name__ == "__main__":
     df, test2 = pipeline_clean.Final_Load()
-    df2,test = Map_categories(df, 2, 0)
-    print(df2[df2['NewID'] == 1])
+    print(df)
+    df2, list_add = Map_categories(df, 8, 0)
+    print(df2)

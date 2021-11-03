@@ -11,15 +11,24 @@ def time_check(start, comment):
     print("-----------------------------------------------")
 
 def daily_piv(df):
-    try:
-        u = df[df['Unique_Phone'] == 1]
-        nu = df[df['NewID'] == 1]
-        print(u.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
-        print(nu.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
-        pass
-    except:
-        print(df.pivot_table(index =['Skill'], values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
+    u = df[df['Unique_Phone'] == 1]
+    roll = df[df['rolled'] == 1]
+    nu = df[df['NewID'] == 1]
 
+    def piv(name, df0):
+        print(f'_-_-_-_-_-_-_-_-_-_- {name} -_-_-_-_-_-_-_-_-_-_-_-')
+        try:
+            df1 = df0[df0[str(name)] == 1]
+            if name != 'rolled':
+                print(df1.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
+            else:
+                print(df1.pivot_table(columns ='Skill', values ='PhoneNumber', aggfunc = ['count']))
+        except:
+            print(f'{name}: Null')
+
+    piv('Unique_Phone', u)
+    piv('NewID', nu)
+    piv('rolled', roll)
     
 def date_list_split(ls, numSplit):
     splits = np.array_split(ls, numSplit)
