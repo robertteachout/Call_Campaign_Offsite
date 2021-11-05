@@ -40,12 +40,24 @@ def Load():
     df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
     return df
 
-def Format(File):
-    Format_Now = File.copy()
-    Format_Now['Last_Call'] = pd.to_datetime(Format_Now['Last_Call'], errors='coerce').dt.date
-    Format_Now['Recommended_Schedule_Date'] = pd.to_datetime(Format_Now['Recommended_Schedule_Date'], errors='coerce').dt.date
-    Format_Now['Project_Due_Date'] = pd.to_datetime(Format_Now['Project_Due_Date'])
-    return Format_Now
+def formate_col(df, col, type):
+        if type == 'date':
+            df[f'{col}'] = pd.to_datetime(df[f'{col}'], errors='coerce').dt.date
+        elif type == 'num':
+            df[f'{col}'] = pd.to_numeric(df[f'{col}'], errors='coerce', downcast="integer")
+        else:
+            print('add new type')
+        return df
+
+def format(df):
+    df.columns = df.columns.str.replace('/ ','')
+    df = df.rename(columns=lambda x: x.replace(' ', "_"))
+    df = formate_col(df, 'PhoneNumber', 'num')
+    df = formate_col(df, 'Site_Clean_Id', 'num')
+    df = formate_col(df, 'Last_Call', 'date')
+    df = formate_col(df, 'Project_Due_Date', 'date')
+    df = formate_col(df, 'Recommended_Schedule_Date', 'date')
+    return df
 
 def Clean_Numbers(df):
     filter1 = df['PhoneNumber'] < 1111111111
@@ -59,34 +71,13 @@ def region_col(df):
     return pd.merge(df, lookup, how="left", on=["State"])
 
 def Last_Call(df):
-    df1 = df
-    df1 = df1[df1['Last_Call'].notnull()].copy()
-    df1['New'] = tomorrow
-
-    df1['DateDiff'] = df1['New'] - df1['Last_Call']
-    df1 = df1.copy()
-    df1['Age'] = (df1['DateDiff']/np.timedelta64(1,'D')).astype(int)
-
-    df['Age'] = 0
-    df['Age'] = df1['Age']
-    df['age_category'] = 0
-
-    filter = df['Last_Call'].isna()
-    df['age_category'] = np.where(filter, 0, df['age_category'])
-    
-    def flt(df0, category, start, stop):
-        df = df0
-        ft = (df['Age'] >= start) & (df['Age'] <= stop)
-        df['age_category'] = np.where(ft, category, df['age_category'])
-        return df
-    
-    df = flt(df,  5,  0,  5)
-    df = flt(df, 10,  6, 10)
-    df = flt(df, 15, 11, 15)
-    df = flt(df, 20, 16, 20)
-    filter = (df['Age'] >= 21)
-    df['age_category'] = np.where(filter, 21, df['age_category'])
-    df['Age'] = df['Age'].fillna(0)
+    df['age'] = (tomorrow - df['Last_Call']).dt.days
+    cut_bins = [0, 5, 10, 15, 20, 10000]
+    label_bins = [ 5, 10, 15, 20, 21]
+    df['age_category'] = pd.cut(df['age'], bins= cut_bins, labels=label_bins)
+    df = formate_col(df, 'age_category', 'num')
+    df = formate_col(df, 'age', 'num')
+    df[['age', 'age_category']] = df[['age', 'age_category']].fillna(0).round(decimals=0).astype(object)
     return df
 
 def Test_Load(df):
@@ -120,7 +111,7 @@ def fire_flag(df, skill_name):
     return df
 
 def Final_Load():
-    df = Last_Call(region_col(Clean_Numbers(Format(Load()))))
+    df = Last_Call(region_col(Clean_Numbers(format(Load()))))
     df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
     df['Daily_Groups'] = 0
     df['Cluster'] = 0
@@ -133,4 +124,5 @@ def Final_Load():
 
 if __name__ == "__main__":
     df, test2 = Final_Load()
-    daily_piv(df)
+    print(df)
+    # daily_piv(df)
