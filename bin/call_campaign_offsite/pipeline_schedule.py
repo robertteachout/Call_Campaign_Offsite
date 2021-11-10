@@ -2,7 +2,6 @@
 import pandas as pd
 import numpy as np
 from datetime import date, timedelta, datetime
-from pipeline_check_missing import pull_list
 from etc_function import next_business_day, Next_N_BD, date_list_split, daily_piv
 from data_config import tables
 from dbo_query import lc_search
@@ -36,14 +35,14 @@ def Load_Assignment():
     assignment = assignment.join(pd.get_dummies(assignment['Daily_Groups']))
     return assignment
 
-def sort(i):
+def clear_sort(i):
     df = Load_Assignment()
     df0 = df[df[i] == 1]['PhoneNumber']
     return df0
 
 def assignment(df, Add_assignment):
     df_local = df
-    filter0 = df_local['PhoneNumber'].isin(sort(Add_assignment).squeeze())
+    filter0 = df_local['PhoneNumber'].isin(clear_sort(Add_assignment).squeeze())
     df_local['Daily_Groups'] = np.where(filter0, Add_assignment, df_local['Daily_Groups'])
     return df_local
 
@@ -115,7 +114,9 @@ def Map_categories(df, Day, test):
         df['OutreachID'] = df['OutreachID'].astype(int)
         if Day != 0:
             ### Add yesterdays daily group that was missed
-            list_add = lc_search(CF=3, NIC=Day)
+            min=[3,Day]
+            min.sort()
+            list_add = lc_search(CF=min[0], NIC=Day)
             filter0 = df['OutreachID'].isin(list_add['OutreachID'].squeeze())
             df['Daily_Groups'] = np.where(filter0, tomorrow, df['Daily_Groups'])
             df['rolled'] = np.where(filter0, 1, 0)
