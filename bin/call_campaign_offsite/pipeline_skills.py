@@ -131,6 +131,11 @@ def wellmed_schedule(df):
     df['Skill'] = np.where(filter1 & (filter2 | filter3) & filter4, 'Child_ORG', df['Skill'])
     return df
 
+def Osprey(df):
+    f1 = df['Project_Type'] == 'Osprey'
+    df['Skill'] = np.where(f1, 'Osprey_Outbound', df['Skill'])
+    return df
+
 def last_call(df):
     # convert CF last call date to child org / child ORG's won't be affected
     df['Last_Call'] = pd.to_datetime(df['Last_Call']).dt.date
@@ -166,6 +171,7 @@ def complex_skills(df):
     f = wellmed_schedule(f)
     f = last_call(f)
     f = CC_Pend_Eligible(f)
+    f = Osprey(f)
     return f
 
 
