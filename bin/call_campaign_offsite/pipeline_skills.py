@@ -101,7 +101,7 @@ def fire_flag(df, skill_name):
     return df
 
 def CC_Pend_Eligible(df):
-    filter1 = df['CallCount'] >= 10
+    filter1 = df['CallCount'] >= 5
     filter2 = df['Outreach_Status'] == 'Unscheduled'
     df['Skill'] = np.where(filter1 & filter2, 'CC_Pend_Eligible', df['Skill'])
     return df
@@ -134,6 +134,11 @@ def wellmed_schedule(df):
 def Osprey(df):
     f1 = df['Project_Type'] == 'Osprey'
     df['Skill'] = np.where(f1, 'Osprey_Outbound', df['Skill'])
+    return df
+
+def rm_schedule(df):
+    f1 = df['Outreach_Status'] == 'Scheduled'
+    df['Skill'] = np.where(f1, 'schedule_pull', df['Skill'])
     return df
 
 def last_call(df):
@@ -171,7 +176,9 @@ def complex_skills(df):
     f = wellmed_schedule(f)
     f = last_call(f)
     f = CC_Pend_Eligible(f)
+    f = rm_schedule(f)
     f = Osprey(f)
+
     return f
 
 
