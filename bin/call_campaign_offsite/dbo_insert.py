@@ -3,8 +3,11 @@ import pandas as pd
 import pyodbc
 import numpy as np
 import time
-from etc_function import x_Bus_Day_ago
+from etc_function import x_Bus_Day_ago, next_business_day
 from data_config import tables, zipfiles
+from datetime import date
+today = date.today()
+tomorrow = next_business_day(today)
 
 class MyDfInsert:
     def __init__(self, cnxn, sql_stub, data_frame, rows_per_batch=1000):
@@ -65,6 +68,7 @@ def Insert_SQL():
             DELETE
             FROM [DWWorking].[dbo].[Call_Campaign]
             WHERE Load_Date < '{x_Bus_Day_ago(4).strftime("%Y-%m-%d")}'
+            OR Load_Date = '{tomorrow.strftime("%Y-%m-%d")}'
             '''
     add =   """
             INSERT INTO DWWorking.dbo.Call_Campaign (
