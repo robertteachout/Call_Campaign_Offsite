@@ -5,8 +5,9 @@ import time
 from etc_function import daily_piv, time_check, next_business_day, Next_N_BD, x_Bus_Day_ago
 from pipeline_clean import Final_Load, Number_stats
 from pipeline_schedule import Assign_Map, Map_categories, static_schedule
-from data_config import tables, zipfiles, count_phone
+from pipeline.tables import tables, zipfiles
 from dbo_insert import Insert_SQL
+import log.log as log
 
 startTime_1 = time.time()
 today = date.today()
@@ -27,9 +28,12 @@ def full_campaign_file():
     print(f'Day: {Day}, Master List: {Master_List}')
     ### Get data and mutate
     df, test0 = Final_Load()
+    log.df_len(df)
     time_check(startTime_1, f'File Load \t{test0}')
 
     df0, list_add = Map_categories(df, Day, Master_List) ### Trigger for lauching sprint schedule
+    log.df_len(df0)
+
     time_check(startTime_1, 'Sprint Schedule')
 
     def split(df, sk):
@@ -72,24 +76,31 @@ def full_campaign_file():
         return df_score_split
 
     df_p_c = drop_dup(df0, Master_List)
+    log.df_len(df_p_c)
+
     time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
 
     if 'NewID' in df_p_c.columns:
         NewID = df_p_c[df_p_c['NewID'] == 1]
+        log.df_len(NewID)
         NewID = NewID[['PhoneNumber', 'Skill', 'Daily_Groups', 'NewID']].reset_index(drop=True)
         NewID['Daily_Groups'] = pd.to_datetime(NewID['Daily_Groups']).dt.strftime('%Y-%m-%d')
         Daily_Groups = tables('pull','NA',"Assignment_Map.csv")
+        log.df_len(Daily_Groups)
+
         N_Daily_Groups = Daily_Groups.append(NewID)
+        log.df_len(N_Daily_Groups)
+
         time_check(startTime_1, 'Add NewIDs to list')
         ####################################
 
     def Save():
         filename = tomorrow.strftime("%Y-%m-%d")
         zipfiles('push',df_p_c, filename)
-        tables('push',  df_p_c,             'Group_Rank.csv')
+        # tables('push',  df_p_c,             'Group_Rank.csv')
         tables('push',  N_Daily_Groups,     'Assignment_Map.csv')
         tables('push',  list_add,           'Missed_ORGs.csv')
-        tables('push',  count_phone(df_p_c),'unique_phone_count.csv')
+        # tables('push',  count_phone(df_p_c),'unique_phone_count.csv')
         time_check(startTime_1, 'Save files')
         ###################################
 
@@ -103,7 +114,7 @@ def full_campaign_file():
         else:
             Save()
             Insert_SQL()
-        time_check(startTime_1, 'Insert_SQL')
+            time_check(startTime_1, 'Insert_SQL')
  
     ###calculate ever 2 weeks
     if Master_List == 1:
