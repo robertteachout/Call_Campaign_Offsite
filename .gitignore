@@ -6,3 +6,5 @@ query_*
 *.xlsx
 *.txt
 *.zip
+reporting_*
+*.log
