@@ -3,11 +3,9 @@ import pandas as pd
 import pyodbc
 import numpy as np
 import time
-from etc_function import x_Bus_Day_ago, next_business_day
-from data_config import tables, zipfiles
+
 from datetime import date
-today = date.today()
-tomorrow = next_business_day(today)
+from pathlib import Path
 
 class MyDfInsert:
     def __init__(self, cnxn, sql_stub, data_frame, rows_per_batch=1000):
@@ -55,7 +53,7 @@ class MyDfInsert:
             crsr = self._cnxn.cursor()
             crsr.execute(self._sql, params)
 
-def Insert_SQL():
+def batch_insert(campaign_history, load):
     if input("""
            y -> Insert
            n -> Exit 
@@ -67,15 +65,15 @@ def Insert_SQL():
     remove=f'''
             DELETE
             FROM [DWWorking].[dbo].[Call_Campaign]
-            WHERE Load_Date < '{x_Bus_Day_ago(4).strftime("%Y-%m-%d")}'
-            OR Load_Date = '{tomorrow.strftime("%Y-%m-%d")}'
+            WHERE Load_Date < '{campaign_history}'
+            -- OR Load_Date = '{campaign_history}'
             '''
     add =   """
             INSERT INTO DWWorking.dbo.Call_Campaign (
             OutreachID, PhoneNumber, Score, Skill, Daily_Groups, Unique_Phone, Load_Date) 
             """
     ### Load file ###
-    df = tables('pull', 'NA', 'Group_Rank.csv')
+    df = load
     ### Clean ###
     df = df[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date']]
     df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]
@@ -107,4 +105,4 @@ def Insert_SQL():
     cnxn.close()
 
 if __name__ == "__main__":
-    Insert_SQL()
+    batch_insert()
