@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from etc_function import x_Bus_Day_ago
 
 def F_Status(df, Status):
     df_local = df
@@ -141,10 +140,16 @@ def rm_schedule(df):
     df['Skill'] = np.where(f1, 'schedule_pull', df['Skill'])
     return df
 
-def last_call(df):
+def atheum(df):
+    f1 = df['Outreach_Status'] == 'Unscheduled'
+    f2 = df['Outreach_Status'] == 'Unscheduled'
+    df['Skill'] = np.where(f1 & f2, 'schedule_pull', df['Skill'])
+    return df
+
+def last_call(df,nbd):
     # convert CF last call date to child org / child ORG's won't be affected
     df['Last_Call'] = pd.to_datetime(df['Last_Call']).dt.date
-    filter1 = df['Last_Call'] >= x_Bus_Day_ago(3)
+    filter1 = df['Last_Call'] >= nbd #x_Bus_Day_ago(3)
     filter2 = df['Skill'] != 'CC_Pend_Eligible'
     df['Skill'] = np.where(filter1 & filter2, 'Child_ORG', df['Skill'])
     return df
@@ -164,7 +169,7 @@ def Re_Skill_Tier(df):
     df_local['Skill'] = np.where(filter5 & filter6 & filter1, 'CC_Tier3', df_local['Skill'])
     return df_local
 
-def complex_skills(df):
+def complex_skills(df, nbd):
     f = df 
     f = Re_Skill_Tier(f)
     f = Re_Skill_Project(f, 'NA', 'WellMed', 1, 300,'CC_Wellmed_Sub15_UNS')
@@ -174,7 +179,7 @@ def complex_skills(df):
     f = Re_Skill_Genpact(f)
     f = random_skill(f)
     f = wellmed_schedule(f)
-    f = last_call(f)
+    f = last_call(f, nbd)
     f = CC_Pend_Eligible(f)
     f = rm_schedule(f)
     f = Osprey(f)
