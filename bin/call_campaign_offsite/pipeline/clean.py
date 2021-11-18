@@ -1,44 +1,10 @@
 import pandas as pd
 import numpy as np
 from datetime import date, timedelta, datetime
-from pipeline_skills import complex_skills
-from etc_function import next_business_day, daily_piv
-from data_config import zipfiles, tables
-import dbo_query
-import time
+
 today = date.today()
 tomorrow = (today + timedelta(days = 1))
 yesterday = (today + timedelta(days = -1))
-nxt_day = next_business_day(today)
-
-def checkfile():
-    filename = str('Call_Campaign_v4_' + today.strftime("%m%d") + '*')
-    try:
-        df0 = zipfiles('pull', 'NA', filename)
-    except IndexError:
-        print('Check file -> data/extract')
-        time.sleep(3)
-        checkfile()
-    ### if exception -> recurse otherwise return none
-    else:
-        return None
-
-def Load():
-    ### Load from data config ###
-    if checkfile() == None:
-        pass
-    filename = str('Call_Campaign_v4_' + today.strftime("%m%d") + '*')
-    df0 = zipfiles('pull', 'NA', filename)
-    df2 = dbo_query.reSchedule()
-    ### Add to query
-    df = df0.append(df2, ignore_index = True)
-    ###
-    df.columns = df.columns.str.replace('/ ','')
-    df = df.rename(columns=lambda x: x.replace(' ', "_"))
-    df['PhoneNumber'] = pd.to_numeric(df['PhoneNumber'], errors='coerce')
-    df['Site_Clean_Id'] = pd.to_numeric(df['Site_Clean_Id'], errors='coerce')
-    df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
-    return df
 
 def formate_col(df, col, type):
         if type == 'date':
@@ -59,16 +25,11 @@ def format(df):
     df = formate_col(df, 'Recommended_Schedule_Date', 'date')
     return df
 
-def Clean_Numbers(df):
+def clean_num(df):
     filter1 = df['PhoneNumber'] < 1111111111
     filter2 = df['PhoneNumber'].isna()
     df['PhoneNumber'] = np.where(filter1 | filter2, 9999999999,df['PhoneNumber'])
     return df
-
-def region_col(df):
-    lookup = tables('pull', 'NA', 'Region_Lookup.csv')
-    lookup = lookup[['State', 'Region']]
-    return pd.merge(df, lookup, how="left", on=["State"])
 
 def Last_Call(df):
     df['age'] = (tomorrow - df['Last_Call']).dt.days
@@ -80,29 +41,12 @@ def Last_Call(df):
     df[['age', 'age_category']] = df[['age', 'age_category']].fillna(0).round(decimals=0).astype(object)
     return df
 
-def Test_Load(df):
-        df0 = df
-        test = df0[df0['Last_Call'] == today]['Last_Call']
-        if today == test.max():
+def Test_Load(df, today):
+        if any(df['Last_Call'] == today):
             test_results = 'Pass'
         else:
             test_results = 'Fail'
-        return test_results
-
-def Number_stats(df):
-    df0 = df
-    audit_sort = {'RADV':0, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':4, 'Medicare Risk':5}
-    name_sort = {'Unscheduled':0, 'Escalated':2, 'PNP Released':1,'Past Due':3,'Scheduled':4}
-    rm_sort = {'EMR Remote': 0, 'HIH - Other': 2, 'Onsite':1,'Offsite':3}
-    age_sort = {21: 0, 0: 1, 20:2, 15:3, 10:4, 5:5}
-    df0['status_sort'] = df0['Outreach_Status'].map(name_sort)
-    df0['rm_sort'] = df0['Retrieval_Group'].map(rm_sort)
-    df0['age_sort'] = df0['age_category'].map(age_sort)
-    df0['audit_sort'] = df0['Audit_Type'].map(audit_sort)
-    df3 = df0
-    if not 'Daily_Priority' in df3.columns:
-        df3['Daily_Priority'] = 0
-    return df3
+        return df, test_results
 
 ### Covert fire flag with specific client project to a 5 day cycle _> add to RADV
 def fire_flag(df, skill_name):
@@ -110,19 +54,17 @@ def fire_flag(df, skill_name):
     df['Outreach_Status'] = np.where(filer1, skill_name, df['Outreach_Status'])
     return df
 
-def Final_Load():
-    df = Last_Call(region_col(Clean_Numbers(format(Load()))))
-    df['Load_Date'] = nxt_day.strftime("%Y-%m-%d")
+def clean(df):
+
+    # df = Last_Call(region_col(clean_num(format(df))))
+    df = Last_Call(clean_num(format(df)))
+    df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
     df['Daily_Groups'] = 0
     df['Cluster'] = 0
     ### Add info to main line and reskill
     df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
     df = pd.merge(df,df2, on='PhoneNumber')
-    df = complex_skills(df)
-    test = Test_Load(df)
-    return df, test
+    return df
 
 if __name__ == "__main__":
-    df, test2 = Final_Load()
-    print(df)
-    # daily_piv(df)
+    print('test')
