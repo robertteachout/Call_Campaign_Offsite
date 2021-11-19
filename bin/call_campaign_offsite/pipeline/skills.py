@@ -140,10 +140,9 @@ def rm_schedule(df):
     df['Skill'] = np.where(f1, 'schedule_pull', df['Skill'])
     return df
 
-def atheum(df):
-    f1 = df['Outreach_Status'] == 'Unscheduled'
-    f2 = df['Outreach_Status'] == 'Unscheduled'
-    df['Skill'] = np.where(f1 & f2, 'schedule_pull', df['Skill'])
+def anthem(df, anthem):
+    f1 = df['OutreachID'].isin(anthem.tolist())
+    df['Skill'] = np.where(f1, 'CC_Adhoc1', df['Skill'])
     return df
 
 def last_call(df,nbd):
@@ -169,7 +168,13 @@ def Re_Skill_Tier(df):
     df_local['Skill'] = np.where(filter5 & filter6 & filter1, 'CC_Tier3', df_local['Skill'])
     return df_local
 
-def complex_skills(df, nbd):
+def fill(df):
+    f1 = df['Skill'].isnull()
+    f2 = df['Skill'] == 'NaN'
+    df['Skill'] = np.where(f1 | f2, 'CC_Tier2', df['Skill'])
+    return df
+
+def complex_skills(df, nbd, anthems):
     f = df 
     f = Re_Skill_Tier(f)
     f = Re_Skill_Project(f, 'NA', 'WellMed', 1, 300,'CC_Wellmed_Sub15_UNS')
@@ -182,8 +187,9 @@ def complex_skills(df, nbd):
     f = last_call(f, nbd)
     f = CC_Pend_Eligible(f)
     f = rm_schedule(f)
+    f = anthem(f, anthems)
     f = Osprey(f)
-
+    f = fill(f)
     return f
 
 
