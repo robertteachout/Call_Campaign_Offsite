@@ -141,7 +141,7 @@ def rm_schedule(df):
     return df
 
 def anthem(df, anthem):
-    f1 = df['OutreachID'].isin(anthem.tolist())
+    f1 = df['OutreachID'].isin(anthem.values.tolist())
     df['Skill'] = np.where(f1, 'CC_Adhoc1', df['Skill'])
     return df
 

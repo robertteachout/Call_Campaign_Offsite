@@ -1,10 +1,8 @@
 from pathlib import Path
 import os, sys
 
-from numpy import False_
 paths = Path(__file__).parent.absolute().parent.absolute().parent.absolute()
 from datetime import date
-
 today = date.today()
 
 from glob import glob
@@ -39,6 +37,9 @@ def count_phone(df):
     return df0.append(gb, ignore_index=True)
 
 if __name__ == "__main__":
-    filename = str(f'Call_Campaign_v4_{today.strftime("%m%d")}*')
-    load = zipfiles('pull', 'NA', filename)
-    print(len(load))
+    # filename = str(f'Call_Campaign_v4_{today.strftime("%m%d")}*')
+    # load = zipfiles('pull', 'NA', filename)
+    # print(len(load))
+    df= pd.DataFrame({'test':[1,2,3,4]})
+    print(df)
+    zipfiles('push', df, 'test')
