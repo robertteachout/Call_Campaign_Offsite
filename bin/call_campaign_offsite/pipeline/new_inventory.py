@@ -4,14 +4,13 @@ import numpy as np
 
 today = date.today()
 
-def NewID_sprint_load_balance(df,nbd,remaining_bd):
+def NewID_sprint_load_balance(df,tomorrow_str,remaining_bd):
     f1 = df['Daily_Groups'] == 0
     df['NewID'] = np.where(f1, 1, 0)
     df['OutreachID'] = df['OutreachID'].astype(int) ## flag
-
     df_new = df[df['NewID'] == 1].reset_index(drop= True)
     if len(df_new) <= 10:
-        df_new['Daily_Groups'] = nbd #tomorrow.strftime('%Y-%m-%d')
+        df_new['Daily_Groups'] = tomorrow_str #tomorrow.strftime('%Y-%m-%d')
         p = df_new.append(df).drop_duplicates(['OutreachID']).reset_index(drop= True)
         return p
     ### split total NewIds into groups ###
