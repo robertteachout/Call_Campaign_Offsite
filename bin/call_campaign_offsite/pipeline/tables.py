@@ -2,7 +2,7 @@ from pathlib import Path
 import os, sys
 
 from numpy import False_
-path = Path(__file__).parent.absolute().parent.absolute().parent.absolute()
+paths = Path(__file__).parent.absolute().parent.absolute().parent.absolute()
 from datetime import date
 
 today = date.today()
@@ -11,14 +11,14 @@ from glob import glob
 import pandas as pd
 import os
 
-table_path  = path / "data/table_drop"
-extract     = path / "data/extract"
-load        = path / "data/load"
+table_path  = paths / "data/table_drop"
+extract     = paths / "data/extract"
+load        = paths / "data/load"
 
 ### Input/output static tables ###
-def tables(push_pull, table, name):
+def tables(push_pull, table, name, path=table_path):
     if push_pull == 'pull':
-        return pd.read_csv(table_path / name, sep=',',on_bad_lines='warn',engine="python",)
+        return pd.read_csv(paths / path / name, sep=',',on_bad_lines='warn',engine="python",)
     else:
         table.to_csv(table_path / name, sep=',', index=False)
 
