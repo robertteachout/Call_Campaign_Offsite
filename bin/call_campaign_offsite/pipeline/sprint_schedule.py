@@ -12,8 +12,19 @@ def static_schedule(B10):
     dt['startdate'] = pd.to_datetime(dt['startdate']) 
     return dt
 
+def check_day(start, nbd):
+    try:
+        day = start[start['startdate'] == nbd]['Number'].to_list()[0]
+        Master_List = 0
+    except IndexError:
+        day = 1
+        Master_List = 1
+    return day, Master_List
+
 def daily_maping(df, assignment, tomorrow_str):
     ### get full list two two date to one number and cut down to future date and remove dubs
+    assignment['PhoneNumber'] = assignment['PhoneNumber'].astype(str).str[:10]
+    
     assignment['Daily_Groups'] = pd.to_datetime(assignment['Daily_Groups'], format='%Y-%m-%d')
     start = assignment[assignment['Daily_Groups'] >= tomorrow_str]
     end =  assignment[assignment['Daily_Groups'] < tomorrow_str]
@@ -22,10 +33,21 @@ def daily_maping(df, assignment, tomorrow_str):
 
     mapping = dict(zip(assignment.PhoneNumber, assignment.Daily_Groups))
     mapped = df
+    mapped['PhoneNumber'] = mapped['PhoneNumber'].astype(str).str[:10]
     mapped.Daily_Groups = mapped.PhoneNumber.map(mapping).fillna(0)
-    # mapped.Daily_Groups = mapped.Daily_Groups
     names = list(assignment['Daily_Groups'].unique())
     return mapped, names
+
+    ## Sprint Schedulual Day
+def map_priotiy(df, Day, names):
+    Sprint = len(names)
+    ### Map and Sort
+    Sprint_schedule = list(range(0,Sprint))
+    Category = names
+    Sprint_schedule = Sprint_schedule[-Day:] + Sprint_schedule
+    Daily_sort = dict(zip(Category,Sprint_schedule))
+    df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort).fillna(Sprint_schedule[-1])
+    return df
 
 ### Create file with assigned categories to ORG
 def Assign_Map(df,B10,num1,num2):
@@ -67,36 +89,6 @@ def Assign_Map(df,B10,num1,num2):
             df_key = df_key.append(assign_audit(i))
     df_key['NewID'] = 0
     return df_key
-
-    ## Sprint Schedulual Day
-def map_priotiy(df, Day, names, lc_search, tomorrow_str):
-    # df['Daily_Groups'] = df['Daily_Groups'].dt.strftime('%Y-%m-%d')
-        # df.Daily_Groups = pd.to_datetime(df.Daily_Groups)
-    if Day != 0:
-        ### Add yesterdays daily group that was missed
-        list_add = lc_search
-        filter0 = df['OutreachID'].isin(list_add['OutreachID'].squeeze())
-        df['Daily_Groups'] = np.where(filter0, tomorrow_str, df['Daily_Groups'])
-        df['rolled'] = np.where(filter0, 1, 0)
-    else:
-        list_add = pd.DataFrame()
-    Sprint = len(names)
-    ### Map and Sort
-    Sprint_schedule = list(range(0,Sprint))
-    Category = names
-    Sprint_schedule = Sprint_schedule[-Day:] + Sprint_schedule
-    Daily_sort = dict(zip(Category,Sprint_schedule))
-    df['Daily_Priority'] = df['Daily_Groups'].map(Daily_sort)
-    return df, list_add
-
-def check_day(start, nbd):
-    try:
-        day = start[start['startdate'] == nbd]['Number'].to_list()[0]
-        Master_List = 0
-    except IndexError:
-        day = 1
-        Master_List = 1
-    return day, Master_List
 
 if __name__ == "__main__":
     print('test')
