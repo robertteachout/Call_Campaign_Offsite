@@ -51,13 +51,10 @@ def split(df, sk):
         df6['Matches'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
         return df6
         
-def drop_dup(df):
-    df3 = Number_stats(df)
+def split_drop_score(df):
+    df3 = Number_stats(df).fillna(0)
     df_score_split = pd.DataFrame()
     ### Sort Order and drop Dups
     for i in df3['Skill'].unique():
         df_score_split = df_score_split.append(split(df3, i))
     return df_score_split
-
-def split_drop_score(df):
-    return drop_dup(df)
