@@ -132,7 +132,7 @@ def wellmed_schedule(df):
 
 def Osprey(df):
     f1 = df['Project_Type'] == 'Osprey'
-    df['Skill'] = np.where(f1, 'Osprey_Outbound', df['Skill'])
+    df['Skill'] = np.where(f1, 'CC_Osprey_Outbound', df['Skill'])
     return df
 
 def rm_schedule(df):
@@ -141,7 +141,7 @@ def rm_schedule(df):
     return df
 
 def anthem(df, anthem):
-    f1 = df['OutreachID'].isin(anthem.values.tolist())
+    f1 = df['OutreachID'].isin(anthem['Outreach Id'].tolist())
     df['Skill'] = np.where(f1, 'CC_Adhoc1', df['Skill'])
     return df
 
