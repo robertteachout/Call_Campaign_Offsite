@@ -187,7 +187,7 @@ def complex_skills(df, nbd, anthems):
     f = last_call(f, nbd)
     f = CC_Pend_Eligible(f)
     f = rm_schedule(f)
-    f = anthem(f, anthems)
+    # f = anthem(f, anthems)
     f = Osprey(f)
     f = fill(f)
     return f
