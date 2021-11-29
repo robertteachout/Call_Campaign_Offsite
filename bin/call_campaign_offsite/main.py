@@ -10,7 +10,7 @@ import pipeline.sprint_schedule
 import pipeline.skills
 import pipeline.new_inventory
 import pipeline.rolled_inventory
-from pipeline.etc import daily_piv, time_check, next_business_day, x_Bus_Day_ago, Next_N_BD
+from pipeline.etc import daily_piv, time_check, next_business_day, x_Bus_Day_ago, Next_N_BD, date_list_split
 from pipeline.tables import tables, zipfiles
 import server.insert
 import server.query
@@ -87,12 +87,16 @@ def full_campaign_file():
 
         min=[3,Day]
         min.sort()
-        lc_search_sql = server.query_lc_org_search.sql(CF=x_Bus_Day_ago(min[0]), NIC=x_Bus_Day_ago(Day),lbd=x_Bus_Day_ago(1))
-        lc_search = server.query.query('DWWorking', lc_search_sql, 'Last Call Check')
-        log.df_len(lc_search)
+        if Day != 0:
+            lc_search_sql = server.query_lc_org_search.sql(CF=x_Bus_Day_ago(min[0]), NIC=x_Bus_Day_ago(Day),lbd=x_Bus_Day_ago(1))
+            lc_search = server.query.query('DWWorking', lc_search_sql, 'Last Call Check')
+            log.df_len(lc_search)
         
-        rolled, list_add = pipeline.rolled_inventory.check_lc(load_balanced_inv,lc_search, Day, tomorrow_str)
-        log.df_len(rolled)
+            rolled, list_add = pipeline.rolled_inventory.check_lc(load_balanced_inv,lc_search, Day, tomorrow_str)
+            log.df_len(rolled)
+        else:
+            rolled = load_balanced_inv 
+            list_add = pd.DataFrame()
 
         clean_for_score = pipeline.sprint_schedule.map_priotiy(rolled, Day, names)
         log.df_len(clean_for_score)
@@ -115,7 +119,7 @@ def full_campaign_file():
 
     def Save():
         zipfiles('push',df_scored, tomorrow_str)
-        # tables('push',  add_inv,            'assignment_map.csv')
+        tables('push',  add_inv,            'assignment_map.csv')
         tables('push',  list_add,           'Missed_ORGs.csv')
         time_check(startTime_1, 'Save files')
         ###################################
@@ -134,7 +138,7 @@ def full_campaign_file():
  
     ###calculate ever 2 weeks
     if Master_List == 1:
-        set1, set2 = pipeline.etc.data_list_split(B10, 2)
+        set1, set2 = date_list_split(B10, 2)
         df_key = pipeline.sprint_schedule.Assign_Map(df_scored,B10,set1,set2)
         tables('push', df_key, str(f'../assignment_map/{tomorrow_str}.csv'))
         tables('push', df_key, 'assignment_map.csv')
