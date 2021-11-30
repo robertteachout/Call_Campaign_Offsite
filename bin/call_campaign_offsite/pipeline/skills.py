@@ -132,7 +132,11 @@ def wellmed_schedule(df):
 
 def Osprey(df):
     f1 = df['Project_Type'] == 'Osprey'
-    df['Skill'] = np.where(f1, 'CC_Osprey_Outbound', df['Skill'])
+    f2 = df['Outreach_Status'] != 'Scheduled'
+    f3 = df['Outreach_Status'] != 'Escalated'
+    # removeing inventory
+    df['Skill'] = np.where(f1 & f2 & f3, 'CC_Osprey_Outbound', df['Skill'])
+
     return df
 
 def rm_schedule(df):
