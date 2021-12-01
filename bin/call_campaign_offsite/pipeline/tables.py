@@ -37,9 +37,6 @@ def count_phone(df):
     return df0.append(gb, ignore_index=True)
 
 if __name__ == "__main__":
-    # filename = str(f'Call_Campaign_v4_{today.strftime("%m%d")}*')
-    # load = zipfiles('pull', 'NA', filename)
-    # print(len(load))
     df= pd.DataFrame({'test':[1,2,3,4]})
     print(df)
     zipfiles('push', df, 'test')

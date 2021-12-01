@@ -3,7 +3,6 @@ import numpy as np
 from datetime import date
 import time
 
-from pandas.core.frame import DataFrame
 import pipeline.clean
 import pipeline.score
 import pipeline.sprint_schedule
@@ -11,7 +10,7 @@ import pipeline.skills
 import pipeline.new_inventory
 import pipeline.rolled_inventory
 from pipeline.etc import daily_piv, time_check, next_business_day, x_Bus_Day_ago, Next_N_BD, date_list_split
-from pipeline.tables import tables, zipfiles
+from pipeline.tables import tables, zipfiles, count_phone
 import server.insert
 import server.query
 import server.query_reschedule
@@ -121,6 +120,7 @@ def full_campaign_file():
         zipfiles('push',df_scored, tomorrow_str)
         tables('push',  add_inv,            'assignment_map.csv')
         tables('push',  list_add,           'Missed_ORGs.csv')
+        tables('push',  count_phone(df_scored),'unique_phone_count.csv')
         time_check(startTime_1, 'Save files')
         ###################################
 
