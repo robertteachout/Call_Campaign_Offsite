@@ -6,14 +6,11 @@ logging.basicConfig(filename='app.log',
                     level=logging.INFO,
                     datefmt='%Y-%m-%d %H:%M:%S')
 
-def generator():
-    yield 
-
 def df_len(df):
     logging.info(f'len: {len(df)}')
+    # logging.info(df.dtypes)
 
 
 if __file__ == '__main__':
     df = [1,2,3,4]
     df_len(df)
-    # print(generator())
