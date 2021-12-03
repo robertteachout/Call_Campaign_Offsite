@@ -130,13 +130,17 @@ def wellmed_schedule(df):
     df['Skill'] = np.where(filter1 & (filter2 | filter3) & filter4, 'Child_ORG', df['Skill'])
     return df
 
+def emr_rm(df):
+    f1 = df['Retrieval_Group'] == 'EMR Remote'
+    df['Skill'] = np.where(f1, 'EMR_Remote_removed', df['Skill'])
+    return df
+
 def Osprey(df):
     f1 = df['Project_Type'] == 'Osprey'
     f2 = df['Outreach_Status'] != 'Scheduled'
     f3 = df['Outreach_Status'] != 'Escalated'
     # removeing inventory
     df['Skill'] = np.where(f1 & f2 & f3, 'CC_Osprey_Outbound', df['Skill'])
-
     return df
 
 def rm_schedule(df):
@@ -194,6 +198,7 @@ def complex_skills(df, nbd, anthems):
     f = anthem(f, anthems)
     f = Osprey(f)
     f = fill(f)
+    f = emr_rm(f)
     return f
 
 

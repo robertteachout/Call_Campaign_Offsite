@@ -55,9 +55,7 @@ def fire_flag(df, skill_name):
     return df
 
 def clean(df, tomorrow_str):
-    # df = Last_Call(region_col(clean_num(format(df))))
     df = Last_Call(clean_num(format(df)))
-    df = df[df['Retrieval_Group'] != 'EMR Remote'] ### Remove and push to separet campaign
     df['Daily_Groups'] = 0
     df['Load_Date'] = tomorrow_str
     df['Cluster'] = 0
