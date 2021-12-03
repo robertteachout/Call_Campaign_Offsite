@@ -146,7 +146,7 @@ def rm_schedule(df):
 
 def anthem(df, anthem):
     f1 = df['OutreachID'].isin(anthem['Outreach Id'].tolist())
-    df['Skill'] = np.where(f1, 'CC_Adhoc1', df['Skill'])
+    df['Skill'] = np.where(f1, 'CC_Adhoc2', df['Skill'])
     return df
 
 def last_call(df,nbd):
@@ -191,7 +191,7 @@ def complex_skills(df, nbd, anthems):
     f = last_call(f, nbd)
     f = CC_Pend_Eligible(f)
     f = rm_schedule(f)
-    # f = anthem(f, anthems)
+    f = anthem(f, anthems)
     f = Osprey(f)
     f = fill(f)
     return f
