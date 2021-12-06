@@ -1,8 +1,4 @@
 import pandas as pd
-import numpy as np
-from datetime import date, timedelta, datetime
-
-today = date.today()
 
 ### Create static two week sprint ###
 def static_schedule(B10):
@@ -54,16 +50,12 @@ def Assign_Map(df,B10,num1,num2):
     skills = df['Skill'].unique()
     df_clean = df.drop_duplicates('PhoneNumber')
     df_key = pd.DataFrame()
-    # B10 = Next_N_BD(today, 10)
-    # num1 , num2 = date_list_split(B10, 2)
     def assign_skill(sk, j, BusDay):
         df_skill = df_clean[df_clean['Skill'] == sk].reset_index(drop = True)
         if j == 5:
             df_skill = df_skill[df_skill['audit_sort'] <= 2].reset_index(drop = True)
-        elif j == 10:
-            df_skill = df_skill[df_skill['audit_sort'] > 2].reset_index(drop = True)
         else:
-            print('error')
+            df_skill = df_skill[df_skill['audit_sort'] > 2].reset_index(drop = True)
         #### INPUT BY DAY ####
         Sprint = j
         ######################
@@ -89,6 +81,3 @@ def Assign_Map(df,B10,num1,num2):
             df_key = df_key.append(assign_audit(i))
     df_key['NewID'] = 0
     return df_key
-
-if __name__ == "__main__":
-    print('test')
