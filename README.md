@@ -1,7 +1,7 @@
 # Call Center Campaign - Offsite Retrieval Method
 
 ## Objective
-The goal of this project is to automate the daily loading of call campaigns. 
+The goal of this project is to automate daily loading & tracking of call campaigns. 
 
 ## Process:
 ### Daily Campaign Transformation
@@ -41,31 +41,30 @@ The goal of this project is to automate the daily loading of call campaigns.
 Assumption: conda is already installed
 (https://www.anaconda.com/products/individual)
 
-### Steps
-0. open cmd & navigate to project root
-1. Run
+Open cmd, navigate to the project root & run command
 ```cmd
 setup.bat
 ```
-    - activates conda base env 
-    - runs conda create environment.yml 
-    - switches to new env
+This file:
+- activates conda base env 
+- runs conda create environment.yml 
+- switches to new env
 
 ## Run program
 0. Drop ASM zip file into .\data\extract
 1. Open cmd & navigate to project root
-2. log in to CIOX VPN
+2. Log in to CIOX VPN
 3. Run
 ```cmd
 run.bat
 ```
 
-### Optional & highly recommended:
-Setup PowerAutomate email attachments transfer 
+## Optional & highly recommended:
+### PowerAutomate email attachments transfer 
 (https://us.flow.microsoft.com/en-us/)
 - ASM email to .\data\extract
 
-Setup Task Scheduler
-(https://www.windowscentral.com how-create-automated-task-using-task-scheduler-windows-10)
+### Task Scheduler 
+(https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
 - Native Windows application
 - Create "Basic Task" with time trigger pointing at run.bat
