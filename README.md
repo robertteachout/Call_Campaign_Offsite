@@ -1,10 +1,45 @@
 # Call Center Campaign - Offsite Retrieval Method
 
-## Objective
+<!--ts-->
+   * [Objective](#Objective)
+   * [Installation](#Installation)
+     * [Run](#Run)
+   * [Process](#Process)
+     * [Transform](#Transform)
+     * [New_Sprints](#New_Sprints)
+     * [Reporting](#Reporting)
+     * [Optional](#Optional)
+<!--te-->
+
+# Objective
 The goal of this project is to automate daily loading & tracking of call campaigns. 
 
-## Process:
-### Daily Campaign Transformation
+# Installation
+Assumption: conda is already installed
+(https://www.anaconda.com/products/individual)
+
+```cmd
+git clone https://github.com/AaronRoethe/Call_Campaign_Offsite.git
+```
+
+```cmd
+setup.bat
+```
+What this file does:
+- activates conda base env 
+- runs conda create environment.yml 
+- switches to new env
+
+## Run
+0. Drop ASM zip file into .\data\extract
+1. Log in to CIOX VPN
+2. Open cmd, navigate to the project root & run command:
+```cmd
+run.bat
+```
+
+# Process:
+## Transform:
 00. Create/track a 10-day sprint schedule
 01. Load raw zip file
 02. Load addition inventory from server
@@ -24,7 +59,7 @@ The goal of this project is to automate daily loading & tracking of call campaig
 14. Save & upload information to the cloud
 15. Insert campaign into server database
 
-### New Sprint schedule
+## New_Sprints:
 0. Track 10-day sprint
 1. Find next 10 business days, CIOX custom holiday calendar
 2. Find unique phone #'s from the current campaign 
@@ -32,39 +67,16 @@ The goal of this project is to automate daily loading & tracking of call campaig
 4. Create 5 & 10-day sprints based on audit type inventory
 5. Split by skill to assign individual campaigns
 
-### Reporting
+## Reporting
 0. Obeya weekly tracking on campaign results
 1. Campaign phone# fall out flow chart
 2. Call volume historical analysis
 
-## Setup
-Assumption: conda is already installed
-(https://www.anaconda.com/products/individual)
-
-Open cmd, navigate to the project root & run command
-```cmd
-setup.bat
-```
-This file:
-- activates conda base env 
-- runs conda create environment.yml 
-- switches to new env
-
-## Run program
-0. Drop ASM zip file into .\data\extract
-1. Open cmd & navigate to project root
-2. Log in to CIOX VPN
-3. Run
-```cmd
-run.bat
-```
-
-## Optional & highly recommended:
+## Optional but highly recommended:
 ### PowerAutomate email attachments transfer 
 (https://us.flow.microsoft.com/en-us/)
 - ASM email to .\data\extract
 
 ### Task Scheduler 
 (https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
-- Native Windows application
 - Create "Basic Task" with time trigger pointing at run.bat
