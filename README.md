@@ -4,11 +4,11 @@
    * [Objective](#Objective)
    * [Installation](#Installation)
      * [Run](#Run)
+     * [Optional](#Optional)
    * [Process](#Process)
      * [Transform](#Transform)
      * [New_Sprints](#New_Sprints)
      * [Reporting](#Reporting)
-     * [Optional](#Optional)
 <!--te-->
 
 # Objective
@@ -37,6 +37,14 @@ What this file does:
 ```cmd
 run.bat
 ```
+## Optional but highly recommended:
+### PowerAutomate email attachments transfer 
+(https://us.flow.microsoft.com/en-us/)
+- ASM email to .\data\extract
+
+### Task Scheduler 
+(https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
+- Create "Basic Task" with time trigger pointing at run.bat
 
 # Process:
 ## Transform:
@@ -59,7 +67,7 @@ run.bat
 14. Save & upload information to the cloud
 15. Insert campaign into server database
 
-## New_Sprints:
+## New_sprints:
 0. Track 10-day sprint
 1. Find next 10 business days, CIOX custom holiday calendar
 2. Find unique phone #'s from the current campaign 
@@ -71,12 +79,3 @@ run.bat
 0. Obeya weekly tracking on campaign results
 1. Campaign phone# fall out flow chart
 2. Call volume historical analysis
-
-## Optional but highly recommended:
-### PowerAutomate email attachments transfer 
-(https://us.flow.microsoft.com/en-us/)
-- ASM email to .\data\extract
-
-### Task Scheduler 
-(https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
-- Create "Basic Task" with time trigger pointing at run.bat
