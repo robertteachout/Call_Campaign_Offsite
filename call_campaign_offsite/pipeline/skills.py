@@ -153,6 +153,11 @@ def anthem(df, anthem):
     df['Skill'] = np.where(f1, 'CC_Adhoc2', df['Skill'])
     return df
 
+def research_pull(df):
+    f1 = df['PhoneNumber'] == 9999999999
+    df['Skill'] = np.where(f1, 'Research_Pull ', df['Skill'])
+    return df
+
 def last_call(df,nbd):
     # convert CF last call date to child org / child ORG's won't be affected
     df['Last_Call'] = pd.to_datetime(df['Last_Call']).dt.date
@@ -193,7 +198,8 @@ def complex_skills(df, nbd, anthems):
     f = random_skill(f)
     f = wellmed_schedule(f)
     f = last_call(f, nbd)
-    f = CC_Pend_Eligible(f)
+    # f = CC_Pend_Eligible(f)
+    f = research_pull(f)
     f = rm_schedule(f)
     f = anthem(f, anthems)
     f = Osprey(f)
