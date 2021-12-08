@@ -67,7 +67,10 @@ def Assign_Map(df,B10,num1,num2):
         ## Create Same len list of letters as len of df
         Daily_Priority = pd.DataFrame(listDay, columns=['Daily_Groups'])
         add_back = df_len - len(Daily_Priority)
-        Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
+        try:
+            Daily_Priority = Daily_Priority.append(Daily_Priority.iloc[[-1]*add_back]).reset_index(drop=True)
+        except IndexError:
+            pass
         df_skill['Daily_Groups'] = Daily_Priority['Daily_Groups']
         return df_skill[['PhoneNumber', 'Skill','Daily_Groups']]
     def assign_audit(sk):
