@@ -20,7 +20,7 @@ def daily_piv(df):
         try:
             df1 = df[df[str(name)] == 1]
             if name != 'rolled':
-                print(df1.pivot_table(index =['Daily_Priority', 'Daily_Groups'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
+                print(df1.pivot_table(index =['Daily_Priority', 'Daily_Groups', 'rolled'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
             else:
                 print(df1.pivot_table(columns ='Skill', values ='PhoneNumber', aggfunc = ['count']))
         except:

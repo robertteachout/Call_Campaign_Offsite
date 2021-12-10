@@ -52,19 +52,14 @@ def full_campaign_file():
     clean= pipeline.clean.clean(df_full0, tomorrow_str)
     log.df_len(clean)
 
-    # anthem_sql = server.query_reschedule.sql()
-    # reSchedule = server.query.query('DWWorking', reschedule_sql, 'Add reschedules')
     anthem = tables('pull', 'NA', 'anthem.csv')
-    # f1 = anthem['Outreach Status'] == 'Unscheduled'
-    # f2 = anthem['Outreach Status'] == 'Scheduled'
-    # anthem = anthem[f1 | f2]['Outreach Id']
     log.df_len(anthem)
 
     skilled = pipeline.skills.complex_skills(clean, x_Bus_Day_ago(3), anthem)
     log.df_len(skilled)
     skilled['PhoneNumber'] = skilled['PhoneNumber'].astype(str)
 
-    df_full, test0 = pipeline.clean.Test_Load(skilled, today)
+    df_full, test0 = pipeline.clean.check_load(skilled, today)
     log.df_len(df_full)
     time_check(startTime_1, f'File Load \t{test0}')
 

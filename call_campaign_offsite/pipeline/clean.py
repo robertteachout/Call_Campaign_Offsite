@@ -41,7 +41,7 @@ def Last_Call(df):
     df[['age', 'age_category']] = df[['age', 'age_category']].fillna(0).round(decimals=0).astype(object)
     return df
 
-def Test_Load(df, today):
+def check_load(df, today):
         if any(df['Last_Call'] == today):
             test_results = 'Pass'
         else:
