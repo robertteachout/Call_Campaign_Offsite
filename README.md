@@ -21,7 +21,9 @@ Assumption: conda is already installed
 ```cmd
 git clone https://github.com/AaronRoethe/Call_Campaign_Offsite.git
 ```
-
+```cmd
+cd Call_Campaign_Offsite
+```
 ```cmd
 setup.bat
 ```
@@ -37,7 +39,7 @@ What this file does:
 ```cmd
 run.bat
 ```
-## Optional but highly recommended:
+## Optional - highly recommended:
 ### PowerAutomate email attachments transfer 
 (https://us.flow.microsoft.com/en-us/)
 - ASM email to .\data\extract
