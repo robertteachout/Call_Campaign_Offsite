@@ -53,7 +53,7 @@ class MyDfInsert:
             crsr = self._cnxn.cursor()
             crsr.execute(self._sql, params)
 
-def batch_insert(campaign_history,load_date, load):
+def batch_insert(servername, database, campaign_history, load_date, load):
     if input("""
            y -> Insert
            n -> Exit 
@@ -85,8 +85,6 @@ def batch_insert(campaign_history,load_date, load):
     df['Load_Date'] = df['Load_Date'].astype('datetime64[ns]')
 
     ### Server Location ###
-    servername = 'EUS1PCFSNAPDB01'
-    database = 'DWWorking'
     conn_str = (f"""
                 DRIVER={{SQL Server}};
                 SERVER={servername}; 

@@ -1,15 +1,19 @@
 import pandas as pd
 import pyodbc
-import sys
 
-def query(database, sql, query_name):
-      servername =  'EUS1PCFSNAPDB01'
+def query(servername, database, sql, query_name):
       # create the connection
       try:
-            conn = pyodbc.connect(f"""DRIVER={{SQL Server}};SERVER={servername};DATABASE={database};Trusted_Connection=yes""") 
+            conn = pyodbc.connect(f"""
+                  DRIVER={{SQL Server}};
+                  SERVER={servername};
+                  DATABASE={database};
+                  Trusted_Connection=yes""",
+                  autocommit=True) 
       except pyodbc.OperationalError:
-            print("""Not connected to server""")
-            sys.exit(1)
-      print('''Connected to Server \t {}'''.format(query_name))
-      df = pd.read_sql(sql, conn)
-      return df
+            print("""Couldn\'t connect to server""")
+            query(database, sql, query_name)
+      else:
+            print(f'''Connected to Server \t {query_name}''')
+            df = pd.read_sql(sql, conn)
+            return df
