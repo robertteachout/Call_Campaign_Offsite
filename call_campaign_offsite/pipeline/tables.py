@@ -1,5 +1,7 @@
 from pathlib import Path
 import os, sys
+import pyarrow as pa
+import pyarrow.csv as csv
 
 paths = Path(__file__).parent.absolute().parent.absolute().parent.absolute()
 from datetime import date
@@ -9,19 +11,20 @@ from glob import glob
 import pandas as pd
 import os
 
-table_path  = paths / "data/table_drop"
-extract     = paths / "data/extract"
-load        = paths / "data/load"
+table_path   = paths / "data/table_drop"
+extract_path = paths / "data/extract"
+load         = paths / "data/load"
 
 ### Input/output static tables ###
 def tables(push_pull, table, name, path=table_path):
     if push_pull == 'pull':
+        # return csv.read_csv(paths / path / name)
         return pd.read_csv(paths / path / name, sep=',',on_bad_lines='warn',engine="python",)
     else:
         table.to_csv(table_path / name, sep=',', index=False)
 
 ### push_pull zip file ###
-def zipfiles(push_pull, table, filename):
+def zipfiles(push_pull, table, filename, extract=extract_path):
     if push_pull == 'pull':
         Extract_path = list(extract.glob(filename))[0]
         return pd.read_csv(Extract_path, sep='|', on_bad_lines='warn',engine="python",quoting=3)
@@ -39,4 +42,4 @@ def count_phone(df):
 if __name__ == "__main__":
     df= pd.DataFrame({'test':[1,2,3,4]})
     print(df)
-    zipfiles('push', df, 'test')
+    # zipfiles('push', df, 'test')

@@ -129,11 +129,11 @@ def main():
         daily_piv(df_scored)
         time_check(startTime_1, 'Create Pivot Table')
         ####################################
-        # if test0 == 'Fail':
-        #     pass
-        # else:
-        #     Save()
-        #     server.insert.batch_insert(servername, database, x_Bus_Day_ago(10).strftime(date_format), tomorrow_str, df_scored)
+        if test0 == 'Fail':
+            pass
+        else:
+            Save()
+            server.insert.batch_insert(servername, database, x_Bus_Day_ago(10).strftime(date_format), tomorrow_str, df_scored)
         time_check(startTime_1, 'batch_insert')
  
     ###calculate ever 2 weeks
