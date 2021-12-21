@@ -1,96 +1,15 @@
 import numpy as np
 import pandas as pd
 
-def F_Status(df, Status):
-    df_local = df
-    if Status != 'NA':
-        filter = df_local['Outreach_Status'] == Status
-    else:
-        filter = df_local['Outreach_Status'] != 'NA'
-    return filter
+def special_handling(df):
+    f1 = df['Agent'] == 'Special Handling'
+    df['Skill'] = np.where(f1, 'PC_Special_Handling', df['Skill'])
+    return df
 
-def F_Audit(df, Audit):
-    df_local = df
-    if Audit != 'NA':
-        filter = df_local['Audit_Type'] == Audit
-    else:
-        filter = df_local['Outreach_Status'] != 'NA'
-    return filter
-
-def F_Retrieval_Method(df, Method):
-    df_local = df
-    if Method != 'NA':
-        filter = df_local['Retrieval Method'] == Method
-    else:
-        filter = df_local['Outreach_Status'] != 'NA'
-    return filter
-
-def F_ToGoCharts(df, Start, End):
-    df_local = df
-    if Start != 'NA':
-        filter1 = df_local['TotalCharts'] >= Start
-        filter2 = df_local['TotalCharts'] <= End
-    else:
-        filter1 = df_local['TotalCharts'] != 'NA' 
-        filter2 = df_local['TotalCharts'] != 'NA'
-    return filter1, filter2 
-
-def F_ProjectType(df, Project_Type):
-    df_local = df
-    if Project_Type != 'NA':
-        filter = df_local['Project_Type'] == Project_Type
-    else:
-        filter = df_local['Outreach_Status'] != 'NA'
-    return filter
-
-def Re_Skill_Project(df, Status, Project_Type, Start, End,Skill_Name):
-    df_local = df
-    filter1 = F_Status(df_local, Status)
-    filter2 = F_ProjectType(df_local, Project_Type)
-    filter3, filter4 = F_ToGoCharts(df_local, Start, End)
-
-    df_local['Skill'] = np.where(filter1 & filter2 & (filter3 & filter4), Skill_Name, df_local['Skill'])
-    return df_local
-
-def Re_Skill_Adhoc(df, Status,  Start, End, Skill_Name):
-    df_local = df
-    filter1 = F_Status(df_local, Status)
-    filter2, filter3 = F_ToGoCharts(df_local, Start, End)
-    df_local['Skill'] = np.where(filter1 & (filter2 & filter3), Skill_Name, df_local['Skill'])
-    return df_local
-
-def Re_Skill_Retrieval(df, Status, Method, Method2, Skill_Name):
-    df_local = df
-    filter1 = F_Status(df_local, Status)
-    filter2 = F_Retrieval_Method(df_local, Method)                  
-    filter3 = F_Retrieval_Method(df_local, Method2)   
-    df_local['Skill'] = np.where(filter1 & (filter2 | filter3), Skill_Name, df_local['Skill'])
-    return df_local
-
-def Re_Skill_Audit(df, Status, Audit, Audit2, Start, End, Skill_Name):
-    df_local = df
-    filter1 = F_Status(df_local, Status)
-    filter2 = F_Audit(df_local, Audit)                  
-    filter3 = F_Audit(df_local, Audit2)
-    filter4, filter5 = F_ToGoCharts(df_local, Start, End)
-    df_local['Skill'] = np.where(filter1 & (filter2 | filter3) & (filter4 & filter5), Skill_Name, df_local['Skill'])
-    return df_local
-
-def Re_Skill_Agent(df):
-    df_local = df
-    filter3 = df_local['Agent'] == 'Special Handling'
-    df_local['Skill'] = np.where(filter3, 'PC_Special_Handling', df_local['Skill'])
-    return df_local
-
-def Re_Skill_Genpact(df):
+def genpact(df):
     filter2 = df['OutreachID_Count'] == 1
     filter3 = df['Retrieval_Team'] == 'Genpact Offshore'
     df['Skill'] = np.where(filter2 &filter3, 'CC_Genpact_Scheduling', df['Skill'])
-    return df
-
-def Re_Skill_status(df, status, skill_name):
-    filter1 = F_Status(df, status)
-    df['Skill'] = np.where(filter1, skill_name, df['Skill'])
     return df
 
 def fire_flag(df, skill_name):
@@ -104,18 +23,18 @@ def CC_Pend_Eligible(df):
     df['Skill'] = np.where(filter1 & filter2, 'CC_Pend_Eligible', df['Skill'])
     return df
 
-def random_skill(df):
-    filter1 = F_Status(df, 'Unscheduled')
-    filter2 = F_ProjectType(df, 'Cigna - IFP RADV')
-    filter3 = F_ProjectType(df, 'Med Mutual of Ohio')
-    filter5 = F_ProjectType(df, 'Clover Health MRA')
-    filter4 = df['Age'] > 2
-    filter6 = df['Age'] == 0
-    filter7 = df['CallCount'] < 5
+def genpactPRV_priority(df):
+    f1 = df['Outreach_Status'] == 'Unscheduled'
+    f2 = df['Project_Type'] == 'Cigna - IFP RADV'
+    f3 = df['Project_Type'] == 'Med Mutual of Ohio'
+    f5 = df['Project_Type'] == 'Clover Health MRA'
 
-    df['Skill'] = np.where(filter1 & filter2 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
-    df['Skill'] = np.where((filter1) & filter3 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
-    df['Skill'] = np.where((filter1) & filter5 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
+    f4 = df['Age'] > 2
+    f6 = df['Age'] == 0
+    f7 = df['CallCount'] < 5
+
+    df['Skill'] = np.where(f1 & f2 &  f4, 'CC_GenpactPRV_Priority', df['Skill'])
+    df['Skill'] = np.where(f1 & (f4 | f6) & f7 & ( f3 | f5), 'CC_GenpactPRV_Priority', df['Skill'])
     return df
 
 def wellmed_schedule(df):
@@ -192,20 +111,25 @@ def fill(df):
     df['Skill'] = np.where(f1 | f2, 'CC_Tier2', df['Skill'])
     return df
 
-def CC_Escalation(df):
-    f1 = df['Skill'] == 'Escalated'
-    f2 = df['Skill'] == 'PNP Released'
+def escalations(df):
+    f1 = df['Outreach_Status'] == 'Escalated'
+    f2 = df['Outreach_Status'] == 'PNP Released'
     df['Skill'] = np.where(f1 | f2, 'CC_Escalation', df['Skill'])
+    return df
+
+def wellmed(df):
+    f1 = df['Project_Type'] == 'WellMed'
+    df['Skill'] = np.where(f1, 'CC_Wellmed_Sub15_UNS', df['Skill'])
     return df
 
 def complex_skills(df, nbd, anthems=0):
     f = df 
     f = Re_Skill_Tier(f)
-    f = Re_Skill_Project(f, 'NA', 'WellMed', 1, 300,'CC_Wellmed_Sub15_UNS')
-    f = CC_Escalation(f)
+    f = wellmed(f)
+    f = escalations(f)
     
-    f = Re_Skill_Genpact(f)
-    f = random_skill(f)
+    f = genpact(f)
+    f = genpactPRV_priority(f)
     f = wellmed_schedule(f)
     f = last_call(f, nbd)
     # f = CC_Pend_Eligible(f)
@@ -217,7 +141,3 @@ def complex_skills(df, nbd, anthems=0):
     f = fill(f)
     f = emr_rm(f)
     return f
-
-
-if __name__ == "__main__":
-    print("Skills")
