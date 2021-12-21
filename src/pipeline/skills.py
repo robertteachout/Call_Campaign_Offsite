@@ -83,11 +83,10 @@ def Re_Skill_Agent(df):
     return df_local
 
 def Re_Skill_Genpact(df):
-    df_local = df
-    filter2 = df_local['OutreachID_Count'] == 1
-    filter3 = df_local['Retrieval_Team'] == 'Genpact Offshore'
-    df_local['Skill'] = np.where(filter2 &filter3, 'CC_Genpact_Scheduling', df_local['Skill'])
-    return df_local
+    filter2 = df['OutreachID_Count'] == 1
+    filter3 = df['Retrieval_Team'] == 'Genpact Offshore'
+    df['Skill'] = np.where(filter2 &filter3, 'CC_Genpact_Scheduling', df['Skill'])
+    return df
 
 def Re_Skill_status(df, status, skill_name):
     filter1 = F_Status(df, status)
@@ -117,8 +116,6 @@ def random_skill(df):
     df['Skill'] = np.where(filter1 & filter2 & filter4, 'CC_GenpactPRV_Priority', df['Skill'])
     df['Skill'] = np.where((filter1) & filter3 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
     df['Skill'] = np.where((filter1) & filter5 & (filter4 | filter6) & filter7, 'CC_GenpactPRV_Priority', df['Skill'])
-    ### Dave gave this to specical team and request to pull out tell friday
-    # df['Skill'] = np.where(filter2, 'Child_ORG', df['Skill'])
     return df
 
 def wellmed_schedule(df):
@@ -149,8 +146,16 @@ def rm_schedule(df):
     return df
 
 def anthem(df, anthem):
+    if all(anthem) == 0:
+        return df
     f1 = df['OutreachID'].isin(anthem['Outreach Id'].tolist())
     df['Skill'] = np.where(f1, 'CC_Adhoc2', df['Skill'])
+    return df
+
+def aetna_commercial(df): 
+    f1 = df['Project_Type'] == 'Aetna Commercial'
+    f2 = df['CallCount'] == 0
+    df['Skill'] = np.where(f1 & f2, 'CC_Adhoc1', df['Skill'])
     return df
 
 def research_pull(df):
@@ -187,12 +192,17 @@ def fill(df):
     df['Skill'] = np.where(f1 | f2, 'CC_Tier2', df['Skill'])
     return df
 
-def complex_skills(df, nbd, anthems):
+def CC_Escalation(df):
+    f1 = df['Skill'] == 'Escalated'
+    f2 = df['Skill'] == 'PNP Released'
+    df['Skill'] = np.where(f1 | f2, 'CC_Escalation', df['Skill'])
+    return df
+
+def complex_skills(df, nbd, anthems=0):
     f = df 
     f = Re_Skill_Tier(f)
     f = Re_Skill_Project(f, 'NA', 'WellMed', 1, 300,'CC_Wellmed_Sub15_UNS')
-    f = Re_Skill_status(f, 'Escalated', 'CC_Escalation')
-    f = Re_Skill_status(f, 'PNP Released', 'CC_Escalation')
+    f = CC_Escalation(f)
     
     f = Re_Skill_Genpact(f)
     f = random_skill(f)
@@ -202,6 +212,7 @@ def complex_skills(df, nbd, anthems):
     f = research_pull(f)
     f = rm_schedule(f)
     f = anthem(f, anthems)
+    f = aetna_commercial(f)
     f = Osprey(f)
     f = fill(f)
     f = emr_rm(f)
