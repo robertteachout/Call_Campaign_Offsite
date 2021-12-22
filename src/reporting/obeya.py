@@ -2,9 +2,9 @@ from pathlib import Path
 from glob import glob
 
 import pandas as pd
-from call_campaign_offsite.pipeline.etc import *
-from call_campaign_offsite.server.query import query
-from call_campaign_offsite.pipeline.tables import tables
+from src.pipeline.etc import *
+from src.server.query import query
+from src.pipeline.tables import tables
 
 yesterday = x_Bus_Day_ago(1)
 

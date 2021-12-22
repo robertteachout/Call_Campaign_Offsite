@@ -2,7 +2,7 @@ from pathlib import Path
 from glob import glob
 
 import pandas as pd
-from call_campaign_offsite.pipeline.tables import tables
+from src.pipeline.tables import tables
 
 def work(i):
     df = tables('pull', 'na', i, '')
