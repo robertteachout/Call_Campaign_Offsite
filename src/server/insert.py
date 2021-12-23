@@ -68,14 +68,21 @@ def batch_insert(servername, database, campaign_history, load_date, load):
             WHERE Load_Date < '{campaign_history}'
             OR Load_Date = '{load_date}'
             '''
-    add =   """
-            INSERT INTO DWWorking.dbo.Call_Campaign (
-            OutreachID, PhoneNumber, Score, Skill, Daily_Groups, Unique_Phone, Load_Date) 
-            """
+
     ### Load file ###
-    columm = load
+    df = load[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date']]
+    columns = df.columns
+    
+    for i in columns:
+        try:
+            clean_columns = clean_columns + ", " + i
+        except:
+            clean_columns = i
+
+    add =   f"""
+            INSERT INTO [DWWorking].[dbo].[Call_Campaign] ({clean_columns}) 
+            """
     ### Clean ###
-    df = columm[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date']]
     df['PhoneNumber'] = df['PhoneNumber'].astype(str)
 
     df = df[df['Daily_Groups'] != '0'] ### remove skill that are out of daily proccess
@@ -85,19 +92,19 @@ def batch_insert(servername, database, campaign_history, load_date, load):
     df['Load_Date'] = df['Load_Date'].astype('datetime64[ns]')
 
     ### Server Location ###
-    conn_str = (f"""
-                DRIVER={{SQL Server}};
-                SERVER={servername}; 
-                DATABASE={database}; 
-                Trusted_Connection=yes
-                """)
-    cnxn = pyodbc.connect(conn_str, autocommit=True)
+    cnxn = pyodbc.connect(f"""
+        DRIVER={{SQL Server}};
+        SERVER={servername}; 
+        DATABASE={database}; 
+        Trusted_Connection=yes""", 
+        autocommit=True)
+
     crsr = cnxn.cursor()
     ### Remove yesterday's file ###
     crsr.execute(remove)
 
     t0 = time.time()
-    ### Add today's file ###
+    ### Add today's file #
     MyDfInsert(cnxn, add, df, rows_per_batch=250)
 
     print()
@@ -108,6 +115,9 @@ def batch_insert(servername, database, campaign_history, load_date, load):
 if __name__ == "__main__":
     import sys  
     from pathlib import Path  
+    import secret
+    servername  = secret.servername
+    database    = secret.database
     file = Path(__file__).resolve()  
     package_root_directory = file.parents[1]  
     sys.path.append(str(package_root_directory))
@@ -119,4 +129,8 @@ if __name__ == "__main__":
     tomorrow = next_business_day(today)
     tomorrow_str = tomorrow.strftime(date_format)
     df = tables('pull','na', f'{tomorrow_str}.zip', Path('data/load'))
-    batch_insert(x_Bus_Day_ago(10).strftime(date_format), tomorrow_str,df)
+    batch_insert(servername,
+                database,
+                x_Bus_Day_ago(10).strftime(date_format),
+                tomorrow_str,
+                df)
