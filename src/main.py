@@ -57,10 +57,7 @@ def main():
     clean= pipeline.clean.clean(df_full0, tomorrow_str)
     log.df_len('clean', clean)
 
-    anthem = tables('pull', 'NA', 'anthem.csv')
-    log.df_len('anthem', anthem)
-
-    skilled = pipeline.skills.complex_skills(clean, x_Bus_Day_ago(3), anthem)
+    skilled = pipeline.skills.complex_skills(clean, x_Bus_Day_ago(3))
     log.df_len('skilled', skilled)
     skilled['PhoneNumber'] = skilled['PhoneNumber'].astype(str)
 

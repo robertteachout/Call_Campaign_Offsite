@@ -64,11 +64,11 @@ def rm_schedule(df):
     df['Skill'] = np.where(f1, 'schedule_pull', df['Skill'])
     return df
 
-def anthem(df, anthem):
-    if all(anthem) == 0:
-        return df
-    f1 = df['OutreachID'].isin(anthem['Outreach Id'].tolist())
-    df['Skill'] = np.where(f1, 'CC_Adhoc2', df['Skill'])
+def adhoc2(df):
+    projects = ['AHN','CDQI HCR','NAMMCA','OC-AZ','OC-NV','OCN-WA','OC-UT','Reliant','Riverside', 'WellMed']
+    f1 = df['Project_Type'].isin(projects)
+    f2 = df['Last_Call'].isna()
+    df['Skill'] = np.where(f1 & f2, 'CC_Adhoc2', df['Skill'])
     return df
 
 def aetna_commercial(df): 
@@ -84,7 +84,7 @@ def research_pull(df):
 
 def last_call(df,nbd):
     # convert CF last call date to child org / child ORG's won't be affected
-    df['Last_Call'] = pd.to_datetime(df['Last_Call']).dt.date
+    df['Last_Call'] = pd.to_datetime(df['Last_Call'], errors='coerce').dt.date
     filter1 = df['Last_Call'] >= nbd #x_Bus_Day_ago(3)
     filter2 = df['Skill'] != 'CC_Pend_Eligible'
     df['Skill'] = np.where(filter1 & filter2, 'Child_ORG', df['Skill'])
@@ -122,7 +122,7 @@ def wellmed(df):
     df['Skill'] = np.where(f1, 'CC_Wellmed_Sub15_UNS', df['Skill'])
     return df
 
-def complex_skills(df, nbd, anthems=0):
+def complex_skills(df, nbd):
     f = df 
     f = Re_Skill_Tier(f)
     f = wellmed(f)
@@ -135,7 +135,7 @@ def complex_skills(df, nbd, anthems=0):
     # f = CC_Pend_Eligible(f)
     f = research_pull(f)
     f = rm_schedule(f)
-    f = anthem(f, anthems)
+    f = adhoc2(f)
     f = aetna_commercial(f)
     f = Osprey(f)
     f = fill(f)
