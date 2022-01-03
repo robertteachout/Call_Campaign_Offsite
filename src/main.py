@@ -113,11 +113,15 @@ def main():
     log.df_len('addInv', add_inv)
     time_check(startTime_1, 'Add NewIDs to list')
 
+    column_types = df_scored.dtypes.reset_index()
+    uniq_num_count = count_phone(df_scored)
+
     def Save():
         zipfiles('push',df_scored, tomorrow_str)
         tables('push',  add_inv,            'assignment_map.csv')
         tables('push',  list_add,           'Missed_ORGs.csv')
-        tables('push',  count_phone(df_scored),'unique_phone_count.csv')
+        tables('push',  uniq_num_count,     'unique_phone_count.csv')
+        tables('push',  column_types,       'columns.csv')
         time_check(startTime_1, 'Save files')
         ###################################
 
