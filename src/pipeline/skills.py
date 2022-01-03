@@ -68,7 +68,9 @@ def adhoc2(df):
     projects = ['AHN','CDQI HCR','NAMMCA','OC-AZ','OC-NV','OCN-WA','OC-UT','Reliant','Riverside', 'WellMed']
     f1 = df['Project_Type'].isin(projects)
     f2 = df['Last_Call'].isna()
-    df['Skill'] = np.where(f1 & f2, 'CC_Adhoc2', df['Skill'])
+    f3 = df['CallCount'] >= 8
+
+    df['Skill'] = np.where(f1 & (f2 | f3), 'CC_Adhoc2', df['Skill'])
     return df
 
 def aetna_commercial(df): 
