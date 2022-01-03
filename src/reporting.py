@@ -1,6 +1,6 @@
-import reporting.optum_care
+import reports.optum_care
 
-batch = 16
+batch = 17
 
-reporting.optum_care.main(batch)
+reports.optum_care.main(batch)
 
