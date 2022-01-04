@@ -143,7 +143,7 @@ def complex_skills(df, nbd):
     f = research_pull(f)
     f = rm_schedule(f)
     f = adhoc2(f)
-    f = aetna_commercial(f)
+    f = adhoc1(f)
     f = Osprey(f)
     f = fill(f)
     f = emr_rm(f)
