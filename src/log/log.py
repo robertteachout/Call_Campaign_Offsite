@@ -7,7 +7,11 @@ logging.basicConfig(filename='app.log',
                     datefmt='%Y-%m-%d %H:%M:%S')
 
 def df_len(name, df):
-    logging.info(f'len: {len(df)} \t\t {name}')
+    try:
+        ln = len(df)
+    except:
+        ln = 0
+    logging.info(f'len: {ln} \t\t {name}')
     # logging.info(df.dtypes)
 
 if __file__ == '__main__':
