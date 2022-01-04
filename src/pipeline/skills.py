@@ -73,10 +73,15 @@ def adhoc2(df):
     df['Skill'] = np.where(f1 & (f2 | f3), 'CC_Adhoc2', df['Skill'])
     return df
 
-def aetna_commercial(df): 
+def adhoc1(df): 
     f1 = df['Project_Type'] == 'Aetna Commercial'
     f2 = df['CallCount'] == 0
-    df['Skill'] = np.where(f1 & f2, 'CC_Adhoc1', df['Skill'])
+
+    f3 = df['Project_Type'] == 'Clover Health MRA'
+    f4 = df['Outreach_Status'] == 'Unscheduled'
+    f5 = df['Outreach_Status'] == 'Past Due'
+
+    df['Skill'] = np.where((f1 & f2) | (f3 & (f4 | f5)), 'CC_Adhoc1', df['Skill'])
     return df
 
 def research_pull(df):
