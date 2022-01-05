@@ -73,7 +73,7 @@ def adhoc2(df):
     df['Skill'] = np.where(f1 & (f2 | f3), 'CC_Adhoc2', df['Skill'])
     return df
 
-def adhoc1(df): 
+def adhoc1(df, advantasure): 
     f1 = df['Project_Type'] == 'Aetna Commercial'
     f2 = df['CallCount'] == 0
 
@@ -81,7 +81,8 @@ def adhoc1(df):
     f4 = df['Outreach_Status'] == 'Unscheduled'
     f5 = df['Outreach_Status'] == 'Past Due'
 
-    df['Skill'] = np.where((f1 & f2) | (f3 & (f4 | f5)), 'CC_Adhoc1', df['Skill'])
+    f6 = df['OutreachID'].isin(advantasure)
+    df['Skill'] = np.where((f1 & f2) | (f3 & (f4 | f5)) | f6, 'CC_Adhoc1', df['Skill'])
     return df
 
 def research_pull(df):
@@ -129,7 +130,7 @@ def wellmed(df):
     df['Skill'] = np.where(f1, 'CC_Wellmed_Sub15_UNS', df['Skill'])
     return df
 
-def complex_skills(df, nbd):
+def complex_skills(df, nbd, advantasure=list()):
     f = df 
     f = Re_Skill_Tier(f)
     f = wellmed(f)
@@ -143,7 +144,7 @@ def complex_skills(df, nbd):
     f = research_pull(f)
     f = rm_schedule(f)
     f = adhoc2(f)
-    f = adhoc1(f)
+    f = adhoc1(f, advantasure)
     f = Osprey(f)
     f = fill(f)
     f = emr_rm(f)
