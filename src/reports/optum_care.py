@@ -71,11 +71,16 @@ def main(batch):
         total[f"{yesterday}"] = [total_inventory, total_calls, total_no_calls]
         group[f"{yesterday}"] = groups
         
-        disp = df_drop.groupby('Disp_Name')['OutreachID'].count().to_frame().rename(columns={"OutreachID":f"{yesterday}"})
+        disp = df_drop.groupby('Disp_Name')['OutreachID'].count().to_frame().rename(columns={"OutreachID":f"{yesterday}"}).sort_values(by=f"{yesterday}",ascending=False)
+        top = 10
+        disp_clean = disp[:top].copy()
+        disp_clean.loc[f'Not Top {top}'] = disp[top:].sum()
+
         try:
-            nic_disp = pd.concat([nic_disp, disp], axis=1)
+            nic_disp = pd.concat([nic_disp, disp_clean], axis=1)
+
         except:
-            nic_disp = disp
+            nic_disp = disp_clean
         
     Projects = pd.DataFrame(columns=total.columns)
     Projects.loc['Projects'] = total.columns
@@ -83,10 +88,8 @@ def main(batch):
     Disposition = pd.DataFrame(columns=total.columns)
     Disposition.loc['Disposition'] = total.columns
 
-    disp_cat = pd.read_csv('docs/disp_category.csv')
+    nic_disp = nic_disp.sort_values(by=f'{yesterday}',ascending=False)
 
-    nic_disp_cat = pd.merge(nic_disp.reset_index(), disp_cat, on='Disp_Name', how='left').groupby('Outcome',dropna=False)[nic_disp.columns].sum()
-
-    report = total.append(Projects).append(group).append(Disposition).append(nic_disp_cat).fillna('')
+    report = total.append(Projects).append(group).append(Disposition).append(nic_disp).fillna('')
 
     report.to_csv(f'docs/report_oc_{batch}.csv')
