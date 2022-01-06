@@ -47,7 +47,8 @@ def main(batch):
         today = datetime.strptime(st, "%Y-%m-%d")
         yesterday = last_business_day(today).strftime("%Y-%m-%d")
         print(yesterday)
-
+        
+        start = start[start['Outreach_Status'] != 'ReSchedule']
         oc = start[start.Project_Type.isin(projects)][['Project_Type', 'PhoneNumber', 'OutreachID', 'Last_Call', 'Skill']]
         oc.Last_Call = pd.to_datetime(oc.Last_Call, errors='ignore')
         oc.PhoneNumber = oc.PhoneNumber.astype(np.int64).astype(str)
