@@ -16,6 +16,7 @@ import server.insert
 import server.secret
 import server.query
 import server.queries.reschedule
+import server.queries.mastersiteID
 import server.queries.last_call_search
 import log.log as log
 
@@ -47,6 +48,14 @@ def main():
     log.df_len('load', load)
     
     ### Add to query
+    ## Master Site ID
+    mastersite_sql = server.queries.mastersiteID.sql()
+    mastersite = server.query.query(servername, database,  mastersite_sql, 'Add mastersiteID')
+    load = pd.merge(load, mastersite, how='left', on='OutreachID')
+    log.df_len('mastersiteID', mastersite)
+    print(load[['OutreachID', 'mastersiteID']])
+
+    ## Reschedules
     reschedule_sql = server.queries.reschedule.sql()
     reSchedule = server.query.query(servername, database,  reschedule_sql, 'Add reschedules')
     log.df_len('reSchedule', reSchedule)

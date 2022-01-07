@@ -130,6 +130,12 @@ def wellmed(df):
     df['Skill'] = np.where(f1, 'CC_Wellmed_Sub15_UNS', df['Skill'])
     return df
 
+def mastersiteID(df):
+    f1 = df['mastersiteID'].notna()
+    f2 = df['mastersiteID'] != 1000838
+    df['Skill'] = np.where(f1 & f2, 'mastersite_inventory', df['Skill'])
+    return df
+
 def complex_skills(df, nbd, advantasure=list()):
     f = df 
     f = Re_Skill_Tier(f)
@@ -143,6 +149,9 @@ def complex_skills(df, nbd, advantasure=list()):
     # f = CC_Pend_Eligible(f)
     f = research_pull(f)
     f = rm_schedule(f)
+    # mass filter 
+    f = mastersiteID(f)
+
     f = adhoc2(f)
     f = adhoc1(f, advantasure)
     f = Osprey(f)
