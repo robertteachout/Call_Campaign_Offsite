@@ -77,12 +77,8 @@ def adhoc1(df, advantasure):
     f1 = df['Project_Type'] == 'Aetna Commercial'
     f2 = df['CallCount'] == 0
 
-    f3 = df['Project_Type'] == 'Clover Health MRA'
-    f4 = df['Outreach_Status'] == 'Unscheduled'
-    f5 = df['Outreach_Status'] == 'Past Due'
-
     f6 = df['OutreachID'].isin(advantasure)
-    df['Skill'] = np.where((f1 & f2) | (f3 & (f4 | f5)) | f6, 'CC_Adhoc1', df['Skill'])
+    df['Skill'] = np.where((f1 & f2) | f6, 'CC_Adhoc1', df['Skill'])
     return df
 
 def research_pull(df):
