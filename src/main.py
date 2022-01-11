@@ -53,7 +53,6 @@ def main():
     mastersite = server.query.query(servername, database,  mastersite_sql, 'Add mastersiteID')
     load = pd.merge(load, mastersite, how='left', on='OutreachID')
     log.df_len('mastersiteID', mastersite)
-    print(load[['OutreachID', 'mastersiteID']])
 
     ## Reschedules
     reschedule_sql = server.queries.reschedule.sql()
@@ -84,7 +83,7 @@ def main():
         clean_for_score = df_full
         list_add = pd.DataFrame()
     else: 
-        assignment = tables('pull', 'NA','assignment_map.csv' )
+        assignment = tables('pull', 'NA','assignment_map.csv')
         mapped, names = pipeline.sprint_schedule.daily_maping(df_full, assignment, tomorrow_str)
         log.df_len('mapped', mapped)
 

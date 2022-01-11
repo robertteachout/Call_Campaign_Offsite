@@ -83,7 +83,7 @@ def batch_insert(servername, database, campaign_history, load_date, load):
             INSERT INTO [DWWorking].[dbo].[Call_Campaign] ({clean_columns}) 
             """
     ### Clean ###
-    df['PhoneNumber'] = df['PhoneNumber'].astype(str)
+    df['PhoneNumber'] = df['PhoneNumber'].astype(int).astype(str)
 
     df = df[df['Daily_Groups'] != '0'] ### remove skill that are out of daily proccess
     df = df.fillna(0)
@@ -129,6 +129,7 @@ if __name__ == "__main__":
     tomorrow = next_business_day(today)
     tomorrow_str = tomorrow.strftime(date_format)
     df = tables('pull','na', f'{tomorrow_str}.zip', Path('data/load'))
+    df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:-2]
     batch_insert(servername,
                 database,
                 x_Bus_Day_ago(10).strftime(date_format),
