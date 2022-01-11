@@ -1,6 +1,10 @@
 import reports.optum_care
 
-batch = 18
+report = reports.optum_care.main()
+import pandas as pd
 
-reports.optum_care.main(batch)
+df1 = pd.read_csv('docs/report_oc.csv',index_col='Total')
+c= pd.merge(df1, report, how='left', left_index=True,right_index=True)
+
+c.to_csv('docs/report_oc.csv')
 
