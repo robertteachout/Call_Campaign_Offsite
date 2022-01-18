@@ -106,7 +106,7 @@ def Re_Skill_Tier(df):
 
     df_local['Skill'] = np.where(filter4, 'CC_Tier1', df_local['Skill'])
     df_local['Skill'] = np.where(filter2 & filter3, 'CC_Tier2', df_local['Skill'])
-    df_local['Skill'] = np.where(filter5 & filter6 & filter1, 'CC_Tier3', df_local['Skill'])
+    # df_local['Skill'] = np.where(filter5 & filter6 & filter1, 'CC_Tier3', df_local['Skill'])
     return df_local
 
 def fill(df):
@@ -135,12 +135,12 @@ def mastersiteID(df):
 def complex_skills(df, nbd, advantasure=list()):
     f = df 
     f = Re_Skill_Tier(f)
-    f = wellmed(f)
+    # f = wellmed(f)
     f = escalations(f)
     
-    f = genpact(f)
-    f = genpactPRV_priority(f)
-    f = wellmed_schedule(f)
+    # f = genpact(f)
+    # f = genpactPRV_priority(f)
+    # f = wellmed_schedule(f)
     f = last_call(f, nbd)
     # f = CC_Pend_Eligible(f)
     f = research_pull(f)
