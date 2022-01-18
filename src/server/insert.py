@@ -83,8 +83,6 @@ def batch_insert(servername, database, campaign_history, load_date, load):
             INSERT INTO [DWWorking].[dbo].[Call_Campaign] ({clean_columns}) 
             """
     ### Clean ###
-    df['PhoneNumber'] = df['PhoneNumber'].astype(int).astype(str)
-
     df = df[df['Daily_Groups'] != '0'] ### remove skill that are out of daily proccess
     df = df.fillna(0)
     df[['OutreachID', 'Score', 'Unique_Phone']] = df[['OutreachID', 'Score', 'Unique_Phone']].astype(np.int64)
