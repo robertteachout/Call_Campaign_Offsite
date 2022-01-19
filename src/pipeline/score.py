@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 
 def Number_stats(df):
     audit_sort = {'RADV':0, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':4, 'Medicare Risk':5}
@@ -39,6 +40,15 @@ def split(df, sk):
         if not 'rolled' in df4.columns:
             df4['rolled'] = 0
         df4 = df4.sort_values(by = ['Daily_Priority','rolled','audit_sort','age_sort'], ascending=[True, False, True, True]).reset_index(drop = True)
+        
+        ### re-rank skill according to meeting sla requirments and tilt towards togo charts
+        f1 = (df4.audit_sort <= 2) & (df4.age_category <= 5) & (df4.age_category != 0)
+        f2 = (df4.audit_sort > 2) & (df4.age_category <= 10) & (df4.age_category != 0)
+        df4['meets_sla'] = np.where(f1 | f2, 1, 0)
+        
+        if sk == 'Tier1' or 'Tier2':
+            df4 = df4.sort_values(by =['meets_sla','ToGoCharts'], ascending=[True,False]).reset_index(drop=True)
+
         df4['Unique_Phone'] = 1
         ### add score column
         df_skill = df4
