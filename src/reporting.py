@@ -1,8 +1,10 @@
-import reports.optum_care
+import reports.project_breakdown
 import reports.optum_aca
+oc_name  = ['AHN','CDQI HCR','NAMMCA','OC-AZ','OC-NV','OCN-WA','OC-UT','Reliant','Riverside', 'WellMed']
+aca_name = ['ACA-HospitalCR','ACA-PhysicianCR']
 
-optum_care = reports.optum_care.main()
-optum_aca = reports.optum_aca.main()
+optum_care = reports.project_breakdown.main(oc_name)
+optum_aca  = reports.project_breakdown.main(aca_name)
 import pandas as pd
 
 report_oc_full = pd.read_csv('docs/report_oc.csv',index_col='Total')
