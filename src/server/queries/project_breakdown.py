@@ -56,22 +56,6 @@ def sql(date):
     LEFT JOIN DW_Operations.dbo.FactChart fc ON fc.OutreachID = cc.OutreachID
     LEFT JOIN DW_Operations.dbo.DimProjectType pt ON pt.ProjectTypeId = fc.ProjectTypeId
     LEFT JOIN nic ON nic.OutreachID = cc.OutreachID
-    LEFT JOIN cf_flag ON cf_flag.OutreachID = cc.OutreachID
-    
-    -- WHERE
-      -- pt.ProjectTypeDescription in (
-      --   'AHN',
-      --   'CDQI HCR',
-      --   'NAMMCA',
-      --   'OC-AZ',
-      --   'OC-NV',
-      --   'OCN-WA',
-      --   'OC-UT',
-      --   'Reliant',
-      --   'Riverside',
-      --   'WellMed'
-      -- )
-      -- AND 
-      
+    LEFT JOIN cf_flag ON cf_flag.OutreachID = cc.OutreachID      
     '''
     return sql
