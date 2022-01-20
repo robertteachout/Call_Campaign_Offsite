@@ -100,19 +100,14 @@ def last_call(df,nbd):
     return df
 
 def Re_Skill_Tier(df):
-    df_local = df
-    filter1 = df_local['OutreachID_Count'] ==1
-    filter2 = df_local['OutreachID_Count'] >=1
-    filter3 = df_local['OutreachID_Count'] <=4
-    filter4 = df_local['OutreachID_Count'] >=5 #### ????
-    
-    filter5 = (df_local['Outreach_Status'] == 'Unscheduled') 
-    filter6 = (df_local['Outreach_Team'] == 'Sub 15') 
+    f1 = df['OutreachID_Count'] ==1
+    f2 = df['OutreachID_Count'] >=1
+    f3 = df['OutreachID_Count'] <=4
+    f4 = df['OutreachID_Count'] >=5 #### ?
 
-    df_local['Skill'] = np.where(filter4, 'CC_Tier1', df_local['Skill'])
-    df_local['Skill'] = np.where(filter2 & filter3, 'CC_Tier2', df_local['Skill'])
-    # df_local['Skill'] = np.where(filter5 & filter6 & filter1, 'CC_Tier3', df_local['Skill'])
-    return df_local
+    df['Skill'] = np.where(f4, 'CC_Tier1', df['Skill'])
+    df['Skill'] = np.where(f2 & f3, 'CC_Tier2', df['Skill'])
+    return df
 
 def fill(df):
     f1 = df['Skill'].isnull()
