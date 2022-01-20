@@ -55,8 +55,12 @@ def Osprey(df):
     f1 = df['Project_Type'] == 'Osprey'
     f2 = df['Outreach_Status'] != 'Scheduled'
     f3 = df['Outreach_Status'] != 'Escalated'
+
+    f4 = df['Outreach_Status'] == 'Escalated'
+    f5 = df['Outreach_Status'] == 'PNP Released'
     # removeing inventory
     df['Skill'] = np.where(f1 & f2 & f3, 'CC_Osprey_Outbound', df['Skill'])
+    df['Skill'] = np.where(f1 & (f4 | f5), 'Osprey_Escalation', df['Skill'])
     return df
 
 def rm_schedule(df):
@@ -70,7 +74,7 @@ def adhoc2(df):
     f2 = df['Last_Call'].isna()
     f3 = df['age_category'] >= 10
     f4 = df['Outreach_Status'] != 'Scheduled'
-    
+
     df['Skill'] = np.where(f1 & (f2 | f3) & f4, 'CC_Adhoc2', df['Skill'])
     return df
 
@@ -144,7 +148,6 @@ def complex_skills(df, nbd, advantasure=list()):
     # f = wellmed_schedule(f)
     f = last_call(f, nbd)
     # f = CC_Pend_Eligible(f)
-    f = research_pull(f)
     f = rm_schedule(f)
     # mass filter 
     f = mastersiteID(f)
@@ -154,4 +157,5 @@ def complex_skills(df, nbd, advantasure=list()):
     f = Osprey(f)
     f = fill(f)
     f = emr_rm(f)
+    f = research_pull(f)
     return f
