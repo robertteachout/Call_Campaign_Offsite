@@ -32,7 +32,15 @@ def clean_num(df):
     return df
 
 def Last_Call(df):
+    df.drop('Age', axis=1, inplace=True)
     df['age'] = (tomorrow - df['Last_Call']).dt.days
+
+    f1 = df.Last_Call.isna()
+    df.age = np.where(f1, df.age.max(), df.age)
+    
+    f1 = df.age < df.DaysSinceCreation
+    df.age = np.where(f1, df.age, df.DaysSinceCreation)
+
     cut_bins = [0, 5, 10, 15, 20, 10000]
     label_bins = [ 5, 10, 15, 20, 21]
     df['age_category'] = pd.cut(df['age'], bins= cut_bins, labels=label_bins)
@@ -58,7 +66,6 @@ def clean(df, tomorrow_str):
     df = Last_Call(clean_num(format(df)))
     df['Daily_Groups'] = 0
     df['Load_Date'] = tomorrow_str
-    df['Cluster'] = 0
     df['PhoneNumber'] = df['PhoneNumber'].astype(str)
     ### Add info to main line and reskill
     df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
