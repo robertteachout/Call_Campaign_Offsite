@@ -7,13 +7,13 @@ tomorrow = (today + timedelta(days = 1))
 yesterday = (today + timedelta(days = -1))
 
 def formate_col(df, col, type):
-        if type == 'date':
-            df[f'{col}'] = pd.to_datetime(df[f'{col}'], errors='coerce').dt.date
-        elif type == 'num':
-            df[f'{col}'] = pd.to_numeric(df[f'{col}'], errors='coerce', downcast="integer")
-        else:
-            print('add new type')
-        return df
+    if type == 'date':
+        df[col] = pd.to_datetime(df[col], errors='coerce').dt.date
+    elif type == 'num':
+        df[col] = pd.to_numeric(df[col], errors='coerce', downcast="integer")
+    else:
+        print('add new type')
+    return df
 
 def format(df):
     df.columns = df.columns.str.replace('/ ','')
@@ -42,11 +42,8 @@ def Last_Call(df):
     df.age = np.where(f1, df.age, df.DaysSinceCreation)
 
     cut_bins = [0, 5, 10, 15, 20, 10000]
-    label_bins = [ 5, 10, 15, 20, 21]
-    df['age_category'] = pd.cut(df['age'], bins= cut_bins, labels=label_bins)
-    df = formate_col(df, 'age_category', 'num')
-    df = formate_col(df, 'age', 'num')
-    df[['age', 'age_category']] = df[['age', 'age_category']].fillna(0).round(decimals=0).astype(object)
+    label_bins = [5, 10, 15, 20, 21]
+    df['age_category'] = pd.cut(df['age'], bins=cut_bins, labels=label_bins, include_lowest=True)
     return df
 
 def check_load(df, today):
@@ -62,14 +59,42 @@ def fire_flag(df, skill_name):
     df['Outreach_Status'] = np.where(filer1, skill_name, df['Outreach_Status'])
     return df
 
-def clean(df, tomorrow_str):
-    df = Last_Call(clean_num(format(df)))
-    df['Daily_Groups'] = 0
+def add_columns(df, tomorrow_str):
+    ### init columns
     df['Load_Date'] = tomorrow_str
+    df['Daily_Groups'] = 0
+    df['Daily_Priority'] = 0
+    df['rolled'] = 0 
+    df['NewID'] = 0
+
+    ### score columns
+    # map
+    audit_sort  = {'RADV':1, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':0, 'Medicare Risk':5}
+    age_sort    = {21:0, 20:1, 15:2, 10:3, 5:4}
+        # name_sort = {'Unscheduled':0, 'Escalated':2, 'PNP Released':1,'Past Due':3,'Scheduled':4}
+        # rm_sort = {'EMR Remote': 0, 'HIH - Other': 2, 'Onsite':1,'Offsite':3}
+    df['audit_sort'] = df['Audit_Type'].map(audit_sort)
+    df['age_sort'] = df['age_category'].map(age_sort)
+    # use map 
+    f1 = df.audit_sort <=2
+    df['sla'] = np.where(f1, 5, 10)
+    f1 = df.sla >= df.age
+    df['meet_sla'] = np.where(f1, 1,0)
+    # togo charts
+    bucket_amount = 5
+    labels = list(reversed([x for x in range(bucket_amount)]))
+    df['togo_bin'] = pd.cut(df.ToGoCharts, bins=bucket_amount, labels=labels)
+    df.togo_bin = df.togo_bin.astype(int)
+    # needed for merge
     df['PhoneNumber'] = df['PhoneNumber'].astype(str)
+    return df
+
+def clean(df, tomorrow_str):
+    df = Last_Call(clean_num(format(df))).reset_index(drop=True)
+    new_col = add_columns(df, tomorrow_str)
     ### Add info to main line and reskill
-    df2 = df.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
-    df = pd.merge(df,df2, on='PhoneNumber')
+    df2 = new_col.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
+    df = pd.merge(new_col,df2, on='PhoneNumber')
     return df
 
 if __name__ == "__main__":
