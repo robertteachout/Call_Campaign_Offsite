@@ -2,9 +2,14 @@ import pandas as pd
 import numpy as np
 
 def rank(df):
+    # temp
+    f1 = df.Project_Type == 'ACA-PhysicianCR'
+    f2 = df.Last_Call.isna()
+    f3 = df.Last_Call == '0'
+    df['temp_rank'] = np.where(f1 & (f2 | f3), 0,1)
     return df.sort_values(
-        by = ['meet_sla','togo_bin', 'age'], 
-        ascending=[True,True, False]
+        by = ['temp_rank', 'meet_sla','togo_bin', 'age'], 
+        ascending=[True, True,True, False]
         ).reset_index(drop = True)
 
 def split(df, sk):
