@@ -16,10 +16,12 @@ tomorrow_str = tomorrow.strftime("%Y-%m-%d")
 
 def main():
     df = tables('pull', 'na', f'{today}.zip','data/load/')
-    df.sort_values('OutreachID')
+    
     f1 = (df.Skill == 'CC_Tier1') & (df.Score < 1500)
     f2 = (df.Skill == 'CC_Tier2') & (df.Score < 5000)
-    df['Called'] = np.where(f1 | f2, 1, 0)
+    f3 = (df.Skill == 'CC_Adhoc1') & (df.Score < 1000)
+    f4 = (df.Skill == 'CC_Adhoc2') & (df.Score < 1000)
+    df['Called'] = np.where(f1 | f2 | f3 | f4, 1, 0)
 
     called = df[df.Called == 1].pivot_table(
                                         index=['Skill','Project_Type'], 
