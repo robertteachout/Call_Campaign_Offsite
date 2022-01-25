@@ -39,6 +39,20 @@ def count_phone(df):
     gb['%'] = round(gb['Unique_Phone'] / gb['Total'], 2)
     return df0.append(gb, ignore_index=True)
 
+def append_column(df, location, index=list()):
+    # get orignal table or create one
+    try:
+        # set index so you don't need to remove it before add new df
+        old = pd.read_csv(location, index_col=index)
+    except:
+        if input('create new table (y/n): ') == 'y':
+            return df.to_csv(location)
+        else:
+            return print('check index input')
+    # left join orignal with new
+    new = pd.merge(old, df, how='left', left_index=True, right_index=True)
+    new.to_csv(location)
+
 if __name__ == "__main__":
     df= pd.DataFrame({'test':[1,2,3,4]})
     print(df)
