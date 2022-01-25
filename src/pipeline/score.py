@@ -6,10 +6,12 @@ def rank(df):
     f1 = df.Project_Type == 'ACA-PhysicianCR'
     f2 = df.Last_Call.isna()
     f3 = df.Last_Call == '0'
-    df['temp_rank'] = np.where(f1 & (f2 | f3), 0,1)
+    f4 = df.DaysSinceCreation > 10
+    # f5 = df.Skill == 'CC_Tier2'
+    df['temp_rank'] = np.where(f1 & (f2 | f3) & f4, 0,1)
     return df.sort_values(
-        by = ['temp_rank', 'meet_sla','togo_bin', 'age'], 
-        ascending=[True, True,True, False]
+        by = ['meet_sla','temp_rank', 'togo_bin', 'age'], 
+        ascending=[True, True,False, False]
         ).reset_index(drop = True)
 
 def split(df, sk):
