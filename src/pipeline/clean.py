@@ -81,8 +81,8 @@ def add_columns(df, tomorrow_str):
     f1 = df.sla >= df.age
     df['meet_sla'] = np.where(f1, 1,0)
     # togo charts
-    bucket_amount = 5
-    labels = list(reversed([x for x in range(bucket_amount)]))
+    bucket_amount = 100
+    labels = list(([x for x in range(bucket_amount)]))
     df['togo_bin'] = pd.cut(df.ToGoCharts, bins=bucket_amount, labels=labels)
     df.togo_bin = df.togo_bin.astype(int)
     # needed for merge
