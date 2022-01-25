@@ -1,5 +1,5 @@
 import os
-
+from pipeline.tables import tables, append_column
 from server.query import query
 import server.secret
 servername  = server.secret.servername
@@ -26,7 +26,7 @@ from datetime import date
 
 from pipeline.etc import last_business_day
 
-def main(projects):
+def main(projects, location):
     today = date.today()
     today_str = today.strftime('%Y-%m-%d')
     b = f'data/load/{today_str}.zip'
@@ -79,4 +79,5 @@ def main(projects):
     nic_disp = nic_disp.sort_values(by=f'{yesterday}',ascending=False)
 
     report = total.append(Projects).append(group).append(Disposition).append(nic_disp).fillna('')
+    append_column(report,location,['Total'])
     return report
