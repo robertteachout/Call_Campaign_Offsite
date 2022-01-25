@@ -87,7 +87,7 @@ def adhoc1(df, advantasure):
     return df
 
 def research_pull(df):
-    f1 = df['PhoneNumber'] == 9999999999
+    f1 = df['PhoneNumber'] == '9999999999'
     df['Skill'] = np.where(f1, 'Research_Pull ', df['Skill'])
     return df
 
