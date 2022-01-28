@@ -132,6 +132,14 @@ def mastersiteID(df):
     df['Skill'] = np.where(f1 & f2, 'mastersite_inventory', df['Skill'])
     return df
 
+def quicklist(df):
+    nocall_list = pd.read_csv('data/table_drop/nocalllist.csv')
+    f1 = nocall_list.OutreachID.tolist()
+    f2 = df.OutreachID.isin(f1)
+    df['Skill'] = np.where(f2, 'CC_Tier2', df['Skill'])
+    df['quicklist'] = np.where(f2, 1,0)
+    return df
+
 def complex_skills(df, nbd, advantasure=list()):
     f = df 
     f = Re_Skill_Tier(f)
@@ -153,4 +161,5 @@ def complex_skills(df, nbd, advantasure=list()):
     f = fill(f)
     f = emr_rm(f)
     f = research_pull(f)
+    f = quicklist(f)
     return f

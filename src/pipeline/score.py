@@ -2,16 +2,20 @@ import pandas as pd
 import numpy as np
 
 def rank(df):
+    f0 = df.quicklist == 1
     # temp
     f1 = df.Project_Type == 'ACA-PhysicianCR'
     f2 = df.Last_Call.isna()
     f3 = df.Last_Call == '0'
     f4 = df.DaysSinceCreation > 10
     # f5 = df.Skill == 'CC_Tier2'
-    df['temp_rank'] = np.where(f1 & (f2 | f3) & f4, 0,1)
+    # df['temp_rank'] = np.where(f1 & (f2 | f3) & f4 | f0, 0,1)
+    df['temp_rank'] = np.where(f0 & (f2 | f3) & f4, 0,1)
     return df.sort_values(
-        by = ['meet_sla','temp_rank', 'togo_bin', 'age'], 
-        ascending=[True, True,False, False]
+        by = ['temp_rank', 'togo_bin', 'age'], 
+        # by = ['meet_sla','temp_rank', 'togo_bin', 'age'], 
+        ascending=[True,False, False]
+        # ascending=[True, True,False, False]
         ).reset_index(drop = True)
 
 def split(df, sk):
