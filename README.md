@@ -18,13 +18,13 @@ The goal of this project is to automate daily loading & tracking of call campaig
 Assumption: conda is already installed
 (https://www.anaconda.com/products/individual)
 
-```cmd
+```bash
 git clone https://github.com/AaronRoethe/Call_Campaign_Offsite.git
 ```
-```cmd
+```bash
 cd Call_Campaign_Offsite
 ```
-```cmd
+```bash
 setup.bat
 ```
 What this file does:
@@ -41,11 +41,11 @@ run.bat
 ```
 ## Optional - highly recommended:
 ### PowerAutomate email attachments transfer 
-(https://us.flow.microsoft.com/en-us/)
+[link](https://us.flow.microsoft.com/en-us/)
 - ASM email to .\data\extract
 
 ### Task Scheduler 
-(https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
+[link](https://www.windowscentral.com/how-create-automated-task-using-task-scheduler-windows-10)
 - Create "Basic Task" with time trigger pointing at run.bat
 
 # Process:
