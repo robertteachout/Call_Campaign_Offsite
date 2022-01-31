@@ -12,6 +12,48 @@ def sql(lbd):
                 ON P.ProjectType = PT.Value
                     AND PT.ListType = 'ProjectType'
         ),
+        retrieval_group AS (
+            SELECT 
+                OM.OutreachID
+                ,ISNULL(RM.Name, 'Off Site Pending') AS 'Retrieval Method'
+                ,(CASE
+                    WHEN Name IN ('Off Site Pending',
+                        'Fax Outreach',
+                        'Provider Portal',
+                        'Mail',
+                        'Fax',
+                        'Email',
+                        'Mail - CD',
+                        'Mail - FD',
+                        'sFTP',
+                        'Targeted Fax') THEN 'Offsite'
+                    WHEN Name IN ('HIH - IOD',
+                        'Z-HIH-HP-Sent',
+                        'CIOX - Onsite',
+                        'CIOX - Remote',
+                        'Digital Direct - Ciox',
+                        'Self Retrieval',
+                        'Digital Direct',
+                        'UHC Onsite',
+                        'CIOX',
+                        'LI - Remote',
+                        'CIOX - Partner') THEN 'ROI & Digital Direct'
+                    WHEN Name IN ('Paper Scan',
+                        'EMR - Print to Scan',
+                        'EMR - Flash Drive',
+                        'LI - Onsite',
+                        'On Site Pending') THEN 'Onsite'
+                    WHEN Name IN ('EMR - Remote',
+                        'EMR - Remote Queued'
+                        ) THEN 'EMR Remote'
+                    WHEN Name = 'HIH - Other' THEN 'HIH'
+                    ELSE 'HIH'
+                END) AS [Retrieval Group]
+            FROM ChartFinder.dbo.OutreachMaster OM WITH (NOLOCK)
+            LEFT JOIN ChartFinder.dbo.List RM WITH (NOLOCK)
+                    ON OM.RetrievalMethod = RM.Value
+                    AND RM.ListType = 'RetrievalMethod'
+        ),
         nic_full as (
             SELECT DISTINCT
                 Contact_Name PhoneNumber
@@ -38,6 +80,8 @@ def sql(lbd):
 
         SELECT
         c.[OutreachID]
+        ,rg.[Retrieval Method]
+        ,rg.[Retrieval Group]
         ,p.ProjectType
         ,c.[PhoneNumber]
         ,nic.Disp_Name
@@ -51,5 +95,7 @@ def sql(lbd):
             AND nic.PhoneNumber = c.PhoneNumber
         LEFT JOIN cf
             ON c.OutreachID = cf.OutreachID
+        LEFT JOIN retrieval_group rg
+            ON rg.OutreachID = c.OutreachID
         WHERE   c.[Load_Date] = '{lbd}'
                     """
