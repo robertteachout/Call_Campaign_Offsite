@@ -25,7 +25,9 @@ def main(projects=list(),day=yesterday_str):
 
     df = data(day)
     # filter for projects
-    df = df[df.ProjectType.isin(projects)].copy()
+    f1 = df.ProjectType.isin(projects)
+    f2 = df.DaysSinceCreation > 10
+    df = df[f1 & f2].copy()
     # map calculation columns
     f1 = df.cf_last_call.isna()
     df['cf_no_call'] = np.where(f1, 1, 0)
