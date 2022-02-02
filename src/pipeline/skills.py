@@ -59,7 +59,7 @@ def Osprey(df):
     f4 = df['Outreach_Status'] == 'Escalated'
     f5 = df['Outreach_Status'] == 'PNP Released'
     # removeing inventory
-    df['Skill'] = np.where(f1 & f2 & f3, 'CC_Osprey_Outbound', df['Skill'])
+    df['Skill'] = np.where(f1, 'CC_Osprey_Outbound', df['Skill'])
     df['Skill'] = np.where(f1 & (f4 | f5), 'Osprey_Escalation', df['Skill'])
     return df
 
@@ -87,8 +87,11 @@ def adhoc1(df, advantasure):
     return df
 
 def research_pull(df):
+    f0 = df['Project_Type'] == 'Osprey'
+
     f1 = df['PhoneNumber'] == '9999999999'
     df['Skill'] = np.where(f1, 'Research_Pull ', df['Skill'])
+    df['Skill'] = np.where(f1 & f0, 'Osprey_research', df['Skill'])
     return df
 
 def last_call(df,nbd):
