@@ -12,6 +12,20 @@ def sql(lbd):
                 ON P.ProjectType = PT.Value
                     AND PT.ListType = 'ProjectType'
         ),
+        daysince AS (
+            SELECT
+                OM.OutreachID
+                ,(DATEDIFF(dd, OM.InsertDate, GETDATE()) + 1) - (DATEDIFF(wk, OM.InsertDate, GETDATE()) * 2) - (
+                CASE
+                    WHEN DATENAME(dw, OM.InsertDate) = 'Sunday' THEN 1
+                    ELSE 0
+                END) - (
+                CASE
+                    WHEN DATENAME(dw, GETDATE()) = 'Saturday' THEN 1
+                    ELSE 0
+                END) AS 'DaysSinceCreation' 
+            FROM ChartFinder.dbo.OutreachMaster OM
+        ),
         retrieval_group AS (
             SELECT 
                 OM.OutreachID
@@ -86,6 +100,7 @@ def sql(lbd):
         ,c.[PhoneNumber]
         ,nic.Disp_Name
         ,cf.cf_last_call
+        ,ds.DaysSinceCreation
 
         FROM [DWWorking].[dbo].[Call_Campaign] AS c
         LEFT JOIN project p
@@ -97,5 +112,7 @@ def sql(lbd):
             ON c.OutreachID = cf.OutreachID
         LEFT JOIN retrieval_group rg
             ON rg.OutreachID = c.OutreachID
+        LEFT JOIN daysince ds
+            ON ds.OutreachID = c.OutreachID 
         WHERE   c.[Load_Date] = '{lbd}'
                     """
