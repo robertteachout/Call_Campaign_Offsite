@@ -85,17 +85,20 @@ def add_columns(df, tomorrow_str):
     labels = list(([x for x in range(bucket_amount)]))
     df['togo_bin'] = pd.cut(df.ToGoCharts, bins=bucket_amount, labels=labels)
     df.togo_bin = df.togo_bin.astype(int)
+    # no call flag
+    f1 = df.Last_Call.isna()
+    df['no_call'] = np.where(f1, 1, 0)
     # needed for merge
     df['PhoneNumber'] = df['PhoneNumber'].astype(str)
-    return df
+    ### Add info to main line and reskill
+    df2 = df.groupby(['PhoneNumber']).agg({'OutreachID':'count','no_call':'sum'}).rename(columns={'OutreachID':'OutreachID_Count','no_call':'no_call_count'}).reset_index()
+    df_merge = pd.merge(df,df2, on=['PhoneNumber'])
+    return df_merge
 
 def clean(df, tomorrow_str):
     df = Last_Call(clean_num(format(df))).reset_index(drop=True)
     new_col = add_columns(df, tomorrow_str)
-    ### Add info to main line and reskill
-    df2 = new_col.groupby(['PhoneNumber']).agg({'PhoneNumber':'count'}).rename(columns={'PhoneNumber':'OutreachID_Count'}).reset_index()
-    df = pd.merge(new_col,df2, on='PhoneNumber')
-    return df
+    return new_col
 
 if __name__ == "__main__":
     print('test')
