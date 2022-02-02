@@ -75,7 +75,7 @@ def adhoc2(df):
     f3 = df['age_category'] >= 10
     f4 = df['Outreach_Status'] != 'Scheduled'
 
-    df['Skill'] = np.where(f1 & (f2 | f3) & f4, 'CC_Adhoc2', df['Skill'])
+    df['Skill'] = np.where(f1 & (f2 | f3) & f4, 'CC_Adhoc1', df['Skill'])
     return df
 
 def adhoc1(df, advantasure): 
