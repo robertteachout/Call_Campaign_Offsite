@@ -124,6 +124,7 @@ if __name__ == "__main__":
     from pipeline.etc import next_business_day, x_Bus_Day_ago
     date_format = '%Y-%m-%d'
     today = date.today()
+    today_str = today.strftime(date_format)
     tomorrow = next_business_day(today)
     tomorrow_str = tomorrow.strftime(date_format)
     df = tables('pull','na', f'{tomorrow_str}.zip', Path('data/load'))
