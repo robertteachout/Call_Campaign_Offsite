@@ -14,7 +14,7 @@ yesterday_str = yesterday.strftime("%Y-%m-%d")
 tomorrow = next_business_day(today)
 tomorrow_str = tomorrow.strftime("%Y-%m-%d") 
 
-def main(today_str):
+def main(today_str=today_str):
     df = tables('pull', 'na', f'{today_str}.zip','data/load/')
     work = {
         'CC_Tier1':1500,
