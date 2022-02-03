@@ -77,7 +77,7 @@ def add_columns(df, tomorrow_str):
     df['age_sort'] = df['age_category'].map(age_sort)
     # use map 
     f1 = df.audit_sort <=2
-    df['sla'] = np.where(f1, 5, 10)
+    df['sla'] = np.where(f1, 4, 8)
     f1 = df.sla >= df.age
     df['meet_sla'] = np.where(f1, 1,0)
     # togo charts
