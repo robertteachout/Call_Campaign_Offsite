@@ -50,7 +50,7 @@ def append_column(df, location, index=list()):
         else:
             return print('check index input')
     # left join orignal with new
-    new = pd.merge(old, df, how='left', left_index=True, right_index=True)
+    new = pd.merge(old, df, how='outer', left_index=True, right_index=True)
     new.to_csv(location)
 
 if __name__ == "__main__":
