@@ -27,8 +27,14 @@ def split(df, sk):
     df0 = df[df['Skill'] == sk].copy()
     scored = rank(df0)
     
+    f1 = scored.Project_Type == 'Chart Sync'
+    scored.Score = np.where(f1, 100000, scored.Score)
+
     non_dup = scored.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
     df_skill = rank(non_dup)
+
+    f1 = df_skill.Project_Type == 'Chart Sync'
+    df_skill.Score = np.where(f1, 100000, scored.Score)
 
     df_skill['Unique_Phone'] = 1
     ### add score column
