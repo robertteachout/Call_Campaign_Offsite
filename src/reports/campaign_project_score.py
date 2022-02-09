@@ -41,4 +41,4 @@ def main(today_str=today_str):
     called.columns = [name]
     
     append_column(called, 'data/daily_priority/campaign_project_score.csv', ['Skill', 'Project_Type'],'outer')
-    table[['Skill','OutreachID', 'PhoneNumber', 'Score','Last_Call','Unique_Phone']].to_csv(f'data/daily_priority/{today_str}.csv', index=False)
+    table[['Project_Type','Skill','OutreachID', 'PhoneNumber', 'Score','Last_Call','Unique_Phone']].to_csv(f'data/daily_priority/{today_str}.csv', index=False)
