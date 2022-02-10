@@ -146,7 +146,7 @@ def chartfinder(df):
     df['Skill'] = 'CC_Chartfinder'
     return df
 
-def complex_skills(df, nbd, advantasure=list()):
+def complex_skills(df):
     f = df 
     f = chartfinder(f)
     f = escalations(f)
