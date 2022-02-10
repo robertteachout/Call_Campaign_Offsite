@@ -88,7 +88,6 @@ def adhoc1(df, advantasure):
 
 def research_pull(df):
     f0 = df['Project_Type'] == 'Osprey'
-
     f1 = df['PhoneNumber'] == '9999999999'
     df['Skill'] = np.where(f1, 'Research_Pull ', df['Skill'])
     df['Skill'] = np.where(f1 & f0, 'Osprey_research', df['Skill'])
@@ -132,37 +131,36 @@ def wellmed(df):
 def mastersiteID(df):
     f1 = df['mastersiteID'].notna()
     f2 = df['mastersiteID'] != 1000838
-    df['Skill'] = np.where(f1 & f2, 'mastersite_inventory', df['Skill'])
+    df['Skill'] = np.where(f1 & f2, 'CC_Cross_Reference', df['Skill'])
     return df
 
 def quicklist(df):
     nocall_list = pd.read_csv('data/table_drop/nocalllist.csv')
     f1 = nocall_list.OutreachID.tolist()
-    f2 = df.OutreachID.isin(f1)
+    f2 = df.OutreachID.isin(f1) 
     df['Skill'] = np.where(f2, 'CC_Tier2', df['Skill'])
     df['quicklist'] = np.where(f2, 1,0)
     return df
 
+def chartfinder(df):
+    df['Skill'] = 'CC_Chartfinder'
+    return df
+
 def complex_skills(df, nbd, advantasure=list()):
     f = df 
-    f = Re_Skill_Tier(f)
-    # f = wellmed(f)
+    f = chartfinder(f)
     f = escalations(f)
     
-    # f = genpact(f)
-    # f = genpactPRV_priority(f)
-    # f = wellmed_schedule(f)
-    f = last_call(f, nbd)
-    # f = CC_Pend_Eligible(f)
+    # f = last_call(f, nbd)
     f = rm_schedule(f)
     # mass filter 
     f = mastersiteID(f)
 
-    f = adhoc2(f)
-    f = adhoc1(f, advantasure)
+    # f = adhoc2(f)
+    # f = adhoc1(f, advantasure)
     f = Osprey(f)
-    f = fill(f)
+    # f = fill(f)
     f = emr_rm(f)
     f = research_pull(f)
-    f = quicklist(f)
+    # f = quicklist(f)
     return f

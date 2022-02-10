@@ -2,25 +2,11 @@ import pandas as pd
 import numpy as np
 
 def rank(df):
-    f0 = df.quicklist == 1
-    # temp
-    f1 = df.Project_Type == 'ACA-PhysicianCR'
-    f2 = df.Last_Call.isna()
-    f3 = df.Last_Call == '0'
-    f4 = df.DaysSinceCreation > 10
-    # f5 = df.Skill == 'CC_Tier2'
-    # df['temp_rank'] = np.where(f1 & (f2 | f3) & f4 | f0, 0,1)
-    df['temp_rank'] = np.where(f0 & (f2 | f3) & f4, 0,1)
-    df_sort = df.sort_values(['Audit_Type']) \
-        .groupby(['Audit_Type']) \
-        .apply(lambda x: x.sort_values(['meet_sla', 'togo_bin', 'age']
-            ,ascending=[True, False, False])) \
-        .reset_index(drop=True)
+    f0 = df.Project_Type.isin(['UHC HEDIS','HEDIS']) # 'ACA-PhysicianCR'
+    df['temp_rank'] = np.where(f0, 0, 1)
 
-    df_sort.Score = df_sort.groupby(['Audit_Type']) \
-        .Score.rank('first')
-    
-    return df_sort.sort_values(['Score', 'Audit_Type']).reset_index(drop=True)
+    return df.sort_values(['meet_sla','temp_rank', 'has_call', 'togo_bin', 'age']
+               ,ascending=[True, True, True, False, False]).reset_index(drop=True)
 
 def split(df, sk):
     # new score
@@ -30,11 +16,13 @@ def split(df, sk):
     f1 = scored.Project_Type == 'Chart Sync'
     scored.Score = np.where(f1, 100000, scored.Score)
 
-    non_dup = scored.drop_duplicates(['PhoneNumber']).reset_index(drop = True)
+    grouping = 'mastersiteID' if sk == 'mastersite_inventory' else 'PhoneNumber'
+
+    non_dup = scored.drop_duplicates([grouping]).reset_index(drop = True)
     df_skill = rank(non_dup)
 
     f1 = df_skill.Project_Type == 'Chart Sync'
-    df_skill.Score = np.where(f1, 100000, scored.Score)
+    df_skill.Score = np.where(f1, 100000, df_skill.Score)
 
     df_skill['Unique_Phone'] = 1
     ### add score column
@@ -45,7 +33,7 @@ def split(df, sk):
     df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
     ### Piped ORGs attached to phone numbers
     df6['OutreachID'] = df6['OutreachID'].astype(str)
-    df6['Matchees'] = df6.groupby(['PhoneNumber'])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
+    df6['Matchees'] = df6.groupby([grouping])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
     return df6
         
 def split_drop_score(df):
