@@ -12,23 +12,14 @@ def time_check(start, comment):
 
 def daily_piv(df):
     def piv(name):
-        print(f"""
-
-        _-_-_-_-_-_-_-_-_-_- {name} -_-_-_-_-_-_-_-_-_-_-_
-        
-        """)
+        print(f""" _-_-_-_-_-_-_-_-_-_- {name} -_-_-_-_-_-_-_-_-_-_-_ """)
         try:
             df1 = df[df[str(name)] == 1]
-            if name != 'rolled':
-                print(df1.pivot_table(index =['Daily_Priority', 'Daily_Groups', 'rolled'], columns ='Skill', values ='PhoneNumber', aggfunc = ['count'], margins=True,margins_name= 'TOTAL'))
-            else:
-                print(df1.pivot_table(columns ='Skill', values ='PhoneNumber', aggfunc = ['count']))
+            print(df1.pivot_table(index ='Skill', values ='OutreachID', aggfunc = ['count']))
         except:
             print(f'{name}: Null')
 
     piv('Unique_Phone')
-    piv('NewID')
-    piv('rolled')
     
 def date_list_split(ls, numSplit):
     splits = np.array_split(ls, numSplit)
