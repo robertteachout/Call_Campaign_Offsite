@@ -2,6 +2,8 @@ from pathlib import Path
 import os, sys
 import pyarrow as pa
 import pyarrow.csv as csv
+from zipfile import ZipFile
+
 
 paths = Path(__file__).parent.absolute().parent.absolute().parent.absolute()
 from datetime import date
@@ -27,7 +29,14 @@ def tables(push_pull, table, name, path=table_path):
 def zipfiles(push_pull, table, filename, extract=extract_path):
     if push_pull == 'pull':
         Extract_path = list(extract.glob(filename))[0]
-        return pd.read_csv(Extract_path, sep='|', on_bad_lines='warn',engine="python",quoting=3)
+        # if re.search("copy", Extract_path): raise SystemExit
+        with ZipFile(Extract_path, 'r') as zip:
+                zip.extractall(Path(extract))
+                listOfFileNames = zip.namelist()[0]
+                file = extract / listOfFileNames
+                df = csv.read_csv(file, parse_options=csv.ParseOptions(delimiter='|'))
+                os.remove(file)
+        return df.to_pandas()
     else:
         compression_options = dict(method='zip', archive_name=f'{filename}.csv')
         table.to_csv(load / f'{filename}.zip', compression=compression_options, sep=',',index=False)
