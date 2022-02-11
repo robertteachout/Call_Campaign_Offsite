@@ -1,44 +1,39 @@
 import pandas as pd
 import numpy as np
+import time
 
-def rank(df):
-    f0 = df.Project_Type.isin(['UHC HEDIS','HEDIS']) # 'ACA-PhysicianCR'
-    df['temp_rank'] = np.where(f0, 0, 1)
+def rank(df, grouping='PhoneNumber'):
+    df.sort_values(['Skill', grouping,'meet_sla','temp_rank', 'no_call', 'togo_bin', 'age']
+               ,ascending=[True, True, True, False, False, False, False], inplace=True)
+    df['overall_rank'] = 1
+    df['overall_rank'] = df.groupby(['Skill', grouping,])['overall_rank'].cumsum()
+    f1 = df.overall_rank == 1
+    df['parent'] = np.where(f1, 1, 0)
+    df.sort_values(['Skill', 'parent','meet_sla','temp_rank', 'no_call', 'togo_bin', 'age']
+                ,ascending=[True, True, True, False, False, False, False], inplace=True)
+    df.Score = 1
+    df.Score = df.groupby(['Skill', 'parent'])['Score'].cumsum()
+    df['Matchees'] = df.groupby([grouping])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
+    return df
 
-    return df.sort_values(['meet_sla','temp_rank', 'has_call', 'togo_bin', 'age']
-               ,ascending=[True, True, True, False, False]).reset_index(drop=True)
-
-def split(df, sk):
+def split(df):
     # new score
-    df0 = df[df['Skill'] == sk].copy()
-    scored = rank(df0)
-    
-    f1 = scored.Project_Type == 'Chart Sync'
-    scored.Score = np.where(f1, 100000, scored.Score)
+    df['OutreachID'] = df['OutreachID'].astype(str)
+    f0 = df.Project_Type.isin(['UHC HEDIS','HEDIS']) # 'ACA-PhysicianCR'
+    df['temp_rank'] = np.where(f0, 1, 0)
 
-    grouping = 'mastersiteID' if sk == 'mastersite_inventory' else 'PhoneNumber'
+    split = 'CC_Cross_Reference'
+    notmsid = df[df.Skill != split].copy()
+    msid    = df[df.Skill == split].copy()
 
-    non_dup = scored.drop_duplicates([grouping]).reset_index(drop = True)
-    df_skill = rank(non_dup)
+    scored = rank(notmsid)
+    msid_scored = rank(msid, grouping='mastersiteID')
 
-    f1 = df_skill.Project_Type == 'Chart Sync'
-    df_skill.Score = np.where(f1, 100000, df_skill.Score)
-
-    df_skill['Unique_Phone'] = 1
-    ### add score column
-    df_skill['Score'] = range(len(df_skill))
-
-    # Add Unique ORGs to Rank list 
-    df5 = df_skill.append(scored)
-    df6 = df5.drop_duplicates(['OutreachID']).reset_index(drop= True)
+    dubs = scored.append(msid_scored)
+    unique = dubs.drop_duplicates(['OutreachID']).reset_index(drop= True)
     ### Piped ORGs attached to phone numbers
-    df6['OutreachID'] = df6['OutreachID'].astype(str)
-    df6['Matchees'] = df6.groupby([grouping])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
-    return df6
+    return unique
         
 def split_drop_score(df):
-    df_score_split = pd.DataFrame()
     ### Sort Order and drop Dups
-    for i in df['Skill'].unique():
-        df_score_split = df_score_split.append(split(df, i))
-    return df_score_split
+    return split(df)
