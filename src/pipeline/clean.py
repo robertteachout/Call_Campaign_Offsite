@@ -47,11 +47,9 @@ def Last_Call(df):
     return df
 
 def check_load(df, today):
-        if any(df['Last_Call'] == today):
-            test_results = 'Pass'
-        else:
-            test_results = 'Fail'
-        return df, test_results
+    df['Last Call'] = pd.to_datetime(df['Last Call'], errors='coerce')#.dt.date
+    test_results = 'Pass' if any(df['Last Call'] == today.strftime('%Y-%m-%d')) else 'Fail'
+    return df, test_results
 
 ### Covert fire flag with specific client project to a 5 day cycle _> add to RADV
 def fire_flag(df, skill_name):
