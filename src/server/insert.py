@@ -128,7 +128,7 @@ if __name__ == "__main__":
     tomorrow = next_business_day(today)
     tomorrow_str = tomorrow.strftime(date_format)
     df = tables('pull','na', f'{tomorrow_str}.zip', Path('data/load'))
-    df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:-2]
+    df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]   
     batch_insert(servername,
                 database,
                 x_Bus_Day_ago(10).strftime(date_format),
