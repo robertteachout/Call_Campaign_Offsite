@@ -12,14 +12,14 @@ def time_check(start, comment):
 
 def daily_piv(df):
     def piv(name):
-        print(f""" _-_-_-_-_-_-_-_-_-_- {name} -_-_-_-_-_-_-_-_-_-_-_ """)
+        print('_-'*10 +name+'-_'*10)
         try:
             df1 = df[df[str(name)] == 1]
             print(df1.pivot_table(index ='Skill', values ='OutreachID', aggfunc = ['count']))
         except:
             print(f'{name}: Null')
 
-    piv('Unique_Phone')
+    piv('parent')
     
 def date_list_split(ls, numSplit):
     splits = np.array_split(ls, numSplit)
