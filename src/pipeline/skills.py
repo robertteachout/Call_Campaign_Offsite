@@ -149,18 +149,11 @@ def chartfinder(df):
 def complex_skills(df):
     f = df 
     f = chartfinder(f)
-    f = escalations(f)
-    
-    # f = last_call(f, nbd)
-    f = rm_schedule(f)
-    # mass filter 
     f = mastersiteID(f)
 
-    # f = adhoc2(f)
-    # f = adhoc1(f, advantasure)
+    f = escalations(f)    
+    f = rm_schedule(f)
     f = Osprey(f)
-    # f = fill(f)
     f = emr_rm(f)
     f = research_pull(f)
-    # f = quicklist(f)
     return f
