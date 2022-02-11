@@ -1,6 +1,5 @@
-import pandas as pd
-import numpy as np
 from datetime import date
+import pandas as pd
 import time
 
 import pipeline.clean
@@ -21,12 +20,8 @@ servername  = server.secret.servername
 database    = server.secret.database
 
 date_format = '%Y-%m-%d'
-startTime_1 = time.time()
-today = date.today()
-tomorrow = next_business_day(today)
-tomorrow_str = tomorrow.strftime(date_format)
-
-B10 = Next_N_BD(today, 10)
+today, startTime_1 = date.today(), time.time()
+tomorrow_str = next_business_day(today).strftime(date_format)
 
 def main():
     ### load & transform
@@ -42,6 +37,8 @@ def main():
     ### Master Site ID
     mastersite_sql = server.queries.mastersiteID.sql()
     mastersite = server.query.query(servername, database,  mastersite_sql, 'Add mastersiteID')
+    tables('push',  mastersite,     'mastersite.csv')
+    # mastersite = tables('pull',  'na',     'mastersite.csv')
     mapped = pd.merge(tested, mastersite, how='left', on='OutreachID')
     log.df_len('mastersiteID', mapped)
     time_check(startTime_1, 'msid map')
@@ -66,18 +63,18 @@ def main():
     time_check(startTime_1, 'skill')
 
     # score inventory per skill
-    scored = pipeline.score.split_drop_score(skilled)
+    scored = pipeline.score.split(skilled)
     log.df_len('scored', scored)
     time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
     
     # get column name & types ~ collect unique phone script
     column_types = scored.dtypes.reset_index()
-    uniq_num_count = count_phone(scored)
+    # uniq_num_count = count_phone(scored)
 
     def Save():
         # save files
-        zipfiles('push',scored, tomorrow_str)
-        tables('push',  uniq_num_count,     'unique_phone_count.csv')
+        zipfiles('push', scored, tomorrow_str)
+        # tables('push',  uniq_num_count,     'unique_phone_count.csv')
         tables('push',  column_types,       'columns.csv')
         time_check(startTime_1, 'Save files')
         # insert into server
