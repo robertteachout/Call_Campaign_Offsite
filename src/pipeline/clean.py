@@ -36,7 +36,7 @@ def Last_Call(df):
     df['age'] = (tomorrow - df['Last_Call']).dt.days
 
     f1 = df.Last_Call.isna()
-    df.age = np.where(f1, df.age.max(), df.age)
+    df.age = np.where(f1, df.DaysSinceCreation, df.age)
     
     f1 = df.age < df.DaysSinceCreation
     df.age = np.where(f1, df.age, df.DaysSinceCreation)
@@ -60,10 +60,6 @@ def fire_flag(df, skill_name):
 def add_columns(df, tomorrow_str):
     ### init columns
     df['Load_Date'] = tomorrow_str
-    df['Daily_Groups'] = 0
-    df['Daily_Priority'] = 0
-    df['rolled'] = 0 
-    df['NewID'] = 0
 
     ### score columns
     # map
@@ -84,14 +80,12 @@ def add_columns(df, tomorrow_str):
     df['togo_bin'] = pd.cut(df.ToGoCharts, bins=bucket_amount, labels=labels)
     df.togo_bin = df.togo_bin.astype(int)
     # no call flag
-    f1 = df.Last_Call.notna()
-    df['has_call'] = np.where(f1, 1,0)
+    f1 = df.Last_Call.isna()
+    df['no_call'] = np.where(f1, 1, 0)
     # needed for merge
     df['PhoneNumber'] = df['PhoneNumber'].astype(str)
     ### Add info to main line and reskill
-    df2 = df.groupby(['PhoneNumber']).agg({'OutreachID':'count','has_call':'sum'}).rename(columns={'OutreachID':'OutreachID_Count','has_call':'has_call_count'}).reset_index()
-    df_merge = pd.merge(df,df2, on=['PhoneNumber'])
-    return df_merge
+    return df
 
 def clean(df, tomorrow_str):
     df = Last_Call(clean_num(format(df))).reset_index(drop=True)
