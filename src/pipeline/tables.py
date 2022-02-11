@@ -32,8 +32,7 @@ def zipfiles(push_pull, table, filename, extract=extract_path):
         # if re.search("copy", Extract_path): raise SystemExit
         with ZipFile(Extract_path, 'r') as zip:
                 zip.extractall(Path(extract))
-                listOfFileNames = zip.namelist()[0]
-                file = extract / listOfFileNames
+                file = extract / zip.namelist()[0]
                 df = csv.read_csv(file, parse_options=csv.ParseOptions(delimiter='|'))
                 os.remove(file)
         return df.to_pandas()
