@@ -41,9 +41,6 @@ def Last_Call(df):
     f1 = df.age < df.DaysSinceCreation
     df.age = np.where(f1, df.age, df.DaysSinceCreation)
 
-    cut_bins = [0, 5, 10, 15, 20, 10000]
-    label_bins = [5, 10, 15, 20, 21]
-    df['age_category'] = pd.cut(df['age'], bins=cut_bins, labels=label_bins, include_lowest=True)
     return df
 
 def check_load(df, today):
@@ -60,21 +57,22 @@ def fire_flag(df, skill_name):
 def add_columns(df, tomorrow_str):
     ### init columns
     df['Load_Date'] = tomorrow_str
-
     ### score columns
-    # map
+    ### age
+    # cut_bins = [0, 5, 10, 15, 20, 10000]
+    # label_bins = [5, 10, 15, 20, 21]
+    # df['age_category'] = pd.cut(df['age'], bins=cut_bins, labels=label_bins, include_lowest=True)
+    # age_sort    = {21:0, 20:1, 15:2, 10:3, 5:4}
+    # df['age_sort'] = df['age_category'].map(age_sort)
+    ### map
     audit_sort  = {'RADV':1, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':0, 'Medicare Risk':5}
-    age_sort    = {21:0, 20:1, 15:2, 10:3, 5:4}
-        # name_sort = {'Unscheduled':0, 'Escalated':2, 'PNP Released':1,'Past Due':3,'Scheduled':4}
-        # rm_sort = {'EMR Remote': 0, 'HIH - Other': 2, 'Onsite':1,'Offsite':3}
     df['audit_sort'] = df['Audit_Type'].map(audit_sort)
-    df['age_sort'] = df['age_category'].map(age_sort)
-    # use map 
+    ### use map 
     f1 = df.audit_sort <=2
     df['sla'] = np.where(f1, 4, 8)
     f1 = df.sla >= df.age
     df['meet_sla'] = np.where(f1, 1,0)
-    # togo charts
+    ### togo charts
     bucket_amount = 100
     labels = list(([x for x in range(bucket_amount)]))
     df['togo_bin'] = pd.cut(df.ToGoCharts, bins=bucket_amount, labels=labels)
@@ -84,7 +82,6 @@ def add_columns(df, tomorrow_str):
     df['no_call'] = np.where(f1, 1, 0)
     # needed for merge
     df['PhoneNumber'] = df['PhoneNumber'].astype(str)
-    ### Add info to main line and reskill
     return df
 
 def clean(df, tomorrow_str):
