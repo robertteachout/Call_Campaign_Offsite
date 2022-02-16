@@ -1,4 +1,5 @@
 from datetime import date, timedelta, datetime
+from subprocess import call
 import holidays
 import numpy as np
 import time
@@ -16,6 +17,20 @@ def daily_piv(df):
         try:
             df1 = df[df[str(name)] == 1]
             print(df1.pivot_table(index ='Skill', values ='OutreachID', aggfunc = ['count']))
+            work = {
+                'CC_Chartfinder':8000,
+                'CC_Cross_Reference':2000,
+                # 'CC_Adhoc2':1000
+            }
+            # get top x in each skill
+            filters = '|'.join([f"(Skill == '{i}' & Score < {j} & parent == 1)" for i, j in work.items()])
+            table = df.query(filters)#.PhoneNumber.tolist()
+            # pivot
+            called = table.pivot_table(
+                                    index=['Skill','Project_Type'], 
+                                    values ='OutreachID', 
+                                    aggfunc = ['count'])
+            print(called)
         except:
             print(f'{name}: Null')
 
