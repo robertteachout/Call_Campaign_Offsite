@@ -143,17 +143,29 @@ def quicklist(df):
     return df
 
 def chartfinder(df):
-    df['Skill'] = 'CC_Chartfinder'
+    df['Skill'] = 'CC_ChartFinder'
+    return df
+
+def Cross_Reference_SPI(df):
+    f1 = df['SPI'] == 'True'
+    df['Skill'] = np.where(f1, 'CC_Cross_Reference_SPI', df['Skill'])
+    return df
+
+def UHC_HEDIS(df):
+    f1 = df['Project_Type'] == 'UHC HEDIS'
+    df['Skill'] = np.where(f1, 'CC_ChartFinder', df['Skill'])
     return df
 
 def complex_skills(df):
     f = df 
     f = chartfinder(f)
     f = mastersiteID(f)
+    f = UHC_HEDIS(f)
 
     f = escalations(f)    
     f = rm_schedule(f)
     f = Osprey(f)
     f = emr_rm(f)
     f = research_pull(f)
+    f = Cross_Reference_SPI(f)
     return f
