@@ -18,12 +18,7 @@ def rank(df=pd.DataFrame, new_col=str, groups=list, rank_cols=dict):
     return df
 
 def stack_inventory(df, grouping):
-    rank_cols = {'meet_sla':True,'temp_rank':False, 'no_call':False, 'togo_bin':False, 'age':False}
-    if grouping == 'mastersiteID':
-        f0 = df.Project_Type.isin(['ACA-PhysicianCR']) # 'ACA-PhysicianCR'
-        f1 = df.Project_Type.isin(['UHC HEDIS']) # 'ACA-PhysicianCR'
-        df['temp_rank'] = np.where(f1, 1, 0)
-        df['temp_rank'] = np.where(f0, 2, df.temp_rank)
+    rank_cols = {'meet_sla':True,'temp_rank':False, 'temp_rank2':False,'no_call':False,'age':False} # 'togo_bin':False, 
     # group by phone number or msid & rank highest value org
     df = rank(df,'overall_rank',['Skill',grouping], rank_cols)
 
@@ -38,10 +33,12 @@ def stack_inventory(df, grouping):
 
 def split(df):
     df['OutreachID'] = df['OutreachID'].astype(str)
-    f0 = df.Project_Type.isin(['UHC HEDIS','ACA-PhysicianCR']) # 'ACA-PhysicianCR'
-    # f1 = df.Project_Type.isin(['ACA-PhysicianCR']) # 'ACA-PhysicianCR'
+    # f0 = df.Project_Type.isin(['UHC HEDIS','ACA-PhysicianCR']) # 'ACA-PhysicianCR'
+    f0 = df.Project_Type.isin(['UHC HEDIS']) # 'ACA-PhysicianCR'
+    f1 = df.Project_Type.isin(['ACA-PhysicianCR']) # 'ACA-PhysicianCR'
     df['temp_rank'] = np.where(f0, 1, 0)
-    # df['temp_rank'] = np.where(f1, 1, df['temp_rank'])
+    df['temp_rank2'] = np.where(f1, 1, 0)
+    # df['temp_rank'] = np.where(f0, 2, df['temp_rank'])
 
     split = 'CC_Cross_Reference'
     notmsid = df[df.Skill != split].copy()
