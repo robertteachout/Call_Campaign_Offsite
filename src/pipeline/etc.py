@@ -18,8 +18,8 @@ def daily_piv(df):
             df1 = df[df[str(name)] == 1]
             print(df1.pivot_table(index ='Skill', values ='OutreachID', aggfunc = ['count']))
             work = {
-                'CC_Chartfinder':8000,
-                'CC_Cross_Reference':2000,
+                'CC_ChartFinder':9600,
+                'CC_Cross_Reference':2400,
                 # 'CC_Adhoc2':1000
             }
             # get top x in each skill

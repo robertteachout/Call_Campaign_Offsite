@@ -1,12 +1,6 @@
 import pandas as pd
 import numpy as np
 
-# def rank(df, group, new_col):
-#     df.sort_values(['Skill', group,'meet_sla','temp_rank', 'no_call', 'togo_bin', 'age']
-#                ,ascending=[True, True, True, False, False, False, False], inplace=True)
-#     df[new_col] = 1
-#     df[new_col] = df.groupby(['Skill', group])[new_col].cumsum()
-#     return df
 
 def rank(df=pd.DataFrame, new_col=str, groups=list, rank_cols=dict):
     sort_columns = groups + [*rank_cols.keys()]
@@ -38,7 +32,6 @@ def split(df):
     f1 = df.Project_Type.isin(['ACA-PhysicianCR']) # 'ACA-PhysicianCR'
     df['temp_rank'] = np.where(f0, 1, 0)
     df['temp_rank2'] = np.where(f1, 1, 0)
-    # df['temp_rank'] = np.where(f0, 2, df['temp_rank'])
 
     split = 'CC_Cross_Reference'
     notmsid = df[df.Skill != split].copy()
