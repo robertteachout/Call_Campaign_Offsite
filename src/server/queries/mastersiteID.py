@@ -16,6 +16,10 @@ def sql():
     SELECT DISTINCT
          msi.[MSId] mastersiteID
         ,msi.outreachid OutreachID
+        ,[SPI]
+        --,[AgentId]
     FROM MasterSiteID.dbo.MSIOutreach MSI
+    LEFT JOIN [MasterSiteID].[dbo].[MSI] ms
+        ON ms.Id = msi.[MSId]
     '''
     return sql
