@@ -18,8 +18,17 @@ def sql():
         ,msi.outreachid OutreachID
         ,[SPI]
         --,[AgentId]
+        ,[Phone] MSI_Phone
     FROM MasterSiteID.dbo.MSIOutreach MSI
     LEFT JOIN [MasterSiteID].[dbo].[MSI] ms
         ON ms.Id = msi.[MSId]
+    LEFT JOIN (
+        SELECT DISTINCT
+        MSId
+        ,Phone
+        FROM [MasterSiteID].[dbo].[MSIContact] msic
+        WHERE msic.[Primary] = 1
+        ) AS msic
+        ON msic.MSId = msi.[MSId]
     '''
     return sql
