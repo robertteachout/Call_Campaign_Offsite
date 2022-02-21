@@ -7,7 +7,7 @@ import pipeline.score
 import pipeline.sprint_schedule
 import pipeline.skills
 from pipeline.etc import daily_piv, time_check, next_business_day, x_Bus_Day_ago
-from pipeline.tables import tables, zipfiles, count_phone
+from pipeline.tables import tables, zipfiles, contact_counts
 
 import server.query, server.insert, server.secret
 import server.queries.mastersiteID
@@ -58,12 +58,11 @@ def main():
     
     ### get column name & types ~ collect unique phone script
     column_types = scored.dtypes.reset_index()
-    # uniq_num_count = count_phone(scored)
 
     def Save():
         zipfiles('push', scored, tomorrow_str)
-        # tables('push',  uniq_num_count,     'unique_phone_count.csv')
         tables('push',  column_types,       'columns.csv')
+        contact_counts(scored)
         time_check(startTime_1, 'Save files')
         ### insert into server ###
         server.insert.batch_insert(servername, database, x_Bus_Day_ago(10).strftime(date_format), tomorrow_str, scored)
@@ -72,7 +71,7 @@ def main():
     ### create campaign pivot
     daily_piv(scored)
     time_check(startTime_1, 'Create Pivot Table')
-    # zipfiles('push', scored, tomorrow_str)
+    zipfiles('push', scored, tomorrow_str)
 
     if test == 'Pass': Save() 
 

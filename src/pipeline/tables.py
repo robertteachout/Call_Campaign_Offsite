@@ -1,6 +1,6 @@
 from pathlib import Path
 import os, sys
-import pyarrow as pa
+# import pyarrow as pa
 import pyarrow.csv as csv
 from zipfile import ZipFile
 
@@ -40,12 +40,24 @@ def zipfiles(push_pull, table, filename, extract=extract_path):
         compression_options = dict(method='zip', archive_name=f'{filename}.csv')
         table.to_csv(load / f'{filename}.zip', compression=compression_options, sep=',',index=False)
 
-def count_phone(df):
-    df0 = tables('pull', 'NA', 'unique_phone_count.csv')
-    gb = df.groupby(['Load_Date'])['Unique_Phone'].count().reset_index()
-    gb['Total'] = len(df)
-    gb['%'] = round(gb['Unique_Phone'] / gb['Total'], 2)
-    return df0.append(gb, ignore_index=True)
+def contact_counts(df):
+    final = tables('pull', 'NA', 'monthly_average_contacts.csv')
+    temp = pd.DataFrame()
+    try:
+        cf = df[(df.mastersiteID == 1000838) | (df.mastersiteID.isna())]
+        msid = df[(df.mastersiteID != 1000838) & (df.mastersiteID.notna())]
+        temp['date'] = df['Load_Date'].head(1)
+        temp['ChartFinder'] = len(cf.PhoneNumber.unique())
+        temp['MSID'] = len(msid.mastersiteID.unique())
+        final = final.append(temp, ignore_index=True)
+
+        final.date = pd.to_datetime(final.date)
+        final['months'] = final['date'].apply(lambda x:x.strftime('%m'))
+        avgs = final.groupby('months')['Total'].mean().astype(int).to_dict()
+        final['monthly Avg'] = final.months.map(avgs)
+    except:
+        print('contact_count doesnt work')
+    tables('push', final, 'monthly_average_contacts.csv')
 
 def append_column(df, location, index=list(),join='left'):
     # get orignal table or create one
