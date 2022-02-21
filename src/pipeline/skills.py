@@ -65,7 +65,8 @@ def Osprey(df):
 
 def rm_schedule(df):
     f1 = df['Outreach_Status'] == 'Scheduled'
-    df['Skill'] = np.where(f1, 'schedule_pull', df['Skill'])
+    f2 = df['Last_Call'].notna()
+    df['Skill'] = np.where(f1 & f2, 'schedule_pull', df['Skill'])
     return df
 
 def adhoc2(df):
@@ -160,10 +161,10 @@ def complex_skills(df):
     f = df 
     f = chartfinder(f)
     f = mastersiteID(f)
-    f = UHC_HEDIS(f)
 
-    f = escalations(f)    
+    f = UHC_HEDIS(f)
     f = rm_schedule(f)
+    f = escalations(f)    
     f = Osprey(f)
     f = emr_rm(f)
     f = research_pull(f)
