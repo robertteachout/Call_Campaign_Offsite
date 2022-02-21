@@ -6,10 +6,16 @@ def special_handling(df):
     df['Skill'] = np.where(f1, 'PC_Special_Handling', df['Skill'])
     return df
 
-def genpact(df):
-    filter2 = df['OutreachID_Count'] == 1
-    filter3 = df['Retrieval_Team'] == 'Genpact Offshore'
-    df['Skill'] = np.where(filter2 &filter3, 'CC_Genpact_Scheduling', df['Skill'])
+def CC_Genpact_Scheduling(df):
+    msi_table = df[df.Skill =='CC_Cross_Reference'].groupby('mastersiteID')['OutreachID'].count().reset_index()
+    cf_table = df[df.Skill == 'CC_Chartfinder'].groupby('PhoneNumber')['OutreachID'].count().reset_index()
+    unique_msid = msi_table[msi_table.OutreachID == 1]['mastersiteID'].astype(int).to_list()
+    unique_cf = cf_table[cf_table.OutreachID == 1]['PhoneNumber'].astype(int).to_list()
+    # chart = df.TotalCharts <= 15
+    f0 = df.PhoneNumber.isin(unique_cf)
+    f1 = df.mastersiteID.isin(unique_msid) 
+    f2 = df.Retrieval_Team  == 'Genpact Offshore'
+    df['Skill'] = np.where( (f0 | f1) & f2, 'CC_Genpact_Scheduling', df['Skill'])
     return df
 
 def fire_flag(df, skill_name):
@@ -148,7 +154,7 @@ def chartfinder(df):
     return df
 
 def Cross_Reference_SPI(df):
-    f1 = df['SPI'] == 'True'
+    f1 = df['SPI'] == 'TRUE'
     df['Skill'] = np.where(f1, 'CC_Cross_Reference_SPI', df['Skill'])
     return df
 
@@ -161,7 +167,8 @@ def complex_skills(df):
     f = df 
     f = chartfinder(f)
     f = mastersiteID(f)
-
+    
+    f = CC_Genpact_Scheduling(f)
     f = UHC_HEDIS(f)
     f = rm_schedule(f)
     f = escalations(f)    
