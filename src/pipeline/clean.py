@@ -65,13 +65,15 @@ def add_columns(df, tomorrow_str):
     # age_sort    = {21:0, 20:1, 15:2, 10:3, 5:4}
     # df['age_sort'] = df['age_category'].map(age_sort)
     ### map
-    audit_sort  = {'RADV':1, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':0, 'Medicare Risk':5}
+    audit_sort  = {'RADV':1, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':6, 'Medicare Risk':5}
     df['audit_sort'] = df['Audit_Type'].map(audit_sort)
     ### use map 
     f1 = df.audit_sort <=2
-    df['sla'] = np.where(f1, 4, 8)
+    df['sla'] = np.where(f1, 5, 10)
+    df['target_sla'] = np.where(f1, 4, 8)
     f1 = df.sla >= df.age
     df['meet_sla'] = np.where(f1, 1,0)
+    df['meet_target_sla'] = np.where(f1, 1,0)
     ### togo charts
     bucket_amount = 100
     labels = list(([x for x in range(bucket_amount)]))
