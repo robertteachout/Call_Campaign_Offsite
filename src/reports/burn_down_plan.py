@@ -1,27 +1,29 @@
-# first try == need refactor
-projects = ['UHC HEDIS', 'HEDIS','ACA-PhysicianCR'] #'Chart Sync','HCR', 'ACA-PhysicianCR','ACA-HospitalCR','UHC HEDIS', 'HEDIS', 'Chart Review'
-df = df0[df0.Project_Type.isin(projects)]
-cf = df[(df.mastersiteID == 1000838) | (df.mastersiteID.isna())]
-msid = df[(df.mastersiteID != 1000838) & (df.mastersiteID.notna())]
 
-piv = msid.pivot_table(index='mastersiteID',columns='Project_Type',values='OutreachID',aggfunc='count')
-# uhc_piv = piv[piv[project] == 1]
-col = piv.columns.to_list()
+def grouping(df, match):
+    piv = df.pivot_table(index=match 
+                        ,columns='Project_Type'
+                        ,values='OutreachID'
+                        ,aggfunc='count')
 
-solo = piv.copy()
-solo['test'] = solo.values.tolist()
-solo['test2'] = solo['test'].apply(lambda x: [i for i in x if pd.isna(i) == False])
-solo['solo'] = solo['test2'].apply(lambda x: len(x) == 1)
-add_col = []
-for i in range(len(col)):
-    add_col.append(i)
-    solo[i] = solo['test'].apply(lambda x: pd.isna(x[i]) == False)
+    col = piv.columns.to_list()
 
-solo_ls = solo[solo.solo == True].index.tolist()
+    t2 = piv.reset_index(drop=False) \
+            .melt(id_vars=[match], value_vars=col) \
+            .dropna(subset=['value'])
+            
+    t2['groups'] = t2.groupby(match)['Project_Type'].transform(lambda x: '|'.join(x))
+    return t2.groupby('groups').value.sum()
 
-# print(piv[piv.index.isin(solo_ls)].sum())
-solo['group'] = solo[add_col].values.tolist()
-solo.pivot_table(index=['group','mastersiteID'], )
+def sites(df0, projects):
+    df = df0[df0.Project_Type.isin(projects)]
+
+    cf = df[(df.mastersiteID == 1000838) | (df.mastersiteID.isna())]
+    msid = df[(df.mastersiteID != 1000838) & (df.mastersiteID.notna())]
+
+    t1 = grouping(cf, 'PhoneNumber')
+    t2 = grouping(msid, 'mastersiteID')
+    return t1, t2
+
 if __name__ == "__main__":
     projects = ['UHC HEDIS', 'HEDIS','ACA-PhysicianCR'] #'Chart Sync','HCR', 'ACA-PhysicianCR','ACA-HospitalCR','UHC HEDIS', 'HEDIS', 'Chart Review'
     cf, msid = sites(df0, projects)
