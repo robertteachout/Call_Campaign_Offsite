@@ -72,8 +72,9 @@ def add_columns(df, tomorrow_str):
     df['sla'] = np.where(f1, 5, 10)
     df['target_sla'] = np.where(f1, 4, 8)
     f1 = df.sla >= df.age
+    f2 = df.target_sla >= df.age
     df['meet_sla'] = np.where(f1, 1,0)
-    df['meet_target_sla'] = np.where(f1, 1,0)
+    df['meet_target_sla'] = np.where(f2, 1,0)
     ### togo charts
     bucket_amount = 100
     labels = list(([x for x in range(bucket_amount)]))
@@ -82,7 +83,10 @@ def add_columns(df, tomorrow_str):
     # no call flag
     f1 = df.Last_Call.isna()
     df['no_call'] = np.where(f1, 1, 0)
-    # needed for merge
+    # core phone number
+    f1 = df.MSI_Phone.isna()
+    df['MSI_Phone'] = np.where(f1, df.PhoneNumber, df.MSI_Phone)
+
     df['PhoneNumber'] = df['PhoneNumber'].astype(str)
     return df
 
