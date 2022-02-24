@@ -12,10 +12,10 @@ def rank(df=pd.DataFrame, new_col=str, groups=list, rank_cols=dict):
     return df
 
 def stack_inventory(df, grouping):
-    rank_cols = {'meet_target_sla':True,'temp_rank':False, 'temp_rank2':False,'no_call':False,'age':False} # 'togo_bin':False, 
+    rank_cols = {'meet_target_sla':True, 'temp_rank':False, 'temp_rank2':False,'no_call':False,'age':False} # 'togo_bin':False, 
     if grouping == 'PhoneNumber':
-        f0 = df.Project_Type.isin(['UHC HEDIS','HEDIS']) # 'ACA-PhysicianCR'
-        df['temp_rank'] = np.where(f0, 1, 0)
+        f0 = df.Project_Type.isin(['HEDIS','Chart Review']) # 'ACA-PhysicianCR'
+        df['temp_rank2'] = np.where(f0, 1, 0)
 
     # group by phone number or msid & rank highest value org
     df = rank(df,'overall_rank',['Skill',grouping], rank_cols)
