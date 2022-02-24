@@ -1,7 +1,7 @@
 import server.secret
 import server.query
 import server.queries.reschedule
-import server.queries.mastersiteID
+import server.queries.MasterSiteId
 import server.queries.last_call_search
 import server.queries.project_breakdown
 import log.log as log

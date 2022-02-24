@@ -17,11 +17,11 @@ def grouping(df, match):
 def sites(df0, projects):
     df = df0[df0.Project_Type.isin(projects)]
 
-    cf = df[(df.mastersiteID == 1000838) | (df.mastersiteID.isna())]
-    msid = df[(df.mastersiteID != 1000838) & (df.mastersiteID.notna())]
+    cf = df[(df.MasterSiteId == 1000838) | (df.MasterSiteId.isna())]
+    msid = df[(df.MasterSiteId != 1000838) & (df.MasterSiteId.notna())]
 
     t1 = grouping(cf, 'PhoneNumber')
-    t2 = grouping(msid, 'mastersiteID')
+    t2 = grouping(msid, 'MasterSiteId')
     return t1, t2
 
 if __name__ == "__main__":

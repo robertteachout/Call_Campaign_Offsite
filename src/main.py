@@ -10,7 +10,7 @@ from pipeline.etc import daily_piv, time_check, next_business_day, x_Bus_Day_ago
 from pipeline.tables import tables, zipfiles, contact_counts
 
 import server.query, server.insert, server.secret
-import server.queries.mastersiteID
+import server.queries.MasterSiteId
 import log.log as log
 
 servername  = server.secret.servername
@@ -32,12 +32,12 @@ def main():
     time_check(startTime_1, f'File Load \t{test}')
     
     ### Master Site ID
-    # mastersite_sql = server.queries.mastersiteID.sql()
-    # mastersite = server.query.query(servername, database,  mastersite_sql, 'Add mastersiteID')
+    # mastersite_sql = server.queries.MasterSiteId.sql()
+    # mastersite = server.query.query(servername, database,  mastersite_sql, 'Add MasterSiteId')
     # tables('push',  mastersite,     'mastersite.csv')
     mastersite = tables('pull',  'na',     'mastersite.csv')
     mapped = pd.merge(tested, mastersite, how='left', on='OutreachID')
-    log.df_len('mastersiteID', mapped)
+    log.df_len('MasterSiteId', mapped)
     time_check(startTime_1, 'msid map')
 
     ### fix & add columns

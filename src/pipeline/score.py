@@ -42,7 +42,7 @@ def split(df):
     msid    = df[df.Skill == split].copy()
 
     scored      = stack_inventory(notmsid, 'PhoneNumber')
-    msid_scored = stack_inventory(msid, 'mastersiteID')
+    msid_scored = stack_inventory(msid, 'MasterSiteId')
 
     dubs = scored.append(msid_scored)
     unique = dubs.drop_duplicates(['OutreachID']).reset_index(drop= True)

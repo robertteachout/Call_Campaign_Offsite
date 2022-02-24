@@ -7,15 +7,16 @@ def special_handling(df):
     return df
 
 def CC_Genpact_Scheduling(df):
-    msi_table = df[df.Skill =='CC_Cross_Reference'].groupby('mastersiteID')['OutreachID'].count().reset_index()
-    cf_table = df[df.Skill == 'CC_Chartfinder'].groupby('PhoneNumber')['OutreachID'].count().reset_index()
-    unique_msid = msi_table[msi_table.OutreachID == 1]['mastersiteID'].astype(int).to_list()
-    unique_cf = cf_table[cf_table.OutreachID == 1]['PhoneNumber'].astype(int).to_list()
+    # msi_table = df[df.Skill =='CC_Cross_Reference'].groupby('MasterSiteId')['OutreachID'].count().reset_index()
+    # cf_table = df[df.Skill == 'CC_Chartfinder'].groupby('PhoneNumber')['OutreachID'].count().reset_index()
+    # unique_msid = msi_table[msi_table.OutreachID == 1]['MasterSiteId'].astype(int).to_list()
+    # unique_cf = cf_table[cf_table.OutreachID == 1]['PhoneNumber'].astype(int).to_list()
     # chart = df.TotalCharts <= 15
-    f0 = df.PhoneNumber.isin(unique_cf)
-    f1 = df.mastersiteID.isin(unique_msid) 
+    # f0 = df.PhoneNumber.isin(unique_cf)
+    # f1 = df.MasterSiteId.isin(unique_msid) 
+    f1 = df.Project_Type.isin(['ACA-HospitalCR','ACA-PhysicianCR'])
     f2 = df.Retrieval_Team  == 'Genpact Offshore'
-    df['Skill'] = np.where( (f0 | f1) & f2, 'CC_Genpact_Scheduling', df['Skill'])
+    df['Skill'] = np.where(f1 & f2, 'CC_Genpact_Scheduling', df['Skill'])
     return df
 
 def fire_flag(df, skill_name):
@@ -135,9 +136,9 @@ def wellmed(df):
     df['Skill'] = np.where(f1, 'CC_Wellmed_Sub15_UNS', df['Skill'])
     return df
 
-def mastersiteID(df):
-    f1 = df['mastersiteID'].notna()
-    f2 = df['mastersiteID'] != 1000838
+def MasterSiteId(df):
+    f1 = df['MasterSiteId'].notna()
+    f2 = df['MasterSiteId'] != 1000838
     df['Skill'] = np.where(f1 & f2, 'CC_Cross_Reference', df['Skill'])
     return df
 
@@ -166,7 +167,7 @@ def UHC_HEDIS(df):
 def complex_skills(df):
     f = df 
     f = chartfinder(f)
-    f = mastersiteID(f)
+    f = MasterSiteId(f)
     
     f = CC_Genpact_Scheduling(f)
     f = UHC_HEDIS(f)

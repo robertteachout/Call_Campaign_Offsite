@@ -44,17 +44,18 @@ def contact_counts(df):
     final = tables('pull', 'NA', 'monthly_average_contacts.csv')
     temp = pd.DataFrame()
     try:
-        cf = df[(df.mastersiteID == 1000838) | (df.mastersiteID.isna())]
-        msid = df[(df.mastersiteID != 1000838) & (df.mastersiteID.notna())]
+        cf = df[(df.MasterSiteId == 1000838) | (df.MasterSiteId.isna())]
+        msid = df[(df.MasterSiteId != 1000838) & (df.MasterSiteId.notna())]
         temp['date'] = df['Load_Date'].head(1)
         temp['ChartFinder'] = len(cf.PhoneNumber.unique())
-        temp['MSID'] = len(msid.mastersiteID.unique())
+        temp['MSID'] = len(msid.MasterSiteId.unique())
+        temp['Total'] = temp.ChartFinder + temp.MSID
+        temp.date = pd.to_datetime(temp.date)
+        temp['months'] = temp.date.apply(lambda x:x.strftime('%m'))
         final = final.append(temp, ignore_index=True)
 
-        final.date = pd.to_datetime(final.date)
-        final['months'] = final['date'].apply(lambda x:x.strftime('%m'))
         avgs = final.groupby('months')['Total'].mean().astype(int).to_dict()
-        final['monthly Avg'] = final.months.map(avgs)
+        final['monthly_avg'] = final.months.map(avgs)
     except:
         print('contact_count doesnt work')
     tables('push', final, 'monthly_average_contacts.csv')

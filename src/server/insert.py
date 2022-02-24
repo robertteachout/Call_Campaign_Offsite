@@ -70,7 +70,7 @@ def batch_insert(servername, database, campaign_history, load_date, load):
             '''
 
     ### Load file ###
-    df = load[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date']]
+    df = load[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date','MasterSiteId']]
     columns = df.columns
     
     for i in columns:
@@ -111,9 +111,12 @@ def batch_insert(servername, database, campaign_history, load_date, load):
     cnxn.close()
 
 if __name__ == "__main__":
-    import sys  
+    import sys, os
     from pathlib import Path  
     import secret
+    from zipfile import ZipFile
+    import pyarrow.csv as csv
+
     servername  = secret.servername
     database    = secret.database
     file = Path(__file__).resolve()  
@@ -128,12 +131,23 @@ if __name__ == "__main__":
     yesterday = x_Bus_Day_ago(1).strftime(date_format)
     tomorrow = next_business_day(today)
     tomorrow_str = tomorrow.strftime(date_format)
-    df = tables('pull','na', f'{tomorrow_str}.zip', Path('data/load'))
+    extract = Path('data/load')
+    file = extract / f'{today_str}.zip'
+
+    with ZipFile(file, 'r') as zips:
+        zips.extractall(extract)
+        file = extract / zips.namelist()[0]
+        df = csv.read_csv(file).to_pandas()
+        os.remove(file)
+
+    # df = tables('pull','na', f'{yesterday}.zip', Path('data/load'))
     df['Daily_Groups'] = '2022-02-14'
-    df = df.rename({'parent':'Unique_Phone'}, axis=1) #, 'mastersiteID':'Daily_Groups'
+    df = df.rename({'parent':'Unique_Phone','mastersiteID':'MasterSiteId'}, axis=1) #, 'MasterSiteId':'Daily_Groups'
     df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]
-    # df['Daily_Groups'] = df['Daily_Groups'].astype(str).str[:10]
-    print(df[['OutreachID', 'PhoneNumber','Unique_Phone']])
+    df['MasterSiteId'] = df['MasterSiteId'].fillna(1000838)#.astype(str).str[:7]#.astype(int)
+    df['MasterSiteId'] = df['MasterSiteId'].apply(lambda x: int(x))
+    df['Unique_Phone'] = df['Unique_Phone'].apply(lambda x: int(x))
+    print(df[['OutreachID', 'PhoneNumber','MasterSiteId','Unique_Phone','Load_Date']])
     batch_insert(servername,
                 database,
                 x_Bus_Day_ago(10).strftime(date_format),

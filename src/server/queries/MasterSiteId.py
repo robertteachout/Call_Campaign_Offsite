@@ -6,7 +6,7 @@ def sql():
     #     ,c.OutreachID c
     # --  ,count(c.OutreachID) c
     # FROM [DWWorking].[dbo].[Call_Campaign] c
-    # LEFT JOIN [MasterSiteID].[dbo].[MSIOutreach] msi
+    # LEFT JOIN [MasterSiteId].[dbo].[MSIOutreach] msi
     #     ON c.OutreachID = msi.OutreachId
     # WHERE c.[Load_Date] = CAST(GETDATE() AS DATE)
     # AND  msi.MSId = 1000838
@@ -14,7 +14,7 @@ def sql():
     
     sql = '''
     SELECT DISTINCT
-         msi.[MSId] mastersiteID
+         msi.[MSId] MasterSiteId
         ,msi.outreachid OutreachID
         ,[SPI]
         --,[AgentId]
