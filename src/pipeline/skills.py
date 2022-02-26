@@ -58,6 +58,16 @@ def emr_rm(df):
     df['Skill'] = np.where(f1, 'EMR_Remote_removed', df['Skill'])
     return df
 
+def HIH_rm(df):
+    f1 = df['Retrieval_Group'] == 'HIH - Other'
+    df['Skill'] = np.where(f1, 'HIH_removed', df['Skill'])
+    return df
+
+def Onsite_rm(df):
+    f1 = df['Retrieval_Group'] == 'Onsite'
+    df['Skill'] = np.where(f1, 'Onsite_removed', df['Skill'])
+    return df
+
 def Osprey(df):
     f1 = df['Project_Type'] == 'Osprey'
     f2 = df['Outreach_Status'] != 'Scheduled'
@@ -86,12 +96,12 @@ def adhoc2(df):
     df['Skill'] = np.where(f1 & (f2 | f3) & f4, 'CC_Adhoc1', df['Skill'])
     return df
 
-def adhoc1(df, advantasure): 
+def adhoc1(df): 
     f1 = df['Project_Type'] == 'Aetna Commercial'
-    f2 = df['CallCount'] == 0
+    ls = df[f1].sort_values('age', ascending=False)['OutreachID'][:3000]
 
-    f6 = df['OutreachID'].isin(advantasure)
-    df['Skill'] = np.where((f1 & f2) | f6, 'CC_Adhoc1', df['Skill'])
+    f6 = df['OutreachID'].isin(ls)
+    df['Skill'] = np.where(f6, 'CC_Adhoc1', df['Skill'])
     return df
 
 def research_pull(df):
@@ -161,20 +171,25 @@ def Cross_Reference_SPI(df):
 
 def UHC_HEDIS(df):
     f1 = df['Project_Type'] == 'UHC HEDIS'
+    f2 = df['Project_Type'] == 'HEDIS'
     df['Skill'] = np.where(f1, 'CC_ChartFinder', df['Skill'])
+    df['Skill'] = np.where(f2, 'CC_ChartFinder', df['Skill'])
     return df
 
 def complex_skills(df):
     f = df 
     f = chartfinder(f)
     f = MasterSiteId(f)
-    
+    f = adhoc1(f)
+
     f = CC_Genpact_Scheduling(f)
     f = UHC_HEDIS(f)
     f = rm_schedule(f)
     f = escalations(f)    
     f = Osprey(f)
-    f = emr_rm(f)
     f = research_pull(f)
     f = Cross_Reference_SPI(f)
+    f = emr_rm(f)
+    f = HIH_rm(f)
+    f = Onsite_rm(f)
     return f
