@@ -27,9 +27,9 @@ def daily_piv(df):
             table = df.query(filters)#.PhoneNumber.tolist()
             # pivot
             called = table.pivot_table(
-                                    index=['Skill','Project_Type'], 
+                                    index=['Skill','Project_Type','no_call'], 
                                     values ='OutreachID', 
-                                    aggfunc = ['count'])
+                                    aggfunc = ['count'])#.sort_values([('count','OutreachID')])
             print(called)
         except:
             print(f'{name}: Null')
