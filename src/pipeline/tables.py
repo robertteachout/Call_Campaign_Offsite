@@ -21,7 +21,7 @@ load         = paths / "data/load"
 def tables(push_pull, table, name, path=table_path):
     if push_pull == 'pull':
         # return csv.read_csv(paths / path / name)
-        return pd.read_csv(paths / path / name, sep=',',on_bad_lines='warn',engine="python",)
+        return pd.read_csv(paths / path / name, sep=',', on_bad_lines='warn', low_memory=False)#, engine="python",)
     else:
         table.to_csv(table_path / name, sep=',', index=False)
 
