@@ -71,17 +71,8 @@ def batch_insert(servername, database, campaign_history, load_date, load):
 
     ### Load file ###
     df = load[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date','MasterSiteId']]
-    columns = df.columns
-    
-    for i in columns:
-        try:
-            clean_columns = clean_columns + ", " + i
-        except:
-            clean_columns = i
 
-    add =   f"""
-            INSERT INTO [DWWorking].[dbo].[Call_Campaign] ({clean_columns}) 
-            """
+    add = f"INSERT INTO [DWWorking].[dbo].[Call_Campaign] ({','.join([x for x in df.columns])})"
     ### Clean ###
     df = df[df['Daily_Groups'] != '0'] ### remove skill that are out of daily proccess
     df = df.fillna(0)
@@ -132,19 +123,21 @@ if __name__ == "__main__":
     tomorrow = next_business_day(today)
     tomorrow_str = tomorrow.strftime(date_format)
     extract = Path('data/load')
-    file = extract / f'{today_str}.zip'
+    # file = extract / f'{tomorrow_str}.zip'
+    file = f'{today_str}.zip'
 
-    with ZipFile(file, 'r') as zips:
-        zips.extractall(extract)
-        file = extract / zips.namelist()[0]
-        df = csv.read_csv(file).to_pandas()
-        os.remove(file)
+    # with ZipFile(file, 'r') as zips:
+    #     zips.extractall(extract)
+    #     file = extract / zips.namelist()[0]
+    #     df = csv.read_csv(file).to_pandas()
+    #     os.remove(file)
 
-    # df = tables('pull','na', f'{yesterday}.zip', Path('data/load'))
+    df = tables('pull','na', file, Path('data/load'))
     df['Daily_Groups'] = '2022-02-14'
     df = df.rename({'parent':'Unique_Phone','mastersiteID':'MasterSiteId'}, axis=1) #, 'MasterSiteId':'Daily_Groups'
     df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]
     df['MasterSiteId'] = df['MasterSiteId'].fillna(1000838)#.astype(str).str[:7]#.astype(int)
+    df['Unique_Phone'] = df['Unique_Phone'].fillna(0)#.astype(str).str[:7]#.astype(int)
     df['MasterSiteId'] = df['MasterSiteId'].apply(lambda x: int(x))
     df['Unique_Phone'] = df['Unique_Phone'].apply(lambda x: int(x))
     print(df[['OutreachID', 'PhoneNumber','MasterSiteId','Unique_Phone','Load_Date']])
