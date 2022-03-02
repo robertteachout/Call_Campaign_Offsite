@@ -20,7 +20,7 @@ date_format = '%Y-%m-%d'
 today, startTime_1 = date.today(), time.time()
 tomorrow_str = next_business_day(today).strftime(date_format)
 
-def main():
+def main(msid='yes', sample='no'):
     ### load & transform
     filename = str(f'Call_Campaign_v4_{today.strftime("%m%d")}*')
     load = zipfiles('pull', 'NA', filename)
@@ -32,9 +32,11 @@ def main():
     time_check(startTime_1, f'File Load \t{test}')
     
     ### Master Site ID
-    # mastersite_sql = server.queries.MasterSiteId.sql()
-    # mastersite = server.query.query(servername, database,  mastersite_sql, 'Add MasterSiteId')
-    # tables('push',  mastersite,     'mastersite.csv')
+    if msid == 'yes':
+        mastersite_sql = server.queries.MasterSiteId.sql()
+        mastersite = server.query.query(servername, database,  mastersite_sql, 'Add MasterSiteId')
+        tables('push',  mastersite,     'mastersite.csv')
+
     mastersite = tables('pull',  'na',     'mastersite.csv')
     mapped = pd.merge(tested, mastersite, how='left', on='OutreachID')
     log.df_len('MasterSiteId', mapped)
@@ -56,12 +58,12 @@ def main():
     log.df_len('scored', scored)
     time_check(startTime_1, 'Split, Score, & Parent/Child Relationship')
     
-    ### get column name & types ~ collect unique phone script
-    column_types = scored.dtypes.reset_index()
-
     def Save():
+        ### save file
         zipfiles('push', scored, tomorrow_str)
-        tables('push',  column_types,       'columns.csv')
+        ### get column name & types ~ collect unique phone script
+        tables('push',  scored.dtypes.reset_index(), 'columns.csv')
+        ### reporting
         contact_counts(scored)
         time_check(startTime_1, 'Save files')
         ### insert into server ###
@@ -71,9 +73,11 @@ def main():
     ### create campaign pivot
     daily_piv(scored)
     time_check(startTime_1, 'Create Pivot Table')
-    zipfiles('push', scored, tomorrow_str)
+
+    if sample == 'yes':
+        zipfiles('push', scored, tomorrow_str)
 
     if test == 'Pass': Save() 
 
 if __name__ == "__main__":
-    main()
+    main(msid='no', sample='no')
