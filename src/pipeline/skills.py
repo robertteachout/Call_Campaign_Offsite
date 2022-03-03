@@ -7,16 +7,10 @@ def special_handling(df):
     return df
 
 def CC_Genpact_Scheduling(df):
-    # msi_table = df[df.Skill =='CC_Cross_Reference'].groupby('MasterSiteId')['OutreachID'].count().reset_index()
-    # cf_table = df[df.Skill == 'CC_Chartfinder'].groupby('PhoneNumber')['OutreachID'].count().reset_index()
-    # unique_msid = msi_table[msi_table.OutreachID == 1]['MasterSiteId'].astype(int).to_list()
-    # unique_cf = cf_table[cf_table.OutreachID == 1]['PhoneNumber'].astype(int).to_list()
-    # chart = df.TotalCharts <= 15
-    # f0 = df.PhoneNumber.isin(unique_cf)
-    # f1 = df.MasterSiteId.isin(unique_msid) 
     f1 = df.Project_Type.isin(['ACA-HospitalCR','ACA-PhysicianCR'])
     f2 = df.Retrieval_Team  == 'Genpact Offshore'
-    df['Skill'] = np.where(f1 & f2, 'CC_Genpact_Scheduling', df['Skill'])
+    f3 = df.Project_Type.isin(['Oscar'])
+    df['Skill'] = np.where((f1 & f2) | f3, 'CC_Genpact_Scheduling', df['Skill'])
     return df
 
 def fire_flag(df, skill_name):
@@ -164,31 +158,31 @@ def chartfinder(df):
     df['Skill'] = 'CC_ChartFinder'
     return df
 
-def Cross_Reference_SPI(df):
-    f1 = df['SPI'] == 'TRUE'
-    df['Skill'] = np.where(f1, 'CC_Cross_Reference_SPI', df['Skill'])
+def Cross_Reference_SPI(df, ls):
+    f1 = df['SPI'] == True
+    f2 = df['Project_Type'].isin(ls)
+    df['Skill'] = np.where(f1 & ~f2, 'CC_Cross_Reference_SPI', df['Skill'])
     return df
 
-def UHC_HEDIS(df):
-    f1 = df['Project_Type'] == 'UHC HEDIS'
-    f2 = df['Project_Type'] == 'HEDIS'
+def mv_projects(df, ls):
+    f1 = df['Project_Type'].isin(ls)
     df['Skill'] = np.where(f1, 'CC_ChartFinder', df['Skill'])
-    df['Skill'] = np.where(f2, 'CC_ChartFinder', df['Skill'])
     return df
 
 def complex_skills(df):
+    ls = ['UHC HEDIS', 'HEDIS', 'ACA-PhysicianCR'] # 'Chart Review'
     f = df 
     f = chartfinder(f)
     f = MasterSiteId(f)
     f = adhoc1(f)
 
     f = CC_Genpact_Scheduling(f)
-    f = UHC_HEDIS(f)
+    f = mv_projects(f, ls)
     f = rm_schedule(f)
     f = escalations(f)    
     f = Osprey(f)
     f = research_pull(f)
-    f = Cross_Reference_SPI(f)
+    f = Cross_Reference_SPI(f, ls)
     f = emr_rm(f)
     f = HIH_rm(f)
     f = Onsite_rm(f)
