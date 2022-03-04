@@ -19,11 +19,16 @@ database    = server.secret.database
 date_format = '%Y-%m-%d'
 today, startTime_1 = date.today(), time.time()
 tomorrow_str = next_business_day(today).strftime(date_format)
+yesterday = x_Bus_Day_ago(1)
 
-def main(msid='yes', sample='no'):
+def main(test='no', msid='yes', sample='no'):
     ### load & transform
-    filename = str(f'Call_Campaign_v4_{today.strftime("%m%d")}*')
-    load = zipfiles('pull', 'NA', filename)
+    if test == 'yes':
+        filename = str(f'Call_Campaign_v4_{yesterday.strftime("%m%d")}*')
+    else:
+        filename = str(f'Call_Campaign_v4_{today.strftime("%m%d")}*')
+    load = pd.read_csv('data/extract/Call_Campaign_v4_03032022193317.txt', sep='|', on_bad_lines='skip', engine="python")
+    # load = zipfiles('pull', 'NA', filename)
     log.df_len('load', load)
 
     ### test last call date = today
@@ -80,4 +85,4 @@ def main(msid='yes', sample='no'):
     if test == 'Pass': Save() 
 
 if __name__ == "__main__":
-    main(msid='no', sample='no')
+    main(test='no', msid='no', sample='no')
