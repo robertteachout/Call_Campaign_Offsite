@@ -19,15 +19,16 @@ def project_rank(df, buz_line, rank):
 
 @dataclass
 class business_lines:
-    projects: list[str]
+    projects: list
     capacity: int
     system:str
+    skill:str
 
 def stack_inventory(df, grouping):
-    uhc     = business_lines(['UHC HEDIS'], 3650,'CC_ChartFinder')
-    hedis   = business_lines(['HEDIS'], 2450,'CC_ChartFinder')
-    aca     = business_lines(['ACA-PhysicianCR'], 3550,'CC_ChartFinder')
-    medicaid= business_lines(['Chart Review','Clinical Review MCaid PhyCR'], 2500,'CC_Cross_Reference')
+    uhc     = business_lines(['UHC HEDIS'],3650,'CC_ChartFinder','CC_Adhoc3')
+    hedis   = business_lines(['HEDIS'], 2450,'CC_ChartFinder','CC_Adhoc4')
+    aca     = business_lines(['ACA-PhysicianCR'], 3550,'CC_ChartFinder','CC_Adhoc5')
+    medicaid= business_lines(['Chart Review','Clinical Review MCaid PhyCR'], 2500,'CC_ChartFinder','CC_Adhoc6')
 
     business = [uhc, hedis, aca, medicaid]
 
@@ -38,7 +39,7 @@ def stack_inventory(df, grouping):
         # create dict for scoring
         temp[f'temp_rank{index}'] = False
 
-    rank_cols = {'meet_target_sla':True, **temp, 'no_call':False, 'togo_bin':False, 'age':False} 
+    rank_cols = {'meet_target_sla':True, **temp, 'no_call':False,'age':False, 'togo_bin':False} 
     # group by phone number or msid & rank highest value org
     df = rank(df,'overall_rank',['Skill', grouping], rank_cols)
 
@@ -49,39 +50,34 @@ def stack_inventory(df, grouping):
     # re-rank parent orgs
     df = rank(df,'Score', ['Skill','parent'], rank_cols)
     
-    if grouping == 'PhoneNumber':  
+    if grouping == 'PhoneNumber':
         for buz_line in business:
-            if buz_line.system == 'CC_Cross_Reference':
-                pass
-            else:
+            if buz_line.system == 'CC_ChartFinder':
                 f0 = df.Skill == buz_line.system
                 f1 = df.Project_Type.isin(buz_line.projects)
-                f2 = df.parent == 1
-                f3 = df.meet_target_sla == 0
+                # f2 = df.parent == 1
+                df.Skill = np.where(f0 & f1, buz_line.skill, df.Skill)
 
-                orgs = df[f0 & f1 & f2 & f3].sort_values('Score')['OutreachID'].head(buz_line.capacity).to_list()
-                print(f'"{buz_line.projects}"\t target: {buz_line.capacity} == {len(orgs)}')
-                try:
-                    assert len(orgs) == buz_line.capacity
-                except:
-                    exit()
+    #             orgs = df[f0 & f1 & f2 & f3].sort_values('Score')['OutreachID'].head(buz_line.capacity).to_list()
+    #             print(f'"{buz_line.projects}"\t target: {buz_line.capacity} == {len(orgs)}')
+    #             try:
+    #                 assert len(orgs) == buz_line.capacity
+    #             except:
+    #                 exit()
 
-                f4 = df.OutreachID.isin(orgs)
-                df.master = np.where(f4, 1, df.master)
+    #             f4 = df.OutreachID.isin(orgs)
+    #             df.master = np.where(f4, 1, df.master)
 
-        new_rank_cols = {'meet_target_sla':True, 'master':False, **temp, 'no_call':False, 'togo_bin':False, 'age':False} 
-        df = rank(df,'Score', ['Skill'], new_rank_cols)
+    #     new_rank_cols = {'meet_target_sla':True, 'master':False, **temp, 'no_call':False, 'togo_bin':False, 'age':False} 
+    #     df = rank(df,'Score', ['Skill'], new_rank_cols)
     
-    df['Matchees'] = df.groupby([grouping])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
+    df['Matchees'] = df.groupby(['Skill', grouping])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
     return df
 
 def split(df):
     df['OutreachID'] = df['OutreachID'].astype(str)
     df['master'] = 0
-    f1 = df.Project_Type == 'UHC HEDIS'
-    piv = df[f1]
-    piv2 = piv.pivot_table(index=['Skill','meet_target_sla','no_call'], values=['OutreachID'], aggfunc='count')
-    print(piv2)
+   
     split = 'CC_Cross_Reference'
     notmsid = df[df.Skill != split].copy()
     msid    = df[df.Skill == split].copy()
