@@ -33,8 +33,12 @@ def zipfiles(push_pull, table, filename, extract=extract_path):
         with ZipFile(Extract_path, 'r') as zip:
                 zip.extractall(Path(extract))
                 file = extract / zip.namelist()[0]
-                df = csv.read_csv(file, parse_options=csv.ParseOptions(delimiter='|'))
-                os.remove(file)
+                try:
+                    df = csv.read_csv(file, parse_options=csv.ParseOptions(delimiter='|'))
+                    os.remove(file)
+                except:
+                    os.remove(file)
+
         return df.to_pandas()
     else:
         compression_options = dict(method='zip', archive_name=f'{filename}.csv')
