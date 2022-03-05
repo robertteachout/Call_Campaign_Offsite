@@ -74,10 +74,11 @@ def Osprey(df):
     df['Skill'] = np.where(f1 & (f4 | f5), 'Osprey_Escalation', df['Skill'])
     return df
 
-def rm_schedule(df):
+def rm_schedule(df, ls):
     f1 = df['Outreach_Status'] == 'Scheduled'
     f2 = df['Last_Call'].notna()
-    df['Skill'] = np.where(f1 & f2, 'schedule_pull', df['Skill'])
+    f3 = df['Project_Type'].isin(ls)
+    df['Skill'] = np.where(f1 & f2 & ~f3, 'schedule_pull', df['Skill'])
     return df
 
 def adhoc2(df):
@@ -178,7 +179,7 @@ def complex_skills(df):
 
     f = CC_Genpact_Scheduling(f)
     f = mv_projects(f, ls)
-    f = rm_schedule(f)
+    f = rm_schedule(f, ls)
     f = escalations(f)    
     f = Osprey(f)
     f = research_pull(f)
