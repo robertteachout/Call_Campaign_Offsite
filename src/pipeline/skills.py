@@ -24,29 +24,6 @@ def CC_Pend_Eligible(df):
     df['Skill'] = np.where(filter1 & filter2, 'CC_Pend_Eligible', df['Skill'])
     return df
 
-def genpactPRV_priority(df):
-    f1 = df['Outreach_Status'] == 'Unscheduled'
-    f2 = df['Project_Type'] == 'Cigna - IFP RADV'
-    f3 = df['Project_Type'] == 'Med Mutual of Ohio'
-    f5 = df['Project_Type'] == 'Clover Health MRA'
-
-    f4 = df['Age'] > 2
-    f6 = df['Age'] == 0
-    f7 = df['CallCount'] < 5
-
-    df['Skill'] = np.where(f1 & f2 &  f4, 'CC_GenpactPRV_Priority', df['Skill'])
-    df['Skill'] = np.where(f1 & (f4 | f6) & f7 & ( f3 | f5), 'CC_GenpactPRV_Priority', df['Skill'])
-    return df
-
-def wellmed_schedule(df):
-    filter1 = df['Skill'] == 'CC_Wellmed_Sub15_UNS'
-    filter4 = df['Outreach_Status'] == 'Scheduled'
-
-    filter2 = df['Age'] <= 2
-    filter3 = df['Age'] > 0
-    df['Skill'] = np.where(filter1 & (filter2 | filter3) & filter4, 'Child_ORG', df['Skill'])
-    return df
-
 def emr_rm(df):
     f1 = df['Retrieval_Group'] == 'EMR Remote'
     df['Skill'] = np.where(f1, 'EMR_Remote_removed', df['Skill'])
