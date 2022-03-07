@@ -31,17 +31,20 @@ def clean_num(df):
     df['PhoneNumber'] = np.where(filter1 | filter2, 9999999999,df['PhoneNumber'])
     return df
 
-def Last_Call(df):
+def Last_Call(df, tomorrow_str):
     df.drop('Age', axis=1, inplace=True)
-    df['age'] = (tomorrow - df['Last_Call']).dt.days
+    # create table of unique dates
+    lc_df = df[df.Last_Call.notna()].copy()
+    Last_Call = lc_df['Last_Call'].unique().tolist()
+    business_dates = pd.DataFrame(Last_Call, columns=['Last_Call'])
+    # calculate true business days from tomorow 
+    business_dates['age'] = business_dates.Last_Call.apply(lambda x: len(pd.bdate_range(x, tomorrow_str)))
+    business_dates['age'] -= 1
+    lc = df.merge(business_dates, on='Last_Call', how='left')
 
-    f1 = df.Last_Call.isna()
-    df.age = np.where(f1, df.DaysSinceCreation, df.age)
-    
-    f1 = df.age < df.DaysSinceCreation
-    df.age = np.where(f1, df.age, df.DaysSinceCreation)
-
-    return df
+    f1 = lc.Last_Call.isna()
+    lc.age = np.where(f1, lc.DaysSinceCreation, lc.age)
+    return lc
 
 def check_load(df, today):
     df['Last Call'] = pd.to_datetime(df['Last Call'], errors='coerce')#.dt.date
@@ -91,8 +94,11 @@ def add_columns(df, tomorrow_str):
     return df
 
 def clean(df, tomorrow_str):
-    df = Last_Call(clean_num(format(df))).reset_index(drop=True)
-    new_col = add_columns(df, tomorrow_str)
+    f = format(df)
+    cn = clean_num(f)
+    lc = Last_Call(cn, tomorrow_str).reset_index(drop=True)
+
+    new_col = add_columns(lc, tomorrow_str)
     return new_col
 
 if __name__ == "__main__":
