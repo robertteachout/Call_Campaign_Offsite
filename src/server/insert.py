@@ -1,5 +1,5 @@
-from datetime import datetime
 import pandas as pd
+import sys, os
 import pyodbc
 import numpy as np
 import time
@@ -53,44 +53,70 @@ class MyDfInsert:
             crsr = self._cnxn.cursor()
             crsr.execute(self._sql, params)
 
-def batch_insert(servername, database, campaign_history, load_date, load):
-    if input("""
-           y -> Insert
-           n -> Exit 
-    enter: """) == 'y':
-        pass
-    else:
-        raise SystemExit
-    ### Remove yesterday's file ###
+def connection(servername):
+    ### Server Location ###
+    return  pyodbc.connect(f"""
+                            DRIVER={{SQL Server}};
+                            SERVER={servername}; 
+                            DATABASE=DWWorking; 
+                            Trusted_Connection=yes""", 
+                            autocommit=True)
+
+def clean_for_insert(load):
+    load.rename({'parent':'Unique_Phone'}, axis=1, inplace=True)
+    df = load[['OutreachID', 'PhoneNumber', 'Score', 'Skill','Unique_Phone','Load_Date','MasterSiteId']].copy()
+    df['Daily_Groups'] = '2022-02-14'
+    df['PhoneNumber'] = df['PhoneNumber'].astype(str).str.replace('\.0', '', regex=True).str[:10]
+
+    col_fill = {'MasterSiteId':1000838, 'Unique_Phone':0}
+    for col, fill in col_fill.items():
+        df[col] = df[col].fillna(fill).apply(lambda x: int(x))
+
+    int_cols    = ['OutreachID', 'Score', 'Unique_Phone']
+    int_key     = dict.fromkeys(int_cols, np.int64)
+    date_cols   = ['Daily_Groups', 'Load_Date']
+    date_key    = dict.fromkeys(date_cols, 'datetime64[ns]')
+    return df.astype(dict(int_key, **date_key))
+
+def batch_insert(servername, campaign_history, load_date, load):
+    cnxn = connection(servername)
+
+    crsr = cnxn.cursor()
+    ### Remove campaign_history's file ###
     remove=f'''
             DELETE
             FROM [DWWorking].[dbo].[Call_Campaign]
             WHERE Load_Date < '{campaign_history}'
             OR Load_Date = '{load_date}'
             '''
-
-    ### Load file ###
-    df = load[['OutreachID', 'PhoneNumber', 'Score', 'Skill', 'Daily_Groups','Unique_Phone','Load_Date','MasterSiteId']]
-
-    add = f"INSERT INTO [DWWorking].[dbo].[Call_Campaign] ({','.join([x for x in df.columns])})"
-    ### Clean ###
-    df = df[df['Daily_Groups'] != '0'] ### remove skill that are out of daily proccess
-    df = df.fillna(0)
-    df[['OutreachID', 'Score', 'Unique_Phone']] = df[['OutreachID', 'Score', 'Unique_Phone']].astype(np.int64)
-    df['Daily_Groups'] = df['Daily_Groups'].astype('datetime64[ns]')
-    df['Load_Date'] = df['Load_Date'].astype('datetime64[ns]')
-
-    ### Server Location ###
-    cnxn = pyodbc.connect(f"""
-        DRIVER={{SQL Server}};
-        SERVER={servername}; 
-        DATABASE={database}; 
-        Trusted_Connection=yes""", 
-        autocommit=True)
-
-    crsr = cnxn.cursor()
     ### Remove yesterday's file ###
     crsr.execute(remove)
+
+    # pull whats in the server
+    lookup = '''
+            SELECT
+                [Load_Date] 
+                ,count([Load_Date]) AS Count
+            FROM [DWWorking].[dbo].[Call_Campaign]
+            GROUP BY [Load_Date]
+            ORDER BY [Load_Date];
+            '''
+    print(pd.read_sql(lookup, cnxn))
+
+    df = clean_for_insert(load)
+    print(df)
+
+    # ask to go forward with insert
+    if input("Enter(y/n): ") == 'y':
+        pass
+    else:
+        raise SystemExit
+    
+
+    ### Load file ###
+
+
+    add = f"INSERT INTO [DWWorking].[dbo].[Call_Campaign] ({','.join([x for x in df.columns])})"
 
     t0 = time.time()
     ### Add today's file #
@@ -98,18 +124,14 @@ def batch_insert(servername, database, campaign_history, load_date, load):
 
     print()
     print(f'Inserts completed in {time.time() - t0:.2f} seconds.')
-
     cnxn.close()
 
 if __name__ == "__main__":
-    import sys, os
-    from pathlib import Path  
     import secret
     from zipfile import ZipFile
     import pyarrow.csv as csv
 
     servername  = secret.servername
-    database    = secret.database
     file = Path(__file__).resolve()  
     package_root_directory = file.parents[1]  
     sys.path.append(str(package_root_directory))
@@ -123,26 +145,18 @@ if __name__ == "__main__":
     tomorrow = next_business_day(today)
     tomorrow_str = tomorrow.strftime(date_format)
     extract = Path('data/load')
+    file = extract / f'{today_str}.zip'
     # file = extract / f'{tomorrow_str}.zip'
-    file = f'{today_str}.zip'
+    # file = f'{today_str}.zip'
 
-    # with ZipFile(file, 'r') as zips:
-    #     zips.extractall(extract)
-    #     file = extract / zips.namelist()[0]
-    #     df = csv.read_csv(file).to_pandas()
-    #     os.remove(file)
+    with ZipFile(file, 'r') as zips:
+        zips.extractall(extract)
+        file = extract / zips.namelist()[0]
+        df = csv.read_csv(file).to_pandas()
+        os.remove(file)
 
-    df = tables('pull','na', file, Path('data/load'))
-    df['Daily_Groups'] = '2022-02-14'
-    df = df.rename({'parent':'Unique_Phone','mastersiteID':'MasterSiteId'}, axis=1) #, 'MasterSiteId':'Daily_Groups'
-    df['PhoneNumber'] = df['PhoneNumber'].astype(str).str[:10]
-    df['MasterSiteId'] = df['MasterSiteId'].fillna(1000838)#.astype(str).str[:7]#.astype(int)
-    df['Unique_Phone'] = df['Unique_Phone'].fillna(0)#.astype(str).str[:7]#.astype(int)
-    df['MasterSiteId'] = df['MasterSiteId'].apply(lambda x: int(x))
-    df['Unique_Phone'] = df['Unique_Phone'].apply(lambda x: int(x))
-    print(df[['OutreachID', 'PhoneNumber','MasterSiteId','Unique_Phone','Load_Date']])
+    # df = tables('pull','na', file, Path('data/load'))
     batch_insert(servername,
-                database,
                 x_Bus_Day_ago(10).strftime(date_format),
                 tomorrow_str,
                 df)
