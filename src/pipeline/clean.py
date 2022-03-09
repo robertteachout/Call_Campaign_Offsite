@@ -90,6 +90,9 @@ def add_columns(df, tomorrow_str):
     f1 = df.MSI_Phone.isna()
     df['MSI_Phone'] = np.where(f1, df.PhoneNumber, df.MSI_Phone)
 
+    timezones = sorted(df.TimeZoneKey.replace('','B').unique())
+    timezone_map = dict(zip(timezones, range(len(timezones))))
+    df['timezone_sort'] = df.TimeZoneKey.map(timezone_map)
     df['PhoneNumber'] = df['PhoneNumber'].astype(str)
     return df
 
