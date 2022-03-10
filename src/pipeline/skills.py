@@ -69,7 +69,7 @@ def adhoc2(df):
     return df
 
 def adhoc1(df): 
-    f1 = df['Project_Type'] == 'Aetna Commercial'
+    f1 = df['Project_Type'].isin(['Aetna Commercial','Aetna Medicare'])
     ls = df[f1].sort_values('age', ascending=False)['OutreachID'][:3000]
 
     f6 = df['OutreachID'].isin(ls)
@@ -148,7 +148,7 @@ def mv_projects(df, ls):
     return df
 
 def complex_skills(df):
-    ls = ['UHC HEDIS', 'HEDIS', 'ACA-PhysicianCR'] # 'Chart Review'
+    ls = ['UHC HEDIS', 'HEDIS', 'ACA-PhysicianCR', 'RADV'] # 'Chart Review'
     f = df 
     f = chartfinder(f)
     f = MasterSiteId(f)
