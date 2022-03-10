@@ -1,5 +1,6 @@
 from datetime import date, timedelta, datetime
-from subprocess import call
+import datetime
+from dataclasses import dataclass
 import holidays
 import numpy as np
 import time
@@ -18,7 +19,7 @@ def daily_piv(df):
             df1 = df[df[str(name)] == 1]
             print(df1.pivot_table(index ='Skill', values ='OutreachID', aggfunc = ['count']))
             work = {
-                'CC_ChartFinder':9600,
+                'CC_ChartFinder':12000,
                 'CC_Cross_Reference':2400,
                 # 'CC_Adhoc2':1000
             }
@@ -27,9 +28,14 @@ def daily_piv(df):
             table = df.query(filters)#.PhoneNumber.tolist()
             # pivot
             called = table.pivot_table(
-                                    index=['Skill','Project_Type','no_call'], 
+                                    index=['Skill'
+                                            ,'Project_Type'
+                                            # ,'no_call'
+                                            ], 
                                     values ='OutreachID', 
-                                    aggfunc = ['count'])#.sort_values([('count','OutreachID')])
+                                    aggfunc = ['count'],
+                                    margins=True)#.sort_values([('count','OutreachID')])
+            called.to_clipboard()
             print(called)
         except:
             print(f'{name}: Null')
@@ -90,3 +96,23 @@ def Next_N_BD(start, N):
             B10.append(item)
         i += 1
     return B10
+
+@dataclass
+class Business_Days:
+    yesterday: datetime.datetime
+    yesterday_str: str
+    today: datetime.datetime
+    today_str: str
+    now: datetime.datetime
+    tomorrow: datetime.datetime
+    tomorrow_str: str
+
+def dates(date_format): 
+    return Business_Days(
+                         x_Bus_Day_ago(1)
+                        ,x_Bus_Day_ago(1).strftime(date_format)
+                        ,date.today()
+                        ,date.today().strftime(date_format)
+                        ,time.time()
+                        ,next_business_day(today)
+                        ,next_business_day(today).strftime(date_format))
