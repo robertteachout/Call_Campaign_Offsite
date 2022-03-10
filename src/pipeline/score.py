@@ -27,9 +27,10 @@ def stack_inventory(df, grouping):
     uhc     = business_lines(['UHC HEDIS'],3650,'CC_ChartFinder','CC_Adhoc3')
     hedis   = business_lines(['HEDIS'], 2450,'CC_ChartFinder','CC_Adhoc4')
     aca     = business_lines(['ACA-PhysicianCR'], 3550,'CC_ChartFinder','CC_Adhoc5')
-    medicaid= business_lines(['Chart Review','Clinical Review MCaid PhyCR','RADV'], 2500,'CC_ChartFinder','CC_Adhoc6')
+    medicaid= business_lines(['Chart Review','Clinical Review MCaid PhyCR'], 2500,'CC_ChartFinder','CC_Adhoc6')
+    radv    = business_lines(['RADV'], 2500,'CC_ChartFinder','CC_Adhoc2')
 
-    business = [uhc, hedis, aca, medicaid]
+    business = [uhc, hedis, aca, medicaid, radv]
 
     temp = {}
     for index, buz_line in enumerate(business):
@@ -56,7 +57,7 @@ def stack_inventory(df, grouping):
                 f1 = df.Project_Type.isin(buz_line.projects)
                 df.Skill = np.where(f0 & f1, buz_line.skill, df.Skill)
 
-    rank_final = {'meet_target_sla':True, 'timezone_sort':True, 'no_call':False,'age':False, 'togo_bin':False} 
+    rank_final = {'meet_target_sla':True, 'timezone_sort':True, **temp, 'no_call':False,'age':False, 'togo_bin':False} 
     df = rank(df,'Score', ['Skill','parent'], rank_final)
     df['Matchees'] = df.groupby(['Skill', grouping])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
     return df
@@ -74,8 +75,8 @@ def split(df):
     dubs = scored.append(msid_scored)
     unique = dubs.drop_duplicates(['OutreachID']).reset_index(drop= True)
     ### Piped ORGs attached to phone numbers
-    # f0 = unique.Project_Type.isin(['Chart Sync']) # 'ACA-PhysicianCR'
-    # unique['Score'] = np.where(f0, 1000000, unique.Score)
+    f0 = unique.Project_Type.isin(['Chart Sync']) # 'ACA-PhysicianCR'
+    unique['Score'] = np.where(f0, 1000000, unique.Score)
     return unique
         
 def split_drop_score(df):
