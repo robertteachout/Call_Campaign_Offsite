@@ -7,10 +7,9 @@ def special_handling(df):
     return df
 
 def CC_Genpact_Scheduling(df):
-    f1 = df.Project_Type.isin(['ACA-HospitalCR','ACA-PhysicianCR'])
+    f1 = df.Project_Type.isin(['Oscar', 'ACA-HospitalCR', 'ACA-PhysicianCR', 'Aetna Commercial','Aetna Medicare'])
     f2 = df.Retrieval_Team  == 'Genpact Offshore'
-    f3 = df.Project_Type.isin(['Oscar'])
-    df['Skill'] = np.where((f1 & f2) | f3, 'CC_Genpact_Scheduling', df['Skill'])
+    df['Skill'] = np.where((f1 & f2), 'CC_Genpact_Scheduling', df['Skill'])
     return df
 
 def fire_flag(df, skill_name):
@@ -148,7 +147,11 @@ def mv_projects(df, ls):
     return df
 
 def complex_skills(df):
-    ls = ['UHC HEDIS', 'HEDIS', 'ACA-PhysicianCR', 'RADV'] # 'Chart Review'
+    ls = ['UHC HEDIS', 'HEDIS', 'ACA-PhysicianCR', 'RADV', 'Chart Review'] # 'Chart Review'
+    # 'Oscar',
+    commerical = ['Centene ACA','Centene HEDIS','WellCare HEDIS','Highmark ACA','Advantasure ACA','Anthem ACA','HealthSpring HEDIS','OptimaHealth HEDIS','Med Mutual of Ohio HEDIS','Inovalon','BCBS TN ACA','Cigna HEDIS','Anthem Hedis','Anthem Comm HEDIS','Devoted Health HEDIS','Aetna HEDIS','Advantasure_HEDIS_WA','IBX Hedis','Molina HEDIS Region 6-FL-SC','Aetna MEDICAID HEDIS','Inovalon Hedis','Advantmed HEDIS','Excellus CRA','Oscar HF ACA','Priority Health ACA','Molina HEDIS Region 5-IL-MI-WI','Advantasure_HEDIS_NE','Aetna Commercial','Gateway HEDIS','Molina HEDIS Region 4-NY-OH','Advantasure_HEDIS_VT','Arizona BlueCross BlueShield','Med Mutual of Ohio ACA','Highmark NY ACA','Molina HEDIS Region 3-MS-NM-TX','Advantasure_HEDIS_ND','Advantasure_HEDIS_OOA_Anthem','Optima Health Commercial','Highmark HEDIS','Centauri','BCBSTN HEDIS','Molina HEDIS Supplemental Region 5- IL-MI-WI','Molina HEDIS Region 2-ID-UT-WA','Premera','Humana HEDIS','Molina HEDIS Supplemental Region 4-NY-OH','Molina HEDIS Supplemental Region 6-FL-SC','ABCBS','Molina HEDIS Region 1-CA','Reveleer HEDIS','Centene HEDIS-WI','Molina HEDIS Supplemental Region 3-MS-NM-TX','Change Healthcare','Alliant Health Plans HEDIS','BCBS TN HEDIS OOA','Humana']
+    commerical = [x for x in commerical if (x.__contains__('ACA')) or (x.__contains__('HEDIS'))]
+    ls += commerical
     f = df 
     f = chartfinder(f)
     f = MasterSiteId(f)
