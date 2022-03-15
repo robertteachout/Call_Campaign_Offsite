@@ -1,10 +1,5 @@
 import pandas as pd
 import numpy as np
-from datetime import date, timedelta, datetime
-
-today = date.today()
-tomorrow = (today + timedelta(days = 1))
-yesterday = (today + timedelta(days = -1))
 
 def formate_col(df, col, type):
     if type == 'date':
@@ -79,9 +74,8 @@ def add_columns(df, tomorrow_str):
     df['meet_sla'] = np.where(f1, 1,0)
     df['meet_target_sla'] = np.where(f2, 1,0)
     ### togo charts
-    bucket_amount = 100
-    labels = list(([x for x in range(bucket_amount)]))
-    df['togo_bin'] = pd.cut(df.ToGoCharts, bins=bucket_amount, labels=labels)
+    bucket_amount = 10
+    df['togo_bin'] = pd.cut(df.ToGoCharts, bins=bucket_amount, labels=[x for x in range(bucket_amount)])
     df.togo_bin = df.togo_bin.astype(int)
     # no call flag
     f1 = df.Last_Call.isna()
