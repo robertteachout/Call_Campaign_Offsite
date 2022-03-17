@@ -1,5 +1,6 @@
 from datetime import date
 import pandas as pd
+import numpy as np
 import time
 
 import pipeline.clean
@@ -12,6 +13,7 @@ from pipeline.tables import tables, zipfiles, contact_counts
 import server.query, server.insert, server.secret
 import server.queries.MasterSiteId
 import server.queries.reschedule
+import server.queries.optum_assigned
 import log.log as log
 
 servername  = server.secret.servername
@@ -59,6 +61,16 @@ def main(test='n', msid='n', sample='n'):
     log.df_len('clean', clean)
     time_check(BusinessDay.now, 'clean')
 
+    # optum assigned inventory
+    optum_assigned_sql = server.queries.optum_assigned.sql()
+    optum_assigned = server.query.query(servername, database,  optum_assigned_sql, 'Add optum_assigned')
+    log.df_len('optum_assigned', optum_assigned)
+    time_check(BusinessDay.now, 'optum_assigned')
+    # add filter with above query
+    org_list = optum_assigned.OutreachID.to_list()
+    f1 = clean.OutreachID.isin(org_list)
+    clean['optum_assigned'] = np.where(f1, 1, 0)
+
     ### reskill inventory
     skilled = pipeline.skills.complex_skills(clean)
     log.df_len('skilled', skilled)
@@ -93,7 +105,7 @@ def main(test='n', msid='n', sample='n'):
 
 if __name__ == "__main__":
     def question(q):
-        return input(f"\n{q}(y/n): ")
+        return input(f"\n{q}(y/n/q): ")
 
     if question('questions') == 'y':
         test=question('test')
