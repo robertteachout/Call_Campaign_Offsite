@@ -146,6 +146,11 @@ def mv_projects(df, ls):
     df['Skill'] = np.where(f1, 'CC_ChartFinder', df['Skill'])
     return df
 
+def optum_assigned(df):
+    f1 = df['optum_assigned'] == 1
+    df['Skill'] = np.where(f1, 'optum_assigned', df['Skill'])
+    return df
+
 def complex_skills(df):
     ls = ['UHC HEDIS', 'HEDIS', 'ACA-PhysicianCR', 'RADV', 'Chart Review'] # 'Chart Review'
     # 'Oscar',
@@ -167,4 +172,5 @@ def complex_skills(df):
     f = emr_rm(f)
     f = HIH_rm(f)
     f = Onsite_rm(f)
+    # f = optum_assigned(f)
     return f
