@@ -1,7 +1,7 @@
 from datetime import date, timedelta, datetime
-import datetime
+from pandas.tseries.holiday import AbstractHolidayCalendar, Holiday, nearest_workday, \
+    USMartinLutherKingJr, USPresidentsDay, USMemorialDay, USLaborDay, USThanksgivingDay
 from dataclasses import dataclass
-import holidays
 import numpy as np
 import time
 startTime_1 = time.time()
@@ -47,24 +47,34 @@ def date_list_split(ls, numSplit):
     return splits
 
 ### CIOX Business Calender
-today = date.today()
-HOLIDAYS_US = holidays.US(years= today.year)
-HOLIDAYS_CIOX = dict(zip(HOLIDAYS_US.values(), HOLIDAYS_US.keys()))
-del_list = ("Washington\'s Birthday", 'Juneteenth National Independence Day','Columbus Day','Veterans Day')
-for i in del_list:
-    HOLIDAYS_CIOX.pop(i)
 
+class CioxHoliday(AbstractHolidayCalendar):
+    rules = [
+        Holiday('NewYearsDay', month=1, day=1, observance=nearest_workday),
+        USMartinLutherKingJr,
+        USPresidentsDay,
+        USMemorialDay,
+        Holiday('USIndependenceDay', month=7, day=4, observance=nearest_workday),
+        USLaborDay,
+        USThanksgivingDay,
+        Holiday('Christmas', month=12, day=25, observance=nearest_workday)
+    ]
+
+ciox_holidays = CioxHoliday()
+today = date.today()
 ONE_DAY = timedelta(days=1)
 
 def next_business_day(start):
     next_day = start + ONE_DAY
-    while next_day.weekday() in holidays.WEEKEND or next_day in HOLIDAYS_CIOX.values():
+    holidays = ciox_holidays.holidays(today, today + timedelta(days=1 * 365)).values
+    while next_day.weekday() >= 5 or next_day in holidays:
         next_day += ONE_DAY
     return next_day
 
 def last_business_day(start):
     next_day = start - ONE_DAY
-    while next_day.weekday() in holidays.WEEKEND or next_day in HOLIDAYS_CIOX.values():
+    holidays = ciox_holidays.holidays(today, today + timedelta(days=1 * 365)).values
+    while next_day.weekday() >= 5 or next_day in holidays:
         next_day -= ONE_DAY
     return next_day
 
@@ -99,12 +109,12 @@ def Next_N_BD(start, N):
 
 @dataclass
 class Business_Days:
-    yesterday: datetime.datetime
+    yesterday: datetime
     yesterday_str: str
-    today: datetime.datetime
+    today: datetime
     today_str: str
-    now: datetime.datetime
-    tomorrow: datetime.datetime
+    now: datetime
+    tomorrow: datetime
     tomorrow_str: str
 
 def dates(date_format): 
