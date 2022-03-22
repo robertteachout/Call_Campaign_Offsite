@@ -57,11 +57,11 @@ def add_columns(df, tomorrow_str):
     df['Load_Date'] = tomorrow_str
     ### score columns
     ### age
-    # cut_bins = [0, 5, 10, 15, 20, 10000]
-    # label_bins = [5, 10, 15, 20, 21]
-    # df['age_category'] = pd.cut(df['age'], bins=cut_bins, labels=label_bins, include_lowest=True)
-    # age_sort    = {21:0, 20:1, 15:2, 10:3, 5:4}
-    # df['age_sort'] = df['age_category'].map(age_sort)
+    cut_bins = [0, 5, 10, 15, 20, 10000]
+    label_bins = [5, 10, 15, 20, 21]
+    df['age_category'] = pd.cut(df['age'], bins=cut_bins, labels=label_bins, include_lowest=True)
+    age_sort    = {21:0, 20:1, 15:2, 10:3, 5:4}
+    df['age_sort'] = df['age_category'].map(age_sort)
     ### map
     audit_sort  = {'RADV':1, 'Medicaid Risk':1, 'HEDIS':2, 'Specialty':3,  'ACA':6, 'Medicare Risk':5}
     df['audit_sort'] = df['Audit_Type'].map(audit_sort)
