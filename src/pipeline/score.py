@@ -23,19 +23,21 @@ def project_rank(df, buz_line, rank):
     df[f'temp_rank{rank}'] = np.where(f1, 1, 0)
     return df
 
-def stack_inventory(df, grouping):
-    uhc     = business_lines(['UHC HEDIS'],3650,'CC_ChartFinder','CC_Adhoc3')
-    hedis   = business_lines(['HEDIS'], 2450,'CC_ChartFinder','CC_Adhoc4')
-    aca     = business_lines(['ACA-PhysicianCR'], 3550,'CC_ChartFinder','CC_Adhoc5')
-    medicaid= business_lines(['Chart Review','Clinical Review MCaid PhyCR'], 2500,'CC_ChartFinder','CC_Adhoc6')
-    radv    = business_lines(['RADV'], 2500,'CC_ChartFinder','CC_Adhoc2')
-    aetna    = business_lines(['Aetna Commercial','Aetna Medicare'], 2500,'CC_Genpact_Scheduling','CC_Genpact_Scheduling')
+def ciox_business_lines():
+    uhc         = business_lines(['UHC HEDIS'],3650,'CC_ChartFinder','CC_Adhoc3')
+    hedis       = business_lines(['HEDIS'], 2450,'CC_ChartFinder','CC_Adhoc4')
+    aca         = business_lines(['ACA-PhysicianCR'], 3550,'CC_ChartFinder','CC_Adhoc5')
+    medicaid    = business_lines(['Chart Review','Clinical Review MCaid PhyCR'], 2500,'CC_ChartFinder','CC_Adhoc6')
+    radv        = business_lines(['RADV'], 2500,'CC_ChartFinder','CC_Adhoc2')
+    aetna       = business_lines(['Aetna Commercial','Aetna Medicare'], 2500,'CC_Genpact_Scheduling','CC_Genpact_Scheduling')
     # commerical_ls = ['Centene ACA','Centene HEDIS','Oscar','WellCare HEDIS','Highmark ACA','Advantasure ACA','Anthem ACA','HealthSpring HEDIS','OptimaHealth HEDIS','Med Mutual of Ohio HEDIS','Inovalon','BCBS TN ACA','Cigna HEDIS','Anthem Hedis','Anthem Comm HEDIS','Devoted Health HEDIS','Aetna HEDIS','Advantasure_HEDIS_WA','IBX Hedis','Molina HEDIS Region 6-FL-SC','Aetna MEDICAID HEDIS','Inovalon Hedis','Advantmed HEDIS','Excellus CRA','Oscar HF ACA','Priority Health ACA','Molina HEDIS Region 5-IL-MI-WI','Advantasure_HEDIS_NE','Aetna Commercial','Gateway HEDIS','Molina HEDIS Region 4-NY-OH','Advantasure_HEDIS_VT','Arizona BlueCross BlueShield','Med Mutual of Ohio ACA','Highmark NY ACA','Molina HEDIS Region 3-MS-NM-TX','Advantasure_HEDIS_ND','Advantasure_HEDIS_OOA_Anthem','Optima Health Commercial','Highmark HEDIS','Centauri','BCBSTN HEDIS','Molina HEDIS Supplemental Region 5- IL-MI-WI','Molina HEDIS Region 2-ID-UT-WA','Premera','Humana HEDIS','Molina HEDIS Supplemental Region 4-NY-OH','Molina HEDIS Supplemental Region 6-FL-SC','ABCBS','Molina HEDIS Region 1-CA','Reveleer HEDIS','Centene HEDIS-WI','Molina HEDIS Supplemental Region 3-MS-NM-TX','Change Healthcare','Alliant Health Plans HEDIS','BCBS TN HEDIS OOA','Humana']
     # commerical_ls = ['Centene ACA', 'Centene HEDIS', 'WellCare HEDIS', 'Highmark ACA', 'Advantasure ACA', 'Anthem ACA', 'HealthSpring HEDIS', 'OptimaHealth HEDIS', 'Med Mutual of Ohio HEDIS', 'BCBS TN ACA', 'Cigna HEDIS', 'Anthem Comm HEDIS', 'Devoted Health HEDIS', 'Aetna HEDIS', 'Advantasure_HEDIS_WA', 'Molina HEDIS Region 6-FL-SC', 'Aetna MEDICAID HEDIS', 'Advantmed HEDIS', 'Oscar HF ACA', 'Priority Health ACA', 'Molina HEDIS Region 5-IL-MI-WI', 'Advantasure_HEDIS_NE', 'Gateway HEDIS', 'Molina HEDIS Region 4-NY-OH', 'Advantasure_HEDIS_VT', 'Med Mutual of Ohio ACA', 'Highmark NY ACA', 'Molina HEDIS Region 3-MS-NM-TX', 'Advantasure_HEDIS_ND', 'Advantasure_HEDIS_OOA_Anthem', 'Highmark HEDIS', 'BCBSTN HEDIS', 'Molina HEDIS Supplemental Region 5- IL-MI-WI', 'Molina HEDIS Region 2-ID-UT-WA', 'Humana HEDIS', 'Molina HEDIS Supplemental Region 4-NY-OH', 'Molina HEDIS Supplemental Region 6-FL-SC', 'Molina HEDIS Region 1-CA', 'Reveleer HEDIS', 'Centene HEDIS-WI', 'Molina HEDIS Supplemental Region 3-MS-NM-TX', 'Alliant Health Plans HEDIS', 'BCBS TN HEDIS OOA']    
     commerical_aca = business_lines(['Advantasure ACA','Anthem ACA'],2500, 'CC_ChartFinder', 'CC_Adhoc7')
     commerical_hedis = business_lines(['Centene HEDIS', 'WellCare HEDIS', 'Med Mutual of Ohio HEDIS','Anthem HEDIS','Anthem Comm HEDIS','Cigna HEDIS','HealthSpring HEDIS'],2500, 'CC_ChartFinder', 'CC_Adhoc8')
-    business = [uhc, hedis, aca, medicaid, radv, commerical_hedis,commerical_aca, aetna]
+    return [uhc, hedis, aca, medicaid, radv, commerical_hedis,commerical_aca, aetna]
 
+def stack_inventory(df, grouping):
+    business = ciox_business_lines()
     temp = {}
     for index, buz_line in enumerate(business):
         # create column on dataframe
@@ -43,7 +45,7 @@ def stack_inventory(df, grouping):
         # create dict for scoring
         temp[f'temp_rank{index}'] = False
 
-    rank_cols = {'meet_target_sla':True, **temp, 'no_call':False,'age':False, 'togo_bin':False} 
+    rank_cols = {'meet_target_sla':True, **temp, 'temp_jen':False,  'no_call':False,'age':False, 'togo_bin':False} 
     # group by phone number or msid & rank highest value org
     find_parent = rank(df,'overall_rank',['Skill', grouping], rank_cols)
 
@@ -62,19 +64,16 @@ def stack_inventory(df, grouping):
                 rank_parent.Skill = np.where(f0 & f1, buz_line.skill, rank_parent.Skill)
 
 
-    rank_final = {'meet_target_sla':True, **temp, 'no_call':False, 'age_sort':False, 'togo_bin':False} 
-    full_rank = rank(rank_parent,'Score', ['Skill','parent'], rank_final).dropna(subset=['OutreachID'])
+    rank_final = {'meet_target_sla':True, **temp,'temp_jen':False,  'no_call':False, 'age_sort':False, 'togo_bin':False} 
+    full_rank = rank(rank_parent,'Score', ['Skill','parent'], rank_final)
     full_rank.OutreachID = full_rank.OutreachID.apply(lambda x: str(x))
     full_rank['Matchees'] = full_rank.groupby(['Skill', grouping])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
-
-    aca = full_rank[full_rank.Skill == 'CC_Adhoc7']
-    skill_rank = {'meet_target_sla':True, 'no_call':False, 'ToGoCharts':False} 
-    dump = rank(aca,'Score', ['Skill','parent'], skill_rank)
-
-    hedis = full_rank[full_rank.Skill == 'CC_Adhoc8']
-    skill_rank = {'meet_target_sla':True, 'no_call':False, 'age':False} 
-    dump = rank(hedis,'Score', ['Skill','parent'], skill_rank)
     return full_rank
+
+def skill_score(df, skill, skill_rank):
+    skill = df[df.Skill == skill].copy()
+    dump = rank(skill,'Score', ['Skill','parent'], skill_rank)
+    return dump.append(df).drop_duplicates(['OutreachID']).reset_index(drop= True)
 
 def split(df):
     df['Outreach ID'] = df['OutreachID'].astype(str)
@@ -85,14 +84,19 @@ def split(df):
 
     scored      = stack_inventory(notmsid, 'PhoneNumber')
     msid_scored = stack_inventory(msid, 'MasterSiteId')
+    unique =  scored.append(msid_scored).drop_duplicates(['OutreachID']).reset_index(drop= True)
 
-    dubs = scored.append(msid_scored)
-    unique = dubs.drop_duplicates(['OutreachID']).reset_index(drop= True)
+    ### skille that need special treatment
+    skill_rank = {'meet_target_sla':True, 'no_call':False, 'ToGoCharts':False} 
+    unique = skill_score(unique, 'CC_Adhoc7', skill_rank)
+
+    skill_rank = {'meet_target_sla':True, 'no_call':False, 'ToGoCharts':False} 
+    unique = skill_score(unique, 'CC_Adhoc8', skill_rank)
     ### Piped ORGs attached to phone numbers
     f0 = unique.Project_Type.isin(['Chart Sync']) # 'ACA-PhysicianCR'
     unique['Score'] = np.where(f0, 1000000, unique.Score)
     return unique
-        
+
 def split_drop_score(df):
     ### Sort Order and drop Dups
     return split(df)
