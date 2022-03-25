@@ -1,7 +1,5 @@
-from datetime import date
 import pandas as pd
 import numpy as np
-import time
 
 import pipeline.clean
 import pipeline.score
@@ -71,6 +69,11 @@ def main(test='n', msid='n', sample='n'):
     f1 = clean.OutreachID.isin(org_list)
     clean['optum_assigned'] = np.where(f1, 1, 0)
 
+    dft = pd.read_csv('data/table_drop/table.csv')
+    f1 = clean.OutreachID.isin(dft.OutreachID.to_list())
+    # f2 = clean.Retrieval_Team  == 'Genpact Offshore'
+    clean['temp_jen'] = np.where(f1, 1, 0)
+    
     ### reskill inventory
     skilled = pipeline.skills.complex_skills(clean)
     log.df_len('skilled', skilled)
@@ -88,10 +91,10 @@ def main(test='n', msid='n', sample='n'):
         ### get column name & types ~ collect unique phone script
         tables('push',  scored.dtypes.reset_index(), 'columns.csv')
         ### reporting
-        contact_counts(scored)
         time_check(BusinessDay.now, 'Save files')
         ### insert into server ###
         server.insert.batch_insert(servername, x_Bus_Day_ago(10).strftime(date_format), BusinessDay.tomorrow_str, scored)
+        contact_counts(scored)
         time_check(BusinessDay.now, 'batch_insert')
 
     ### create campaign pivot
@@ -105,7 +108,7 @@ def main(test='n', msid='n', sample='n'):
 
 if __name__ == "__main__":
     def question(q):
-        return input(f"\n{q}(y/n/q): ")
+        return input(f"\n{q}(y/n): ")
 
     if question('questions') == 'y':
         test=question('test')
