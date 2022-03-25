@@ -11,9 +11,7 @@ def main():
 
     # reports.project_breakdown.main(oc_name, 'docs/report_oc.csv')
     # reports.project_breakdown.main(aca_name, 'docs/report_aca.csv')
-    reports.campaign_project_score.main()
-    # ls = ['2022-01-14','2022-01-18','2022-01-19','2022-01-20','2022-01-21','2022-01-24','2022-01-25','2022-01-26','2022-01-27']
-    # for i in ls:
-    reports.campaign_disp.main(projects=aca_name)
+    reports.campaign_project_score.main('2022-02-16')
+    # reports.campaign_disp.main(projects=aca_name)
 if __name__ == '__main__':
     main()

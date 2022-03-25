@@ -17,19 +17,19 @@ tomorrow_str = tomorrow.strftime("%Y-%m-%d")
 def main(today_str=today_str):
     df = tables('pull', 'na', f'{today_str}.zip','data/load/')
     work = {
-        'CC_Tier1':1500,
-        'CC_Tier2':5000,
-        'CC_Adhoc1':3000,
+        'CC_ChartFinder':8000,
+        'CC_Cross_Reference':2000,
         # 'CC_Adhoc2':1000
     }
     # get top x in each skill
-    filters = '|'.join([f"(Skill == '{i}' & Score < {j})" for i, j in work.items()])
-    top_num = df.query(filters).PhoneNumber.tolist()
+    filters = '|'.join([f"(Skill == '{i}' & Score < {j} & parent == 1)" for i, j in work.items()])
+    table = df.query(filters)#.PhoneNumber.tolist()
     # filter skills
-    skills = '|'.join([f"(Skill == '{i}')" for i in work.keys()])
-    full =  df.query(skills)
+    # skills = '|'.join([f"(Skill == '{i}')" for i in work.keys()])
+    # full =  df.query(skills)
     # filter numbers
-    table = full[full.PhoneNumber.isin(top_num)]
+    # table = full[full.PhoneNumber.isin(top_num)]
+    parent = df.query(filters)
     # pivot
     called = table.pivot_table(
                             index=['Skill','Project_Type'], 
@@ -39,6 +39,6 @@ def main(today_str=today_str):
     called.columns = called.columns.droplevel()
     name = today_str
     called.columns = [name]
-    
-    append_column(called, 'data/daily_priority/campaign_project_score.csv', ['Skill', 'Project_Type'],'outer')
-    table[['Project_Type','Skill','OutreachID', 'PhoneNumber', 'Score','Last_Call','Unique_Phone']].to_csv(f'data/daily_priority/{today_str}.csv', index=False)
+    print(called)
+    # append_column(called, 'data/daily_priority/campaign_project_score.csv', ['Skill', 'Project_Type'],'outer')
+    # table[['Project_Type','Skill','OutreachID', 'PhoneNumber', 'Score','Last_Call','parent']].to_csv(f'data/daily_priority/{today_str}.csv', index=False)

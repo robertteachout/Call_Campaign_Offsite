@@ -29,6 +29,9 @@ from pipeline.etc import last_business_day
 def main(projects, location):
     today = date.today()
     today_str = today.strftime('%Y-%m-%d')
+    yesterday = last_business_day(today)
+    yesterday_str = yesterday.strftime("%Y-%m-%d")
+
     b = f'data/load/{today_str}.zip'
 
     group = pd.DataFrame()
@@ -37,8 +40,6 @@ def main(projects, location):
 
     start = pd.read_csv(b)
 
-    yesterday = last_business_day(today).strftime("%Y-%m-%d")
-    
     start = start[start['Outreach_Status'] != 'ReSchedule']
     oc = start[start.Project_Type.isin(projects)][['Project_Type', 'PhoneNumber', 'OutreachID', 'Last_Call', 'Skill']]
     oc.Last_Call = pd.to_datetime(oc.Last_Call, errors='ignore')
