@@ -27,7 +27,7 @@ def sql(lbd):
                 WHERE CAST([Start_Date] AS  DATE) = @date
             ) as nic_raw
         WHERE top_disp = 1
-        AND Skill_Name in ('CC_Chart_Finder', 'CC_Cross_Reference')
+        AND Skill_Name in ('CC_ChartFinder', 'CC_Cross_Reference')
     ),
 
     project AS (
