@@ -1,8 +1,10 @@
+from abc import ABC, abstractmethod
+from dataclasses import dataclass, field
 import pandas as pd
 import sys, os
-import pyodbc
 import numpy as np
 import time
+import sqlalchemy
 
 from datetime import date
 from pathlib import Path
@@ -53,14 +55,22 @@ class MyDfInsert:
             crsr = self._cnxn.cursor()
             crsr.execute(self._sql, params)
 
-def connection(servername):
-    ### Server Location ###
-    return  pyodbc.connect(f"""
-                            DRIVER={{SQL Server}};
-                            SERVER={servername}; 
-                            DATABASE=DWWorking; 
-                            Trusted_Connection=yes""", 
-                            autocommit=True)
+
+class Server(ABC):
+    @abstractmethod
+    def create_engine():
+        pass
+
+@dataclass
+class MSSQL:
+    server  : str
+    database: str
+    driver  : str = "ODBC Driver 17 for SQL Server"
+    engine  : sqlalchemy.engine = field(init=False)
+
+    def __post_init__(self) -> None:
+        self.engine = sqlalchemy.create_engine(
+        f"mssql+pyodbc://{self.server}/{self.database}?driver={self.driver}", fast_executemany=True)
 
 def clean_for_insert(load):
     load.rename({'parent':'Unique_Phone'}, axis=1, inplace=True)
@@ -78,85 +88,44 @@ def clean_for_insert(load):
     date_key    = dict.fromkeys(date_cols, 'datetime64[ns]')
     return df.astype(dict(int_key, **date_key))
 
-def batch_insert(servername, campaign_history, load_date, load):
-    cnxn = connection(servername)
+def before_insert(server:MSSQL, remove, lookup) -> None:
+    server.engine.execute(remove)
+    print(pd.read_sql(lookup, dwworking.engine))
 
-    crsr = cnxn.cursor()
-    ### Remove campaign_history's file ###
-    remove=f'''
-            DELETE
-            FROM [DWWorking].[dbo].[Call_Campaign]
-            WHERE Load_Date < '{campaign_history}'
-            OR Load_Date = '{load_date}'
-            '''
-    ### Remove yesterday's file ###
-    crsr.execute(remove)
-
-    # pull whats in the server
-    lookup = '''
-            SELECT
-                [Load_Date] 
-                ,count([Load_Date]) AS Count
-            FROM [DWWorking].[dbo].[Call_Campaign]
-            GROUP BY [Load_Date]
-            ORDER BY [Load_Date];
-            '''
-    print(pd.read_sql(lookup, cnxn))
-
-    df = clean_for_insert(load)
-    print(df)
-
+def sql_insert(load, server: MSSQL, table):
     # ask to go forward with insert
     if input("Enter(y/n): ") == 'y':
         pass
     else:
         raise SystemExit
-    
-
     ### Load file ###
-
-
-    add = f"INSERT INTO [DWWorking].[dbo].[Call_Campaign] ({','.join([x for x in df.columns])})"
-
     t0 = time.time()
     ### Add today's file #
-    MyDfInsert(cnxn, add, df, rows_per_batch=250)
-
-    print()
+    load.to_sql(table, server.engine, index=False, if_exists="append")
     print(f'Inserts completed in {time.time() - t0:.2f} seconds.')
-    cnxn.close()
 
 if __name__ == "__main__":
-    import secret
-    from zipfile import ZipFile
-    import pyarrow.csv as csv
-
-    servername  = secret.servername
     file = Path(__file__).resolve()  
     package_root_directory = file.parents[1]  
     sys.path.append(str(package_root_directory))
-
-    from pipeline.tables import tables
-    from pipeline.etc import next_business_day, x_Bus_Day_ago
-    date_format = '%Y-%m-%d'
-    today = date.today()
-    today_str = today.strftime(date_format)
-    yesterday = x_Bus_Day_ago(1).strftime(date_format)
-    tomorrow = next_business_day(today)
-    tomorrow_str = tomorrow.strftime(date_format)
+    from pipeline.etc import Business_Days, x_Bus_Day_ago
+    from server.queries.call_campaign_insert import sql
+    buzday = Business_Days()
+    
+    day = buzday.tomorrow_str
+    
     extract = Path('data/load')
-    file = extract / f'{today_str}.zip'
-    # file = extract / f'{tomorrow_str}.zip'
-    # file = f'{today_str}.zip'
+    file = extract / f'{day}.zip'
+    df = pd.read_csv(file)
 
-    with ZipFile(file, 'r') as zips:
-        zips.extractall(extract)
-        file = extract / zips.namelist()[0]
-        df = csv.read_csv(file).to_pandas()
-        os.remove(file)
+    server      = 'EUS1PCFSNAPDB01'
+    database    = 'DWWorking'
+    table       = 'Call_Campaign'
 
-    # df = tables('pull','na', file, Path('data/load'))
-    batch_insert(servername,
-                x_Bus_Day_ago(10).strftime(date_format),
-                tomorrow_str,
-                df)
+    dwworking   = MSSQL(server, database)
+
+    load = clean_for_insert(df)
+    load_date = ''.join(df.Load_Date.unique())
+    remove, lookup = sql(x_Bus_Day_ago(10), load_date)
+    before_insert(dwworking, remove, lookup)
+    sql_insert(load, dwworking, table)
