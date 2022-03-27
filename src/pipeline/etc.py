@@ -109,20 +109,12 @@ def Next_N_BD(start, N):
 
 @dataclass
 class Business_Days:
-    yesterday: datetime
-    yesterday_str: str
-    today: datetime
-    today_str: str
-    now: datetime
-    tomorrow: datetime
-    tomorrow_str: str
+    date_format     : str       = '%Y-%m-%d'
+    yesterday       : datetime  = x_Bus_Day_ago(1)
+    yesterday_str   : str       = x_Bus_Day_ago(1).strftime(date_format)
+    today           : datetime  = date.today()
+    today_str       : str       = date.today().strftime(date_format)
+    now             : datetime  = time.time()
+    tomorrow        : datetime  = next_business_day(today)
+    tomorrow_str    : str       = next_business_day(today).strftime(date_format)
 
-def dates(date_format): 
-    return Business_Days(
-                         x_Bus_Day_ago(1)
-                        ,x_Bus_Day_ago(1).strftime(date_format)
-                        ,date.today()
-                        ,date.today().strftime(date_format)
-                        ,time.time()
-                        ,next_business_day(today)
-                        ,next_business_day(today).strftime(date_format))
