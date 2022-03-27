@@ -5,20 +5,23 @@ import pipeline.clean
 import pipeline.score
 import pipeline.sprint_schedule
 import pipeline.skills
-from pipeline.etc import daily_piv, time_check, x_Bus_Day_ago, dates
+from pipeline.etc import daily_piv, time_check, x_Bus_Day_ago, Business_Days
 from pipeline.tables import tables, zipfiles, contact_counts
 
 import server.query, server.insert, server.secret
 import server.queries.MasterSiteId
 import server.queries.reschedule
 import server.queries.optum_assigned
+import server.queries.call_campaign_insert
+from server.insert import clean_for_insert, MSSQL, before_insert, sql_insert
+
 import log.log as log
 
 servername  = server.secret.servername
 database    = server.secret.database
 
 date_format = '%Y-%m-%d'
-BusinessDay = dates(date_format)
+BusinessDay = Business_Days
 
 def main(test='n', msid='n', sample='n'):
     ### load & transform
@@ -93,7 +96,17 @@ def main(test='n', msid='n', sample='n'):
         ### reporting
         time_check(BusinessDay.now, 'Save files')
         ### insert into server ###
-        server.insert.batch_insert(servername, x_Bus_Day_ago(10).strftime(date_format), BusinessDay.tomorrow_str, scored)
+        server_name = 'EUS1PCFSNAPDB01'
+        database    = 'DWWorking'
+        table       = 'Call_Campaign'
+        dwworking   = MSSQL(server_name, database)
+
+        load = clean_for_insert(scored)
+        load_date = ''.join(scored.Load_Date.unique())
+        remove, lookup = server.queries.call_campaign_insert.sql(x_Bus_Day_ago(10), load_date)
+        before_insert(dwworking, remove, lookup)
+        sql_insert(load, dwworking, table)
+
         contact_counts(scored)
         time_check(BusinessDay.now, 'batch_insert')
 
