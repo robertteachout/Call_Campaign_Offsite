@@ -86,14 +86,10 @@ class MSSQL(Server):
     database: str
     driver  : str = "ODBC Driver 17 for SQL Server"
 
-    def create_engine(self) -> sqlalchemy.engine:
+    def create_engine(self):
         return sqlalchemy.create_engine(
-            f"mssql+pyodbc://{self.server}/{self.database}?driver={self.driver}", fast_executemany=True)
-    
-    # def __post_init__(self) -> None:
-    #     self.engine = sqlalchemy.create_engine(
-    #     f"mssql+pyodbc://{self.server}/{self.database}?driver={self.driver}", fast_executemany=True)
-
+            f"mssql+pyodbc://{self.server}/{self.database}?driver={self.driver}"
+            , fast_executemany=True)
 
 def before_insert(engine:sqlalchemy.engine, remove, lookup) -> None:
     engine.execute(remove)
