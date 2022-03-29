@@ -56,7 +56,7 @@ def contact_counts(df):
         temp['Total'] = temp.ChartFinder + temp.MSID
         temp.date = pd.to_datetime(temp.date)
         temp['months'] = temp.date.apply(lambda x:x.strftime('%m'))
-        final = final.append(temp, ignore_index=True).drop_duplicates(subset='data')
+        final = final.append(temp, ignore_index=True).drop_duplicates(subset='date')
 
         avgs = final.groupby('months')['Total'].mean().astype(int).to_dict()
         final['monthly_avg'] = final.months.map(avgs)
@@ -82,3 +82,5 @@ if __name__ == "__main__":
     df= pd.DataFrame({'test':[1,2,3,4]})
     print(df)
     # zipfiles('push', df, 'test')
+    df = tables('pull','na','../load/2022-03-25.zip')
+    contact_counts(df)
