@@ -92,6 +92,12 @@ def split(df):
 
     skill_rank = {'meet_target_sla':True, 'no_call':False, 'ToGoCharts':False} 
     unique = skill_score(unique, 'CC_Adhoc8', skill_rank)
+
+    f1 = unique.Skill == 'CC_Adhoc3'
+    f2 = unique.Outreach_Status == 'Scheduled'
+    unique['Skill'] = np.where(f1 & f2, 'CC_ChartFinder',unique.Skill)
+    skill_rank = {'no_call':False, 'age':False} 
+    unique = skill_score(unique, 'CC_Adhoc3', skill_rank)
     ### Piped ORGs attached to phone numbers
     f0 = unique.Project_Type.isin(['Chart Sync']) # 'ACA-PhysicianCR'
     unique['Score'] = np.where(f0, 1000000, unique.Score)
