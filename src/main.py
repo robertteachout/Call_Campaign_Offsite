@@ -100,12 +100,13 @@ def main(test='n', msid='n', sample='n'):
         database    = 'DWWorking'
         table       = 'Call_Campaign'
         dwworking   = MSSQL(server_name, database)
+        dw_engine = dwworking.create_engine()
 
         load = clean_for_insert(scored)
         load_date = ''.join(scored.Load_Date.unique())
         remove, lookup = server.queries.call_campaign_insert.sql(x_Bus_Day_ago(10), load_date)
-        before_insert(dwworking, remove, lookup)
-        sql_insert(load, dwworking, table)
+        before_insert(dw_engine, remove, lookup)
+        sql_insert(load, dw_engine, table)
 
         contact_counts(scored)
         time_check(BusinessDay.now, 'batch_insert')
