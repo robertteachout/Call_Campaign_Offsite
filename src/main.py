@@ -69,19 +69,19 @@ def main(test='n', msid='n', sample='n'):
     time_check(BusinessDay.now, 'clean')
 
     # optum assigned inventory
-    optum_assigned_sql = server.queries.optum_assigned.sql()
-    optum_assigned =  pd.read_sql(optum_assigned_sql, dw_engine)
-    log.df_len('optum_assigned', optum_assigned)
-    time_check(BusinessDay.now, 'optum_assigned')
-    # add filter with above query
-    org_list = optum_assigned.OutreachID.to_list()
-    f1 = clean.OutreachID.isin(org_list)
-    clean['optum_assigned'] = np.where(f1, 1, 0)
+    # optum_assigned_sql = server.queries.optum_assigned.sql()
+    # optum_assigned =  pd.read_sql(optum_assigned_sql, dw_engine)
+    # log.df_len('optum_assigned', optum_assigned)
+    # time_check(BusinessDay.now, 'optum_assigned')
+    # # add filter with above query
+    # org_list = optum_assigned.OutreachID.to_list()
+    # f1 = clean.OutreachID.isin(org_list)
+    # clean['optum_assigned'] = np.where(f1, 1, 0)
 
-    dft = pd.read_csv('data/table_drop/table.csv')
-    f1 = clean.OutreachID.isin(dft.OutreachID.to_list())
-    # f2 = clean.Retrieval_Team  == 'Genpact Offshore'
-    clean['temp_jen'] = np.where(f1, 1, 0)
+    # dft = pd.read_csv('data/table_drop/table.csv')
+    # f1 = clean.OutreachID.isin(dft.OutreachID.to_list())
+    # # f2 = clean.Retrieval_Team  == 'Genpact Offshore'
+    # clean['temp_jen'] = np.where(f1, 1, 0)
     
     ### reskill inventory
     skilled = pipeline.skills.complex_skills(clean)

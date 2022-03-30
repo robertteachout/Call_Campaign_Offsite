@@ -172,5 +172,5 @@ def complex_skills(df):
     f = emr_rm(f)
     f = HIH_rm(f)
     f = Onsite_rm(f)
-    f = optum_assigned(f)
+    # f = optum_assigned(f)
     return f
