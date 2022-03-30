@@ -8,12 +8,12 @@ import pipeline.skills
 from pipeline.etc import daily_piv, time_check, x_Bus_Day_ago, Business_Days
 from pipeline.tables import tables, zipfiles, contact_counts
 
-import server.query, server.insert, server.secret
+import server.connections, server.insert, server.secret
 import server.queries.MasterSiteId
 import server.queries.reschedule
 import server.queries.optum_assigned
 import server.queries.call_campaign_insert
-from server.insert import clean_for_insert, MSSQL, before_insert, sql_insert
+from server.insert import clean_for_insert, before_insert, sql_insert
 
 import log.log as log
 
@@ -24,6 +24,12 @@ date_format = '%Y-%m-%d'
 BusinessDay = Business_Days
 
 def main(test='n', msid='n', sample='n'):
+    server_name = 'EUS1PCFSNAPDB01'
+    database    = 'DWWorking'
+    table       = 'Call_Campaign'
+    dwworking   = server.connections.MSSQL(server_name, database)
+    dw_engine   = dwworking.create_engine()
+
     ### load & transform
     if test == 'y':
         filename = str(f'Call_Campaign_v4_{BusinessDay.yesterday.strftime("%m%d")}*')
@@ -40,7 +46,7 @@ def main(test='n', msid='n', sample='n'):
     
     # ## Reschedules
     # reschedule_sql = server.queries.reschedule.sql()
-    # reSchedule = server.query.query(servername, database,  reschedule_sql, 'Add reschedules')
+    # reSchedule = pd.read_sql(reschedule_sql, dw_engine)
     # log.df_len('reSchedule', reSchedule)
 
     # df_full0 = tested.append(reSchedule, ignore_index = True)
@@ -49,7 +55,7 @@ def main(test='n', msid='n', sample='n'):
     ### Master Site ID
     if msid == 'y':
         mastersite_sql = server.queries.MasterSiteId.sql()
-        mastersite = server.query.query(servername, database,  mastersite_sql, 'Add MasterSiteId')
+        mastersite = pd.read_sql(mastersite_sql, dw_engine)
         tables('push',  mastersite,     'mastersite.csv')
 
     mastersite = tables('pull',  'na',     'mastersite.csv')
@@ -64,7 +70,7 @@ def main(test='n', msid='n', sample='n'):
 
     # optum assigned inventory
     optum_assigned_sql = server.queries.optum_assigned.sql()
-    optum_assigned = server.query.query(servername, database,  optum_assigned_sql, 'Add optum_assigned')
+    optum_assigned =  pd.read_sql(optum_assigned_sql, dw_engine)
     log.df_len('optum_assigned', optum_assigned)
     time_check(BusinessDay.now, 'optum_assigned')
     # add filter with above query
@@ -96,12 +102,6 @@ def main(test='n', msid='n', sample='n'):
         ### reporting
         time_check(BusinessDay.now, 'Save files')
         ### insert into server ###
-        server_name = 'EUS1PCFSNAPDB01'
-        database    = 'DWWorking'
-        table       = 'Call_Campaign'
-        dwworking   = MSSQL(server_name, database)
-        dw_engine = dwworking.create_engine()
-
         load = clean_for_insert(scored)
         load_date = ''.join(scored.Load_Date.unique())
         remove, lookup = server.queries.call_campaign_insert.sql(x_Bus_Day_ago(10), load_date)
