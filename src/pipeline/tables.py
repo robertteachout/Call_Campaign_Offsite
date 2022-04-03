@@ -25,6 +25,36 @@ def tables(push_pull, table, name, path=table_path):
     else:
         table.to_csv(table_path / name, sep=',', index=False)
 
+def read_compressed(file_path):
+    match str(file_path).split('.')[-1]:
+        case 'zip':
+            with ZipFile(file_path, 'r') as zip:
+                with zip.open(zip.namelist()[0], 'r') as file:
+                        return csv.read_csv(file).to_pandas()
+        case 'gz':
+            return csv.read_csv(file_path).to_pandas()
+
+def write_compressed(file_path, table):
+    match str(file_path).split('.')[-1]:
+        case 'zip':
+            table.to_csv(file_path, compression='zip', sep=',',index=False)
+        case 'gz':
+            table.to_csv(file_path, compression='gzip',index=False)
+
+def new_zipfiles(filename, path=Path("data/load"), table='read'):
+        extract_path = path / filename
+        if isinstance(table, str):
+            try:    
+                read_compressed(extract_path)
+            except:
+                return pd.read_csv(extract_path)
+
+        elif isinstance(table, pd.DataFrame):
+            try:
+                write_compressed(extract_path, table)
+            except:
+                table.to_csv(extract_path, index=False)
+
 ### push_pull zip file ###
 def zipfiles(push_pull, table, filename, extract=extract_path):
     if push_pull == 'pull':
