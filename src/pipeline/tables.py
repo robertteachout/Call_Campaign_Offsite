@@ -1,36 +1,45 @@
 from pathlib import Path
-import os, sys
-# import pyarrow as pa
+import pyarrow as pa
 import pyarrow.csv as csv
 from zipfile import ZipFile
-
+from .etc import Business_Days
 
 paths = Path(__file__).parent.absolute().parent.absolute().parent.absolute()
-from datetime import date
-today = date.today()
 
 from glob import glob
 import pandas as pd
-import os
 
 table_path   = paths / "data/table_drop"
-extract_path = paths / "data/extract"
 load         = paths / "data/load"
 
+Bus_day = Business_Days()
+
+def extract_file_name(test):
+    extract = Path('data/extract')
+    if test == 'y':
+        file_search = str(f'Call_Campaign_v4_{Bus_day.yesterday.strftime("%m%d")}*')
+    else:
+        file_search = str(f'Call_Campaign_v4_{Bus_day.today.strftime("%m%d")}*')
+    
+    file_match  = list(extract.glob(file_search))[0]
+    file_name   = str(file_match).split('\\')[-1]
+    return extract, file_name
+
 ### Input/output static tables ###
-def tables(push_pull, table, name, path=table_path):
+def tables(push_pull, table, name, path=Path('data/extract')):
     if push_pull == 'pull':
         # return csv.read_csv(paths / path / name)
         return pd.read_csv(paths / path / name, sep=',', on_bad_lines='warn', low_memory=False)#, engine="python",)
     else:
         table.to_csv(table_path / name, sep=',', index=False)
 
-def read_compressed(file_path):
+def read_compressed(file_path, sep):
     match str(file_path).split('.')[-1]:
         case 'zip':
             with ZipFile(file_path, 'r') as zip:
-                with zip.open(zip.namelist()[0], 'r') as file:
-                        return csv.read_csv(file).to_pandas()
+                file_name = zip.namelist()[0]
+                with zip.open(file_name, 'r') as file:
+                        return csv.read_csv(file,parse_options=csv.ParseOptions(delimiter=sep)).to_pandas()
         case 'gz':
             return csv.read_csv(file_path).to_pandas()
 
@@ -39,40 +48,28 @@ def write_compressed(file_path, table):
         case 'zip':
             table.to_csv(file_path, compression='zip', sep=',',index=False)
         case 'gz':
-            table.to_csv(file_path, compression='gzip',index=False)
-
-def new_zipfiles(filename, path=Path("data/load"), table='read'):
+            try:
+                pa_table = pa.Table.from_pandas(table)
+            except Exception as e:
+                print(e)
+            with pa.CompressedOutputStream(file_path, 'gzip') as out:
+                    csv.write_csv(pa_table, out)
+### push_pull zip file ###
+def compressed_files(filename, path=Path("data/load"), table='read', sep=','):
         extract_path = path / filename
         if isinstance(table, str):
             try:    
-                read_compressed(extract_path)
+                return read_compressed(extract_path, sep)
             except:
-                return pd.read_csv(extract_path)
+                print('slow')
+                return pd.read_csv(extract_path, sep=sep)
 
         elif isinstance(table, pd.DataFrame):
             try:
                 write_compressed(extract_path, table)
             except:
+                print('slow')
                 table.to_csv(extract_path, index=False)
-
-### push_pull zip file ###
-def zipfiles(push_pull, table, filename, extract=extract_path):
-    if push_pull == 'pull':
-        Extract_path = list(extract.glob(filename))[0]
-        # if re.search("copy", Extract_path): raise SystemExit
-        with ZipFile(Extract_path, 'r') as zip:
-                zip.extractall(Path(extract))
-                file = extract / zip.namelist()[0]
-                try:
-                    df = csv.read_csv(file, parse_options=csv.ParseOptions(delimiter='|'))
-                    os.remove(file)
-                except:
-                    os.remove(file)
-
-        return df.to_pandas()
-    else:
-        compression_options = dict(method='zip', archive_name=f'{filename}.csv')
-        table.to_csv(load / f'{filename}.zip', compression=compression_options, sep=',',index=False)
 
 def contact_counts(df):
     final = tables('pull', 'NA', 'monthly_average_contacts.csv')
@@ -109,8 +106,9 @@ def append_column(df, location, index=list(),join='left'):
     new.to_csv(location)
 
 if __name__ == "__main__":
-    df= pd.DataFrame({'test':[1,2,3,4]})
-    print(df)
-    # zipfiles('push', df, 'test')
-    df = tables('pull','na','../load/2022-03-25.zip')
-    contact_counts(df)
+    # df= pd.DataFrame({'test':[1,2,3,4]})
+    # print(df)
+    # # zipfiles('push', df, 'test')
+    # df = tables('pull','na','../load/2022-03-25.zip')
+    # contact_counts(df)
+    extract_file_name('y')
