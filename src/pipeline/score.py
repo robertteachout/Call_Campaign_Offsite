@@ -79,7 +79,7 @@ def split(df):
     status_map = {'Unscheduled':1, 'Past Due':2, 'Scheduled':3, 'PNP Released':0,'Escalated':0}
     unique['status_map'] = unique.Outreach_Status.map(status_map)
 
-    skill_rank = {'meet_target_sla':True,'status_map':True, 'no_call':False, 'age':False} 
+    skill_rank = {'meet_target_sla':True, 'no_call':False, 'age':False} 
     unique = skill_score(unique, 'CC_Adhoc3', skill_rank)
     ### Piped ORGs attached to phone numbers
     f0 = unique.Project_Type.isin(['Chart Sync']) # 'ACA-PhysicianCR'
