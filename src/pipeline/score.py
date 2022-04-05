@@ -58,6 +58,20 @@ def skill_score(df, skill, skill_rank):
     dump = rank(skill,'Score', ['Skill','parent'], skill_rank)
     return pd.concat([dump, df]).drop_duplicates(['OutreachID']).reset_index(drop= True)
 
+def custom_skills(table):
+    skills = [
+        { "CC_Adhoc7": {'meet_target_sla':True, 'no_call':False, 'age':False} },
+        { "CC_Adhoc8": {'meet_target_sla':True, 'Centene_HEDIS':True, 'no_call':False, 'ToGoCharts':False} },
+        { "CC_Adhoc3": {'meet_target_sla':True, 'no_call':False, 'age':False} },
+        { "CC_Adhoc3": {'meet_target_sla':True, 'no_call':False, 'age':False} },
+        { "CC_Genpact_Scheduling": {'meet_target_sla':True, 'aetna_comm':False,'no_call':False, 'age':False} },
+        { "CC_ChartFinder": {'meet_target_sla':True, 'wellmed':False,'no_call':False, 'age':False} },
+    ]
+    for skill in skills:    
+        for skill_name , rank_order in skill.items():
+            table = skill_score(table, skill_name, rank_order)
+    return table
+
 def split(df):
     df['Outreach ID'] = df['OutreachID'].astype(str)
    
@@ -70,17 +84,8 @@ def split(df):
     unique =  pd.concat([scored, msid_scored]).drop_duplicates(['OutreachID']).reset_index(drop= True)
 
     ### skille that need special treatment
-    skill_rank = {'meet_target_sla':True, 'no_call':False, 'age':False} 
-    unique = skill_score(unique, 'CC_Adhoc7', skill_rank)
+    unique = custom_skills(unique)
 
-    skill_rank = {'meet_target_sla':True, 'no_call':False, 'ToGoCharts':False} 
-    unique = skill_score(unique, 'CC_Adhoc8', skill_rank)
-
-    status_map = {'Unscheduled':1, 'Past Due':2, 'Scheduled':3, 'PNP Released':0,'Escalated':0}
-    unique['status_map'] = unique.Outreach_Status.map(status_map)
-
-    skill_rank = {'meet_target_sla':True, 'no_call':False, 'age':False} 
-    unique = skill_score(unique, 'CC_Adhoc3', skill_rank)
     ### Piped ORGs attached to phone numbers
     f0 = unique.Project_Type.isin(['Chart Sync']) # 'ACA-PhysicianCR'
     unique['Score'] = np.where(f0, 1000000, unique.Score)
