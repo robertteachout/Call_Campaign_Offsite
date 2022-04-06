@@ -21,16 +21,20 @@ def project_rank(df, buz_line, rank, temp):
     temp[f'temp_rank{rank}'] = False
     return df, temp
 
-def campaign_rank_cycle(temp):
-    rank_cols = {'meet_target_sla':True, **temp, 'no_call':False,'age':False, 'togo_bin':False} 
-    rank_final = {'meet_target_sla':True, **temp,  'no_call':False, 'age_sort':False, 'togo_bin':False} 
-
 def stack_inventory(df, grouping):
     business = ciox_busines_lines()
     temp = {}
     for index, buz_line in enumerate(business):
         # create column on dataframe
         df, temp = project_rank(df, buz_line, index, temp) 
+
+    # for chartfinder inventory search projects and move to adhoc skills
+    if grouping == 'PhoneNumber':
+        for buz_line in business:
+            if buz_line.system == 'CC_ChartFinder':
+                f0 = df.Skill == buz_line.system
+                f1 = df.Project_Type.isin(buz_line.projects)
+                df.Skill = np.where(f0 & f1, buz_line.skill, df.Skill)
 
     rank_cols = {'meet_target_sla':True, **temp, 'no_call':False,'age_sort':False, 'ToGoCharts':False} 
     # group by phone number or msid & rank highest value org
@@ -40,26 +44,21 @@ def stack_inventory(df, grouping):
     f1 = find_parent.overall_rank == 1
     find_parent['parent'] = np.where(f1, 1, 0)
 
-    # re-rank parent orgs
-    rank_parent = rank(find_parent,'Score', ['Skill','parent'], rank_cols)
-    
-    if grouping == 'PhoneNumber':
-        for buz_line in business:
-            if buz_line.system == 'CC_ChartFinder':
-                f0 = rank_parent.Skill == buz_line.system
-                f1 = rank_parent.Project_Type.isin(buz_line.projects)
-                rank_parent.Skill = np.where(f0 & f1, buz_line.skill, rank_parent.Skill)
-
-
-    full_rank = rank(rank_parent,'Score', ['Skill','parent'], rank_cols)
+    # rank parent orgs
+    full_rank = rank(find_parent,'Score', ['Skill','parent'], rank_cols)
     full_rank.OutreachID = full_rank.OutreachID.apply(lambda x: str(x))
     full_rank['Matchees'] = full_rank.groupby(['Skill', grouping])['OutreachID'].transform(lambda x : '|'.join(x)).apply(lambda x: x[:3000])
     return full_rank
 
 def skill_score(df, skill, skill_rank):
-    skill = df[df.Skill == skill].copy()
-    dump = rank(skill,'Score', ['Skill','parent'], skill_rank)
-    return pd.concat([dump, df]).drop_duplicates(['OutreachID']).reset_index(drop= True)
+    # check if skill is active & ranking columns exists
+    if df.Skill.isin([skill]).any() and set(skill_rank.keys()).issubset(df.columns):
+        skill = df[df.Skill == skill].copy()
+        dump = rank(skill,'Score', ['Skill','parent'], skill_rank)
+        return pd.concat([dump, df]).drop_duplicates(['OutreachID']).reset_index(drop= True)
+    else:
+        print(f'Check Skill: {skill} | validate columns: {set(skill_rank.keys())}')
+        raise SystemExit
 
 def custom_skills(table, skills):
     for skill in skills:    
