@@ -57,16 +57,6 @@ def rm_schedule(df, ls):
     df['Skill'] = np.where(f1 & f2 & ~f3, 'schedule_pull', df['Skill'])
     return df
 
-def adhoc2(df):
-    projects = ['AHN','CDQI HCR','NAMMCA','OC-AZ','OC-NV','OCN-WA','OC-UT','Reliant','Riverside', 'WellMed']
-    f1 = df['Project_Type'].isin(projects)
-    f2 = df['Last_Call'].isna()
-    f3 = df['age_category'] >= 10
-    f4 = df['Outreach_Status'] != 'Scheduled'
-
-    df['Skill'] = np.where(f1 & (f2 | f3) & f4, 'CC_Adhoc1', df['Skill'])
-    return df
-
 def adhoc1(df): 
     f1 = df['Project_Type'].isin(['Aetna Commercial','Aetna Medicare'])
     ls = df[f1].sort_values('age', ascending=False)['OutreachID'][:3000]
