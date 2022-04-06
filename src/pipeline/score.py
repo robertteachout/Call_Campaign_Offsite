@@ -1,6 +1,9 @@
+import json
+from json.decoder import JSONDecodeError
 import pandas as pd
 import numpy as np
 from .business_prioirty import ciox_busines_lines
+from .tables import CONFIG_PATH
 
 def rank(df=pd.DataFrame, new_col=str, groups=list, rank_cols=dict):
     sort_columns = groups + [*rank_cols.keys()]
@@ -58,15 +61,7 @@ def skill_score(df, skill, skill_rank):
     dump = rank(skill,'Score', ['Skill','parent'], skill_rank)
     return pd.concat([dump, df]).drop_duplicates(['OutreachID']).reset_index(drop= True)
 
-def custom_skills(table):
-    skills = [
-        { "CC_Adhoc7": {'meet_target_sla':True, 'no_call':False, 'age':False} },
-        { "CC_Adhoc8": {'meet_target_sla':True, 'Centene_HEDIS':True, 'no_call':False, 'ToGoCharts':False} },
-        { "CC_Adhoc3": {'meet_target_sla':True, 'no_call':False, 'age':False} },
-        { "CC_Adhoc3": {'meet_target_sla':True, 'no_call':False, 'age':False} },
-        { "CC_Genpact_Scheduling": {'meet_target_sla':True, 'aetna_comm':False,'no_call':False, 'age':False} },
-        { "CC_ChartFinder": {'meet_target_sla':True, 'wellmed':False,'no_call':False, 'age':False} },
-    ]
+def custom_skills(table, skills):
     for skill in skills:    
         for skill_name , rank_order in skill.items():
             table = skill_score(table, skill_name, rank_order)
@@ -83,8 +78,15 @@ def split(df):
     msid_scored = stack_inventory(msid, 'MasterSiteId')
     unique =  pd.concat([scored, msid_scored]).drop_duplicates(['OutreachID']).reset_index(drop= True)
 
-    ### skille that need special treatment
-    unique = custom_skills(unique)
+    ### skills that need special treatment
+    try:
+        with open(CONFIG_PATH / 'custom_skill_rank.json') as json_file:
+            skills = json.load(json_file)
+    except JSONDecodeError:  # includes simplejson.decoder.JSONDecodeError
+        skills = None
+    
+    if skills != None:
+        unique = custom_skills(unique, skills)
 
     ### Piped ORGs attached to phone numbers
     f0 = unique.Project_Type.isin(['Chart Sync']) # 'ACA-PhysicianCR'
