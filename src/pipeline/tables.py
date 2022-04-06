@@ -9,6 +9,8 @@ paths = Path(__file__).parent.absolute().parent.absolute().parent.absolute()
 from glob import glob
 import pandas as pd
 
+CONFIG_PATH = paths / "src/config"
+
 table_path   = paths / "data/table_drop"
 load         = paths / "data/load"
 
@@ -26,7 +28,7 @@ def extract_file_name(test):
     return extract, file_name
 
 ### Input/output static tables ###
-def tables(push_pull, table, name, path=Path('data/extract')):
+def tables(push_pull, table, name, path=Path('data/table_drop')):
     if push_pull == 'pull':
         # return csv.read_csv(paths / path / name)
         return pd.read_csv(paths / path / name, sep=',', on_bad_lines='warn', low_memory=False)#, engine="python",)
@@ -46,7 +48,9 @@ def read_compressed(file_path, sep):
 def write_compressed(file_path, table):
     match str(file_path).split('.')[-1]:
         case 'zip':
-            table.to_csv(file_path, compression='zip', sep=',',index=False)
+            filename = str(file_path).split('\\')[-1][-4:]
+            compression_options = dict(method='zip', archive_name=f'{filename}.csv')
+            table.to_csv(file_path, compression=compression_options, sep=',',index=False)
         case 'gz':
             try:
                 pa_table = pa.Table.from_pandas(table)
@@ -54,6 +58,7 @@ def write_compressed(file_path, table):
                 print(e)
             with pa.CompressedOutputStream(file_path, 'gzip') as out:
                     csv.write_csv(pa_table, out)
+
 ### push_pull zip file ###
 def compressed_files(filename, path=Path("data/load"), table='read', sep=','):
         extract_path = path / filename
