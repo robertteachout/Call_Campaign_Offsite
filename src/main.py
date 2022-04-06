@@ -50,6 +50,7 @@ def main(test='n', msid='n', sample='n'):
 
     mastersite = tables('pull',  'na',     'mastersite.csv')
     mapped = pd.merge(tested, mastersite, how='left', on='OutreachID')
+    mapped.MasterSiteId = mapped.MasterSiteId.fillna(1000838)
     log.df_len('MasterSiteId', mapped)
     time_check(Bus_day.now, 'msid map')
 
@@ -100,9 +101,8 @@ if __name__ == "__main__":
         return input(f"\n{q}(y/n): ")
 
     if question('questions') == 'y':
-        test=question('test')
-        msid=question('msid')
-        sample=question('save')
+        answer = question('test, msid, save (yyy): ')
+        test,msid,sample = [a for a in answer]
         main(test,msid,sample)
     else:
         main()
