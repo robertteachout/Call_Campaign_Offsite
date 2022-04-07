@@ -5,6 +5,7 @@ def formate_col(df, col, type):
     if type == 'date':
         df[col] = pd.to_datetime(df[col], errors='coerce').dt.date
     elif type == 'num':
+        # df[col].astype(str).replace('\.0', '', regex=True)
         df[col] = pd.to_numeric(df[col], errors='coerce', downcast="integer")
     else:
         print('add new type')
@@ -13,6 +14,7 @@ def formate_col(df, col, type):
 def format(df):
     df.columns = df.columns.str.replace('/ ','')
     df = df.rename(columns=lambda x: x.replace(' ', "_"))
+    df = formate_col(df, 'Zip', 'num')
     df = formate_col(df, 'PhoneNumber', 'num')
     df = formate_col(df, 'Site_Clean_Id', 'num')
     df = formate_col(df, 'Last_Call', 'date')
@@ -83,6 +85,15 @@ def add_columns(df, tomorrow_str):
     # core phone number
     f1 = df.MSI_Phone.isna()
     df['MSI_Phone'] = np.where(f1, df.PhoneNumber, df.MSI_Phone)
+
+    f1 = df.Project_Type == "Centene HEDIS"
+    df['Centene_HEDIS'] = np.where(f1, 1, 0)
+
+    f1 = df.Project_Type == "Aetna Commercial"
+    df['aetna_comm'] = np.where(f1, 1, 0)
+
+    f1 = df.Project_Type == "WellMed"
+    df['wellmed'] = np.where(f1, 1, 0)
 
     timezones = sorted(df.TimeZoneKey.replace('','B').unique())
     timezone_map = dict(zip(timezones, range(len(timezones))))
