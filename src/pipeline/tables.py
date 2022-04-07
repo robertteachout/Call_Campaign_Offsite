@@ -48,7 +48,7 @@ def read_compressed(file_path, sep):
 def write_compressed(file_path, table):
     match str(file_path).split('.')[-1]:
         case 'zip':
-            filename = str(file_path).split('\\')[-1][-4:]
+            filename = str(file_path).split('\\')[-1][:-4]
             compression_options = dict(method='zip', archive_name=f'{filename}.csv')
             table.to_csv(file_path, compression=compression_options, sep=',',index=False)
         case 'gz':
