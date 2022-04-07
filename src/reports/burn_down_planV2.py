@@ -1,7 +1,9 @@
-import numpy as np
-import pandas as pd
 import re
 from dataclasses import dataclass
+
+import numpy as np
+import pandas as pd
+
 
 @dataclass
 class business_lines:
@@ -83,6 +85,7 @@ def sites(df0, projects, project=None):
 
 if __name__ == "__main__":
     from datetime import date
+
     from pipeline.tables import tables
     today = date.today()
     today_str = today.strftime('%Y-%m-%d')

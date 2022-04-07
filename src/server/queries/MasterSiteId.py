@@ -1,4 +1,3 @@
-
 def sql():
     ### Pull from db
     # SELECT DISTINCT
@@ -11,8 +10,8 @@ def sql():
     # WHERE c.[Load_Date] = CAST(GETDATE() AS DATE)
     # AND  msi.MSId = 1000838
     # OR  msi.MSId IS NULL
-    
-    sql = '''
+
+    sql = """
     SELECT DISTINCT
          msi.[MSId] MasterSiteId
         ,msi.outreachid OutreachID
@@ -30,5 +29,5 @@ def sql():
         WHERE msic.[Primary] = 1
         ) AS msic
         ON msic.MSId = msi.[MSId]
-    '''
+    """
     return sql

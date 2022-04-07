@@ -1,5 +1,5 @@
 def sql(date):
-    sql = f'''
+    sql = f"""
     With cc as (
       SELECT
         c.OutreachID
@@ -57,5 +57,5 @@ def sql(date):
     LEFT JOIN DW_Operations.dbo.DimProjectType pt ON pt.ProjectTypeId = fc.ProjectTypeId
     LEFT JOIN nic ON nic.OutreachID = cc.OutreachID
     LEFT JOIN cf_flag ON cf_flag.OutreachID = cc.OutreachID      
-    '''
+    """
     return sql

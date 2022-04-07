@@ -1,5 +1,5 @@
 def sql():
-	sql = """
+    sql = """
 	SELECT DISTINCT
          m.[Outreach ID]										AS [OutreachID]
 		,m.[Audit Type] 										
@@ -26,4 +26,4 @@ def sql():
 		AND m.[Project Due Date] > GETDATE()
         AND sc.PrimaryFlag = 1
 	"""
-	return sql
+    return sql

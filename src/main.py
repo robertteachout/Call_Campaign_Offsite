@@ -1,21 +1,22 @@
 import pandas as pd
 
+import log.log as log
 import pipeline.clean
 import pipeline.score
-import pipeline.sprint_schedule
 import pipeline.skills
-from pipeline.etc import daily_piv, time_check, x_Bus_Day_ago, Business_Days
-from pipeline.tables import tables, compressed_files, contact_counts, extract_file_name
-
-import server.queries.MasterSiteId
-import server.queries.reschedule
-import server.queries.optum_assigned
+import pipeline.sprint_schedule
+import server.connections
+import server.insert
 import server.queries.call_campaign_insert
-from server.insert import clean_for_insert, before_insert, sql_insert
-import log.log as log
+import server.queries.MasterSiteId
+import server.queries.optum_assigned
+import server.queries.reschedule
+from pipeline.etc import Business_Days, daily_piv, time_check, x_Bus_Day_ago
+from pipeline.tables import (compressed_files, contact_counts,
+                             extract_file_name, tables)
+from server.insert import before_insert, clean_for_insert, sql_insert
 
 Bus_day = Business_Days()
-import server.connections, server.insert
 
 
 def main(test="n", msid="n", sample="n"):

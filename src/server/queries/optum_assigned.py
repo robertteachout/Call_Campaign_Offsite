@@ -1,4 +1,3 @@
-
 def sql():
     return """
     WITH base AS (

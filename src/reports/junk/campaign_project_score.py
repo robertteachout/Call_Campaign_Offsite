@@ -1,29 +1,33 @@
-import pandas as pd
-import numpy as np
-from datetime import datetime, date
+from datetime import date, datetime
 
-from pipeline.tables import tables, append_column
+import numpy as np
+import pandas as pd
+
 from pipeline.etc import last_business_day, next_business_day
+from pipeline.tables import append_column, tables
 
 today = date.today()
-today_str = today.strftime("%Y-%m-%d") 
+today_str = today.strftime("%Y-%m-%d")
 
 yesterday = last_business_day(today)
-yesterday_str = yesterday.strftime("%Y-%m-%d") 
+yesterday_str = yesterday.strftime("%Y-%m-%d")
 
 tomorrow = next_business_day(today)
-tomorrow_str = tomorrow.strftime("%Y-%m-%d") 
+tomorrow_str = tomorrow.strftime("%Y-%m-%d")
+
 
 def main(today_str=today_str):
-    df = tables('pull', 'na', f'{today_str}.zip','data/load/')
+    df = tables("pull", "na", f"{today_str}.zip", "data/load/")
     work = {
-        'CC_ChartFinder':8000,
-        'CC_Cross_Reference':2000,
+        "CC_ChartFinder": 8000,
+        "CC_Cross_Reference": 2000,
         # 'CC_Adhoc2':1000
     }
     # get top x in each skill
-    filters = '|'.join([f"(Skill == '{i}' & Score < {j} & parent == 1)" for i, j in work.items()])
-    table = df.query(filters)#.PhoneNumber.tolist()
+    filters = "|".join(
+        [f"(Skill == '{i}' & Score < {j} & parent == 1)" for i, j in work.items()]
+    )
+    table = df.query(filters)  # .PhoneNumber.tolist()
     # filter skills
     # skills = '|'.join([f"(Skill == '{i}')" for i in work.keys()])
     # full =  df.query(skills)
@@ -32,9 +36,8 @@ def main(today_str=today_str):
     parent = df.query(filters)
     # pivot
     called = table.pivot_table(
-                            index=['Skill','Project_Type'], 
-                            values ='OutreachID', 
-                            aggfunc = ['count'])
+        index=["Skill", "Project_Type"], values="OutreachID", aggfunc=["count"]
+    )
     # clean pivot
     called.columns = called.columns.droplevel()
     name = today_str

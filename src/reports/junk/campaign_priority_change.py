@@ -1,10 +1,10 @@
+import os
+
 import pandas as pd
 import pyarrow as pa
 import pyarrow.csv as csv
 
-import os
-
-ls = [x for x in os.listdir('data/daily_priority') if x[0] == '2']
+ls = [x for x in os.listdir("data/daily_priority") if x[0] == "2"]
 final = pd.DataFrame()
 # for index,i in enumerate(ls):
 #     table = csv.read_csv(f'data/daily_priority/{i}')
@@ -24,18 +24,22 @@ final = pd.DataFrame()
 #     else:
 #         sub = orgs
 # print(final)
-for index,i in enumerate(ls):
+for index, i in enumerate(ls):
     print(i[:-4])
-    table = pd.read_csv(f'data/load/{i[:-4]}.zip')
-    df = table#.to_pandas()
+    table = pd.read_csv(f"data/load/{i[:-4]}.zip")
+    df = table  # .to_pandas()
     # orgs = set(df.OutreachID)
     # orgs = df[['Skill', 'OutreachID']]#.set_index('OutreachID').rename(columns={'Skill':f'Skill_{i[5:10]}'})
-    df = df[(df.Project_Type == 'ACA-PhysicianCR') & (df.Last_Call.isna()) & (df.Unique_Phone == 1)].copy()
-    piv = df.groupby('Skill').OutreachID.count().to_frame()
-    piv = piv.rename(columns={'OutreachID':f'{i[5:10]}'})
+    df = df[
+        (df.Project_Type == "ACA-PhysicianCR")
+        & (df.Last_Call.isna())
+        & (df.Unique_Phone == 1)
+    ].copy()
+    piv = df.groupby("Skill").OutreachID.count().to_frame()
+    piv = piv.rename(columns={"OutreachID": f"{i[5:10]}"})
     print(piv)
     if index != 0:
-        final = pd.merge(final, piv, how='left',left_index=True, right_index=True)
+        final = pd.merge(final, piv, how="left", left_index=True, right_index=True)
     else:
         final = piv
 

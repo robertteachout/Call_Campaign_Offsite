@@ -1,5 +1,5 @@
 def sql(CF, NIC, lbd):
-    sql = (f'''
+    sql = f"""
             SELECT
             c.[Skill]
             ,c.[OutreachID]
@@ -32,5 +32,5 @@ def sql(CF, NIC, lbd):
             AND     od.lastcalldate <= '{CF}'
             AND     n.[NIC_Last_Call] <= '{NIC}'
             -- AND     c.[Unique_Phone] = 1
-            ''')
+            """
     return sql
