@@ -25,7 +25,6 @@
     {
         "CC_Adhoc2": {
             "meet_target_sla":true, 
-            "wellmed":true,
             "no_call":false, 
             "age":false
         }

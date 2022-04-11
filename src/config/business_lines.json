@@ -24,16 +24,10 @@
         "skill":"CC_Adhoc6"
     },
     {   
-        "projects":["RADV","WellMed"],
+        "projects":["RADV","Aetna Medicare","HealthSpring"], 
         "capacity":2500,
         "system":"CC_ChartFinder",
         "skill":"CC_Adhoc2"
-    },
-    {
-        "projects":["Aetna Commercial","Aetna Medicare"],
-        "capacity":2500,
-        "system":"CC_Genpact_Scheduling",
-        "skill":"CC_Genpact_Scheduling"
     },
     {
         "projects":["Centene - WI", "Arizona BlueCross BlueShield", "Excellus CRA", "Highmark ACA","Advantasure ACA","Anthem ACA","BCBS TN ACA","Oscar HF ACA","Priority Health ACA","Med Mutual of Ohio ACA","Highmark NY ACA"],
@@ -42,7 +36,7 @@
         "skill":"CC_Adhoc7"
     },
     {
-        "projects":["Centene HEDIS", "WellCare HEDIS", "Cigna HEDIS", "Aetna HEDIS", "Advantasure_HEDIS_WA", "Advantasure_HEDIS_NE", "Advantasure_HEDIS_VT","Advantasure_HEDIS_ND"],
+        "projects":["WellMed", "Centene HEDIS", "WellCare HEDIS", "Cigna HEDIS", "Aetna HEDIS", "Advantasure_HEDIS_WA", "Advantasure_HEDIS_NE", "Advantasure_HEDIS_VT","Advantasure_HEDIS_ND"],
         "capacity":2500,
         "system":"CC_ChartFinder",
         "skill":"CC_Adhoc8"

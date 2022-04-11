@@ -13,9 +13,7 @@ def CC_Genpact_Scheduling(df):
         [
             "Oscar",
             "ACA-HospitalCR",
-            "ACA-PhysicianCR",
             "Aetna Commercial",
-            "Aetna Medicare",
         ]
     )
     f2 = df.Retrieval_Team == "Genpact Offshore"
@@ -246,7 +244,7 @@ def complex_skills(df):
     f = df
     f = chartfinder(f)
     f = MasterSiteId(f)
-    f = adhoc1(f)
+    # f = adhoc1(f)
 
     f = CC_Genpact_Scheduling(f)
     f = mv_projects(f, ls)
