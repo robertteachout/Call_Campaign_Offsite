@@ -117,9 +117,6 @@ def add_columns(df, tomorrow_str):
     f1 = df.Project_Type == "WellMed"
     df["wellmed"] = np.where(f1, 1, 0)
 
-    timezones = sorted(df.TimeZoneKey.replace("", "B").unique())
-    timezone_map = dict(zip(timezones, range(len(timezones))))
-    df["timezone_sort"] = df.TimeZoneKey.map(timezone_map)
     df["PhoneNumber"] = df["PhoneNumber"].astype(str)
     return df
 
