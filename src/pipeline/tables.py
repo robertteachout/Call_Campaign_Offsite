@@ -36,9 +36,7 @@ def extract_file_name(test):
 def tables(push_pull, table, name, path=Path("data/table_drop")):
     if push_pull == "pull":
         # return csv.read_csv(paths / path / name)
-        return pd.read_csv(
-            paths / path / name, sep=",", on_bad_lines="warn", low_memory=False
-        )  # , engine="python",)
+        return pd.read_csv(paths / path / name, sep=",", on_bad_lines="warn", engine="python")
     else:
         table.to_csv(table_path / name, sep=",", index=False)
 
@@ -81,7 +79,7 @@ def compressed_files(filename, path=Path("data/load"), table="read", sep=","):
             return read_compressed(extract_path, sep)
         except:
             print("slow")
-            return pd.read_csv(extract_path, sep=sep)
+            return pd.read_csv(extract_path, sep=sep, on_bad_lines='skip', engine="python")
 
     elif isinstance(table, pd.DataFrame):
         try:
