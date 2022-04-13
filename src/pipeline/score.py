@@ -29,11 +29,11 @@ def stack_inventory(df, grouping):
     # if data available in business_lines.json load into scoring logic
     if isinstance(business, list):
     # remove default skills that only need re-scoring
-        re_skill_business = [line for line in business
-                                if line.system != "default"]
-        for index, buz_line in enumerate(re_skill_business):
-            # create column on dataframe
-            df, temp = project_rank(df, buz_line.projects, index, temp)
+        # re_skill_business = [line for line in business
+        #                         if line.system != "default"]
+        # for index, buz_line in enumerate(re_skill_business):
+        #     # create column on dataframe
+        #     df, temp = project_rank(df, buz_line.projects, index, temp)
 
         # for chartfinder inventory search projects and move to adhoc skills
         if grouping == "PhoneNumber":

@@ -60,15 +60,16 @@
         }
     },
     {
-        "projects":["WellMed", "Centene HEDIS", "WellCare HEDIS", "Cigna HEDIS", "Aetna HEDIS", "Advantasure_HEDIS_WA", "Advantasure_HEDIS_NE", "Advantasure_HEDIS_VT","Advantasure_HEDIS_ND"],
+        "projects":["WellMed", "Centene HEDIS", "Molina HEDIS Supplemental Region 1-CA", "Molina HEDIS Supplemental Region 2-ID-UT-WA", "Molina HEDIS Supplemental Region 3-MS-NM-TX", "Molina HEDIS Supplemental Region 4-NY-OH", "Molina HEDIS Supplemental Region 5- IL-MI-WI", "Molina HEDIS Supplemental Region 6-FL-SC", "Centene HEDIS-WI", "Advantmed HEDIS", "Alliant Health Plans HEDIS", "Anthem Hedis", "Anthem Comm HEDIS", "Centauri HEDIS", "Devoted Health HEDIS", "Gateway HEDIS", "IBX Hedis", "Med Mutual of Ohio HEDIS", "Molina HEDIS Region 1-CA", "Molina HEDIS Region 2-ID-UT-WA", "Molina HEDIS Region 3-MS-NM-TX", "Molina HEDIS Region 4-NY-OH", "Molina HEDIS Region 5-IL-MI-WI", "Molina HEDIS Region 6-FL-SC", "OptimaHealth HEDIS", "Reveleer HEDIS", "Advantasure_HEDIS_ND", "Advantasure_HEDIS_NE", "Advantasure_HEDIS_OOA_Anthem", "Advantasure_HEDIS_OOAHost_NE", "Advantasure_HEDIS_VT", "Advantasure_HEDIS_WA", "Aetna HEDIS", "Aetna MEDICAID HEDIS", "BCBS TN HEDIS OOA", "BCBSTN HEDIS", "Centene HEDIS", "Change Healthcare HEDIS", "Cigna HEDIS", "HealthSpring HEDIS", "Highmark HEDIS", "Humana HEDIS", "Inovalon Hedis", "WellCare HEDIS"],           
         "capacity":2500,
         "system":"CC_ChartFinder",
         "skill":"CC_Adhoc8",
         "scoring": {
             "meet_target_sla":true, 
-            "Centene_HEDIS":true, 
+            "Centene_HEDIS":false, 
+            "wellmed":false,
             "no_call":false, 
-            "ToGoCharts":false
+            "age":false
         } 
     },
     {
