@@ -1,6 +1,6 @@
 from pathlib import Path
 from zipfile import ZipFile
-
+import re
 import pyarrow as pa
 import pyarrow.csv as csv
 
@@ -23,12 +23,13 @@ Bus_day = Business_Days()
 def extract_file_name(test):
     extract = Path("data/extract")
     if test == "y":
-        file_search = str(f'Call_Campaign_v4_{Bus_day.yesterday.strftime("%m%d")}*')
+        # file_search = str(f'Call_Campaign_v4_{Bus_day.yesterday.strftime("%m%d")}*')
+        file_search = str(f'Call_Campaign_v4_0412*')
     else:
         file_search = str(f'Call_Campaign_v4_{Bus_day.today.strftime("%m%d")}*')
 
     file_match = list(extract.glob(file_search))[0]
-    file_name = str(file_match).split("\\")[-1]
+    file_name = re.split(r"\\|\/",str(file_match))[-1]
     return extract, file_name
 
 
@@ -126,9 +127,4 @@ def append_column(df, location, index=list(), join="left"):
 
 
 if __name__ == "__main__":
-    # df= pd.DataFrame({'test':[1,2,3,4]})
-    # print(df)
-    # # zipfiles('push', df, 'test')
-    # df = tables('pull','na','../load/2022-03-25.zip')
-    # contact_counts(df)
     extract_file_name("y")

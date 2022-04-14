@@ -1,0 +1,58 @@
+[
+    {   
+        "skill":"Priority_Work",
+        "filters":{
+            "Outreach_Status":["Escalated","PNP Released"],
+            "general":["default"],
+            "Project_Type":["default"]
+        },
+        "new_columns":[""],
+        "scoring": {
+            "meet_target_sla":true,
+            "no_call":false, 
+            "age":false
+        }
+    },
+    {
+        "skill":"First_Outreach",
+        "filters":{
+            "Outreach_Status":["Unscheduled","Scheduled", "Past Due"],
+            "general":["no_call"],
+            "Project_Type":["default"]
+        },
+        "new_columns":[""],
+        "scoring": {
+            "meet_target_sla":true, 
+            "no_call":false, 
+            "age":false
+        }
+    },
+    {
+        "skill":"First_Follow_up",
+        "filters":{
+            "Outreach_Status":["Unscheduled","Scheduled", "Past Due"],
+            "general":["CallCount"],
+            "Project_Type":["default"]
+        },
+        "new_columns":[""],
+        "scoring": {
+            "meet_target_sla":true, 
+            "no_call":false, 
+            "age":false
+        }
+    },
+    {
+        "skill":"Continued_Follow_up",
+        "filters":{
+            "Outreach_Status":["Unscheduled","Scheduled", "Past Due"],
+            "general":["default"],
+            "Project_Type":["default"]
+        },
+        "new_columns":[""],
+        "scoring": {
+            "meet_target_sla":true, 
+            "no_call":false, 
+            "age":false
+        }
+    }
+]

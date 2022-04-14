@@ -14,34 +14,34 @@ def rank(df=pd.DataFrame, new_col=str, groups=list, rank_cols=dict):
     df[new_col] = df.groupby(groups)[new_col].cumsum()
     return df
 
+def create_custom_skill(df, custom_skill:Business_Line):
+    new_skill_name = custom_skill.Skill
 
-def project_rank(df, projects, rank, temp):
-    f1 = df.Project_Type.isin(projects)
-    df[f"temp_rank{rank}"] = np.where(f1, 1, 0)
-    # create dict for scoring
-    temp[f"temp_rank{rank}"] = False
-    return df, temp
+    def check_filter(key, value):
+        if key != "general":
+            return f"{key} in {value}" 
+        else:
+            return ' & '.join([f"{item} == 1" for item in value])
+            
 
+    for custom_skill in reversed(business):
+        check = " & ".join(
+            [check_filter(k,v) 
+                for k,v in custom_skill.filters.items() 
+                if v != ["default"]])
+
+        get_index = df.query(check).index
+        f = df.index.isin(get_index)
+        df.Skill = np.where(f, new_skill_name, df.Skill)
+    
 
 def stack_inventory(df, grouping):
     # init temp ranks
     temp = {}
     # if data available in business_lines.json load into scoring logic
-    if isinstance(business, list):
-    # remove default skills that only need re-scoring
-        # re_skill_business = [line for line in business
-        #                         if line.system != "default"]
-        # for index, buz_line in enumerate(re_skill_business):
-        #     # create column on dataframe
-        #     df, temp = project_rank(df, buz_line.projects, index, temp)
-
-        # for chartfinder inventory search projects and move to adhoc skills
-        if grouping == "PhoneNumber":
-            for buz_line in business:
-                if buz_line.system == "CC_ChartFinder":
-                    f0 = df.Skill == buz_line.system
-                    f1 = df.Project_Type.isin(buz_line.projects)
-                    df.Skill = np.where(f0 & f1, buz_line.skill, df.Skill)
+    if grouping == "PhoneNumber":
+        if isinstance(business, list):
+            df = create_custom_skill(df, business)   
 
     rank_cols = {
         "meet_target_sla": True,
@@ -91,9 +91,9 @@ def custom_skills(table, business:list[Business_Line]):
 def split(df):
     df["Outreach ID"] = df["OutreachID"].astype(str)
 
-    split = "CC_Cross_Reference"
-    notmsid = df[df.Skill != split].copy()
-    msid = df[df.Skill == split].copy()
+    split = "CC_ChartFinder"
+    notmsid = df[df.Skill == split].copy()
+    msid = df[df.Skill != split].copy()
 
     scored = stack_inventory(notmsid, "PhoneNumber")
     msid_scored = stack_inventory(msid, "MasterSiteId")
