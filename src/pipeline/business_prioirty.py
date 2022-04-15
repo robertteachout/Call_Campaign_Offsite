@@ -4,13 +4,13 @@ from typing import Dict, List
 
 from .tables import CONFIG_PATH
 
-name = 'data.json'
+name = 'business_lines.json'
 
 @dataclass
 class Business_Line:
     skill: str              = field(default_factory=lambda: "New_skill")
     filters: Dict[str,list] = field(default_factory=lambda:{"status":["default"],
-                                                            "general":["default"],
+                                                            "equal_1":["default"],
                                                             "projects":["default"]})
     new_columns: List       = field(default_factory=lambda: ["default"])
     scoring:Dict[str,bool]  = field(default_factory=lambda:{"meet_target_sla":True, 

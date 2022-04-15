@@ -108,15 +108,6 @@ def add_columns(df, tomorrow_str):
     f1 = df.MSI_Phone.isna()
     df["MSI_Phone"] = np.where(f1, df.PhoneNumber, df.MSI_Phone)
 
-    f1 = df.Project_Type == "Centene HEDIS"
-    df["Centene_HEDIS"] = np.where(f1, 1, 0)
-
-    f1 = df.Project_Type == "Aetna Commercial"
-    df["aetna_comm"] = np.where(f1, 1, 0)
-
-    f1 = df.Project_Type == "WellMed"
-    df["wellmed"] = np.where(f1, 1, 0)
-
     df["PhoneNumber"] = df["PhoneNumber"].astype(str)
     return df
 

@@ -1,9 +1,12 @@
 [
     {   
-        "projects":["RADV","Aetna Medicare","HealthSpring"], 
-        "capacity":2500,
-        "system":"CC_ChartFinder",
         "skill":"CC_Adhoc2",
+        "filters":{
+            "Outreach_Status":["default"],
+            "equal_1":["default"],
+            "Project_Type":["RADV","Aetna Medicare","HealthSpring"]
+        },
+        "new_columns":["default"],
         "scoring": {
             "meet_target_sla":true, 
             "no_call":false, 
@@ -11,10 +14,13 @@
         }
     },
     {
-        "projects":["UHC HEDIS"],
-        "capacity":3650,
-        "system":"CC_ChartFinder",
         "skill":"CC_Adhoc3",
+        "filters":{
+            "Outreach_Status":["default"],
+            "equal_1":["default"],
+            "Project_Type":["UHC HEDIS"]
+        },
+        "new_columns":["default"],
         "scoring": {
             "meet_target_sla":true, 
             "no_call":false, 
@@ -22,37 +28,61 @@
         }
     }, 
     {
-        "projects":["HEDIS"],
-        "capacity":2450,
-        "system":"CC_ChartFinder",
         "skill":"CC_Adhoc4",
+        "filters":{
+            "Outreach_Status":["default"],
+            "equal_1":["default"],
+            "Project_Type":["HEDIS"]
+        },
+        "new_columns":["default"],
         "scoring":{
             "default":true
         }
     },
     {
-        "projects":["ACA-PhysicianCR"],
-        "capacity":3550,
-        "system":"CC_ChartFinder",
         "skill":"CC_Adhoc5",
+        "filters":{
+            "Outreach_Status":["default"],
+            "equal_1":["default"],
+            "Project_Type":["ACA-PhysicianCR"]
+        },
+        "new_columns":["default"],
         "scoring":{
             "default":true
         }
     },
     { 
-        "projects":["Chart Review","Clinical Review MCaid PhyCR"],
-        "capacity":2500,
-        "system":"CC_ChartFinder",
         "skill":"CC_Adhoc6",
+        "filters":{
+            "Outreach_Status":["default"],
+            "equal_1":["default"],
+            "Project_Type":["Chart Review","Clinical Review MCaid PhyCR"]
+        },
+        "new_columns":["default"],
         "scoring":{
             "default":true
         }
     },
     {
-        "projects":["Centene - WI", "Arizona BlueCross BlueShield", "Excellus CRA", "Highmark ACA","Advantasure ACA","Anthem ACA","BCBS TN ACA","Oscar HF ACA","Priority Health ACA","Med Mutual of Ohio ACA","Highmark NY ACA"],
-        "capacity":2500,
-        "system":"CC_ChartFinder",
         "skill":"CC_Adhoc7",
+        "filters":{
+            "Outreach_Status":["default"],
+            "equal_1":["default"],
+            "Project_Type":["Centene - WI", "Arizona BlueCross BlueShield", "Excellus CRA",
+                "Oscar",
+                "Centene ACA",
+                "Aetna Commercial",
+                "Anthem ACA",
+                "BCBS TN ACA",
+                "Priority Health ACA",
+                "Oscar HF ACA",
+                "Excellus CRA",
+                "Arizona BlueCross BlueShield",
+                "Inovalon",
+                "Fallon Health",
+                "Premera"]
+        },
+        "new_columns":["default"],
         "scoring": {
             "meet_target_sla":true,
             "no_call":false, 
@@ -60,26 +90,34 @@
         }
     },
     {
-        "projects":["WellMed", "Centene HEDIS", "Molina HEDIS Supplemental Region 1-CA", "Molina HEDIS Supplemental Region 2-ID-UT-WA", "Molina HEDIS Supplemental Region 3-MS-NM-TX", "Molina HEDIS Supplemental Region 4-NY-OH", "Molina HEDIS Supplemental Region 5- IL-MI-WI", "Molina HEDIS Supplemental Region 6-FL-SC", "Centene HEDIS-WI", "Advantmed HEDIS", "Alliant Health Plans HEDIS", "Anthem Hedis", "Anthem Comm HEDIS", "Centauri HEDIS", "Devoted Health HEDIS", "Gateway HEDIS", "IBX Hedis", "Med Mutual of Ohio HEDIS", "Molina HEDIS Region 1-CA", "Molina HEDIS Region 2-ID-UT-WA", "Molina HEDIS Region 3-MS-NM-TX", "Molina HEDIS Region 4-NY-OH", "Molina HEDIS Region 5-IL-MI-WI", "Molina HEDIS Region 6-FL-SC", "OptimaHealth HEDIS", "Reveleer HEDIS", "Advantasure_HEDIS_ND", "Advantasure_HEDIS_NE", "Advantasure_HEDIS_OOA_Anthem", "Advantasure_HEDIS_OOAHost_NE", "Advantasure_HEDIS_VT", "Advantasure_HEDIS_WA", "Aetna HEDIS", "Aetna MEDICAID HEDIS", "BCBS TN HEDIS OOA", "BCBSTN HEDIS", "Centene HEDIS", "Change Healthcare HEDIS", "Cigna HEDIS", "HealthSpring HEDIS", "Highmark HEDIS", "Humana HEDIS", "Inovalon Hedis", "WellCare HEDIS"],           
-        "capacity":2500,
-        "system":"CC_ChartFinder",
         "skill":"CC_Adhoc8",
+        "filters":{
+            "Outreach_Status":["default"],
+            "equal_1":["default"],
+            "Project_Type":["WellMed", "Centene HEDIS", "Molina HEDIS Supplemental Region 1-CA", "Molina HEDIS Supplemental Region 2-ID-UT-WA", "Molina HEDIS Supplemental Region 3-MS-NM-TX", "Molina HEDIS Supplemental Region 4-NY-OH", "Molina HEDIS Supplemental Region 5- IL-MI-WI", "Molina HEDIS Supplemental Region 6-FL-SC", "Centene HEDIS-WI", "Advantmed HEDIS", "Alliant Health Plans HEDIS", "Anthem Hedis", "Anthem Comm HEDIS", "Centauri HEDIS", "Devoted Health HEDIS", "Gateway HEDIS", "IBX Hedis", "Med Mutual of Ohio HEDIS", "Molina HEDIS Region 1-CA", "Molina HEDIS Region 2-ID-UT-WA", "Molina HEDIS Region 3-MS-NM-TX", "Molina HEDIS Region 4-NY-OH", "Molina HEDIS Region 5-IL-MI-WI", "Molina HEDIS Region 6-FL-SC", "OptimaHealth HEDIS", "Reveleer HEDIS", "Advantasure_HEDIS_ND", "Advantasure_HEDIS_NE", "Advantasure_HEDIS_OOA_Anthem", "Advantasure_HEDIS_OOAHost_NE", "Advantasure_HEDIS_VT", "Advantasure_HEDIS_WA", "Aetna HEDIS", "Aetna MEDICAID HEDIS", "BCBS TN HEDIS OOA", "BCBSTN HEDIS", "Centene HEDIS", "Change Healthcare HEDIS", "Cigna HEDIS", "HealthSpring HEDIS", "Highmark HEDIS", "Humana HEDIS", "Inovalon Hedis", "WellCare HEDIS"]
+        },
+        "new_columns":["Highmark HEDIS","Centene HEDIS","WellMed"],
         "scoring": {
-            "meet_target_sla":true, 
-            "Centene_HEDIS":false, 
-            "wellmed":false,
+            "meet_target_sla":true,
+            "Highmark HEDIS":false, 
+            "Centene HEDIS":false, 
+            "WellMed":false,
             "no_call":false, 
             "age":false
         } 
     },
     {
-        "projects":["default"],
-        "capacity":2500,
-        "system":"default",
         "skill":"CC_Genpact_Scheduling",
+        "filters":{
+            "Outreach_Status":["default"],
+            "equal_1":["default"],
+            "Project_Type":["default"]
+        },
+        "new_columns":["Aetna Commercial"],
         "scoring": {
             "meet_target_sla":true, 
-            "Centene_HEDIS":true, 
+            "Aetna Commercial":false,
+            "Centene HEDIS":false, 
             "no_call":false, 
             "ToGoCharts":false
         } 

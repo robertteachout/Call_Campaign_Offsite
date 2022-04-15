@@ -15,29 +15,28 @@ def rank(df=pd.DataFrame, new_col=str, groups=list, rank_cols=dict):
     return df
 
 def create_custom_skill(df, custom_skill:Business_Line):
-    new_skill_name = custom_skill.Skill
 
     def check_filter(key, value):
-        if key != "general":
-            return f"{key} in {value}" 
-        else:
-            return ' & '.join([f"{item} == 1" for item in value])
+        return ' & '.join([f"{item} == 1" for item in value]) \
+        if key == "equal_1" \
+        else f"{key} in {value}" 
             
+    for custom_skill in business:
+        filters = [check_filter(k,v) 
+                    for k,v in custom_skill.filters.items() 
+                    if v != ["default"]]
 
-    for custom_skill in reversed(business):
-        check = " & ".join(
-            [check_filter(k,v) 
-                for k,v in custom_skill.filters.items() 
-                if v != ["default"]])
-
-        get_index = df.query(check).index
-        f = df.index.isin(get_index)
-        df.Skill = np.where(f, new_skill_name, df.Skill)
-    
+        if len(filters) == 0:
+            pass
+        else:
+            filters = " & ".join(filters)
+        
+            get_index = df.query(filters).index
+            f = df.index.isin(get_index)
+            df.Skill = np.where(f, custom_skill.skill, df.Skill)
+    return df
 
 def stack_inventory(df, grouping):
-    # init temp ranks
-    temp = {}
     # if data available in business_lines.json load into scoring logic
     if grouping == "PhoneNumber":
         if isinstance(business, list):
@@ -45,7 +44,6 @@ def stack_inventory(df, grouping):
 
     rank_cols = {
         "meet_target_sla": True,
-        **temp,
         "no_call": False,
         "age_sort": False,
         "ToGoCharts": False,
@@ -87,6 +85,10 @@ def custom_skills(table, business:list[Business_Line]):
         table = skill_score(table, line.skill, line.scoring)
     return table
 
+def create_score_column(df, name):
+    f1 = df.Project_Type == name
+    df[name] = np.where(f1, 1, 0)
+    return df
 
 def split(df):
     df["Outreach ID"] = df["OutreachID"].astype(str)
@@ -102,6 +104,11 @@ def split(df):
         .drop_duplicates(["OutreachID"])
         .reset_index(drop=True)
     )
+
+    for skill in business:
+        if skill.new_columns != ["default"]:
+            for name in skill.new_columns:
+                unique = create_score_column(unique, name)
 
     ### skills that need special treatment
     if business != None:
