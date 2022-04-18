@@ -116,7 +116,10 @@ def add_columns(df, tomorrow_str):
 
     f1 = df.Project_Type == "WellMed"
     df["wellmed"] = np.where(f1, 1, 0)
-
+    
+    f1 = df.Project_Type.isin(["Advantasure RADV","Gateway RADV","HealthSpring RADV","PopHealthCare"])
+    df["four_projects"] = np.where(f1, 1, 0)
+    
     df["PhoneNumber"] = df["PhoneNumber"].astype(str)
     return df
 
