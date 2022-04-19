@@ -59,7 +59,7 @@ if __name__ == "__main__":
     file = Path(__file__).resolve()
     package_root_directory = file.parents[1]
     sys.path.append(str(package_root_directory))
-    from pipeline.etc import Business_Days, x_Bus_Day_ago
+    from pipeline.utils import Business_Days, x_Bus_Day_ago
     from server.connections import MSSQL
     from server.queries.call_campaign_insert import sql
 

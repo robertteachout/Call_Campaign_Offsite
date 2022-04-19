@@ -13,7 +13,7 @@ import server.queries.call_campaign_insert
 import server.queries.MasterSiteId
 import server.queries.optum_assigned
 import server.queries.reschedule
-from pipeline.etc import Business_Days, daily_piv, time_check, x_Bus_Day_ago
+from pipeline.utils import Business_Days, daily_piv, time_check, x_Bus_Day_ago
 from pipeline.tables import (compressed_files, contact_counts,
                              extract_file_name, tables)
 from server.insert import before_insert, clean_for_insert, sql_insert
@@ -28,7 +28,6 @@ inputs = ciox_busines_lines()
 new_skill = Business_Line()
 inputs.append(new_skill)
 
-print(inputs)
 ls_skill = [line.skill for line in inputs]
 projects = load['Project Type'].unique()
 columns  = load.columns

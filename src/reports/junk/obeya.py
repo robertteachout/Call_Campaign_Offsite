@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.pipeline.etc import *
+from src.pipeline.utils import *
 from src.pipeline.tables import tables
 from src.server.query import query
 

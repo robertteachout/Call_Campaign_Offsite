@@ -3,7 +3,7 @@ from datetime import date, datetime
 import numpy as np
 import pandas as pd
 
-from pipeline.etc import last_business_day, next_business_day
+from pipeline.utils import last_business_day, next_business_day
 from pipeline.tables import append_column, tables
 
 today = date.today()
