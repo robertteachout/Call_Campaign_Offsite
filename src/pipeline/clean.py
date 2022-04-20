@@ -120,6 +120,13 @@ def add_columns(df, tomorrow_str):
     f1 = df.Project_Type.isin(["Advantasure RADV","Gateway RADV","HealthSpring RADV","PopHealthCare"])
     df["four_projects"] = np.where(f1, 1, 0)
     
+    f1 = df.Audit_Type == "Medicare Risk"
+    f2 = df.Project_Type != "Chart Sync"
+    df["mra"] = np.where(f1 & f2, 1, 0)
+
+    f1 = df.age > 110
+    df['super_age'] = np.where(f1, 1, 0)
+
     df["PhoneNumber"] = df["PhoneNumber"].astype(str)
     return df
 

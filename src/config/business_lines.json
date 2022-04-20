@@ -89,5 +89,29 @@
             "no_call":false, 
             "ToGoCharts":false
         } 
+    },
+    {
+        "projects":["default"],
+        "capacity":2500,
+        "system":"default",
+        "skill":"CC_ChartFinder",
+        "scoring": {
+            "meet_target_sla":true, 
+            "mra":false,
+            "no_call":false, 
+            "ToGoCharts":false
+        } 
+    },
+    {
+        "projects":["default"],
+        "capacity":2500,
+        "system":"default",
+        "skill":"CC_Adhoc1",
+        "scoring": {
+            "meet_target_sla":true, 
+            "super_age":false,
+            "no_call":false, 
+            "age":false
+        } 
     }
 ]
