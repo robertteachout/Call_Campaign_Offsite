@@ -13,7 +13,6 @@ def CC_Genpact_Scheduling(df):
         [
             "Oscar",
             "ACA-HospitalCR",
-            "Aetna Commercial",
         ]
     )
     f2 = df.Retrieval_Team == "Genpact Offshore"
@@ -74,11 +73,8 @@ def rm_schedule(df, ls):
 
 
 def adhoc1(df):
-    f1 = df["Project_Type"].isin(["Aetna Commercial", "Aetna Medicare"])
-    ls = df[f1].sort_values("age", ascending=False)["OutreachID"][:3000]
-
-    f6 = df["OutreachID"].isin(ls)
-    df["Skill"] = np.where(f6, "CC_Adhoc1", df["Skill"])
+    f1 = df["super_age"] == 1
+    df["Skill"] = np.where(f1, "CC_Adhoc1", df["Skill"])
     return df
 
 
@@ -244,7 +240,7 @@ def complex_skills(df):
     f = df
     f = chartfinder(f)
     f = MasterSiteId(f)
-    # f = adhoc1(f)
+    f = adhoc1(f)
 
     f = CC_Genpact_Scheduling(f)
     f = mv_projects(f, ls)
