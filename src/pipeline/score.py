@@ -14,18 +14,8 @@ def rank(df=pd.DataFrame, new_col=str, groups=list, rank_cols=dict):
     df[new_col] = df.groupby(groups)[new_col].cumsum()
     return df
 
-
-def project_rank(df, projects, rank, temp):
-    f1 = df.Project_Type.isin(projects)
-    df[f"temp_rank{rank}"] = np.where(f1, 1, 0)
-    # create dict for scoring
-    temp[f"temp_rank{rank}"] = False
-    return df, temp
-
-
 def stack_inventory(df, grouping):
     # init temp ranks
-    temp = {}
     # if data available in business_lines.json load into scoring logic
     if isinstance(business, list):
     # remove default skills that only need re-scoring
@@ -45,7 +35,6 @@ def stack_inventory(df, grouping):
 
     rank_cols = {
         "meet_target_sla": True,
-        **temp,
         "no_call": False,
         "age_sort": False,
         "ToGoCharts": False,
@@ -109,7 +98,4 @@ def split(df):
                             if list(line.scoring.keys()) != ["default"]]
         unique = custom_skills(unique, score_business)
 
-    ### Piped ORGs attached to phone numbers
-    f0 = unique.Project_Type.isin(["Chart Sync"])  # 'ACA-PhysicianCR'
-    unique["Score"] = np.where(f0, 1000000, unique.Score)
     return unique

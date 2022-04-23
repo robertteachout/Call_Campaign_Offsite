@@ -64,11 +64,10 @@ def Osprey(df):
     return df
 
 
-def rm_schedule(df, ls):
+def rm_schedule(df):
     f1 = df["Outreach_Status"] == "Scheduled"
     f2 = df["Last_Call"].notna()
-    f3 = df["Project_Type"].isin(ls)
-    df["Skill"] = np.where(f1 & f2 & ~f3, "schedule_pull", df["Skill"])
+    df["Skill"] = np.where(f1 & f2, "schedule_pull", df["Skill"])
     return df
 
 
@@ -78,7 +77,7 @@ def adhoc1(df):
     return df
 
 
-def research_pull(df):
+def osprey_research(df):
     f0 = df["Project_Type"] == "Osprey"
     f1 = df["PhoneNumber"] == "9999999999"
     df["Skill"] = np.where(f1, "Research_Pull ", df["Skill"])
@@ -127,9 +126,15 @@ def wellmed(df):
 
 
 def MasterSiteId(df):
-    f1 = df["MasterSiteId"].notna()
-    f2 = df["MasterSiteId"] != 1000838
-    df["Skill"] = np.where(f1 & f2, "CC_Cross_Reference", df["Skill"])
+    # f1 = df["MasterSiteId"].notna()
+    # f2 = df["MasterSiteId"] != 1000838
+    f1 = df["Outreach_Status"] != "Scheduled"
+    f2 = df["SPI"] == True
+    msid = df[f1 & ~f2].sort_values("age").reset_index().MasterSiteId.unique()[:8000]
+    msid = [int(i) for i in list(msid)]
+    msid.remove(1000838)
+    f3 = df["MasterSiteId"].isin(msid)
+    df["Skill"] = np.where(f3, "CC_Cross_Reference", df["Skill"])
     return df
 
 
@@ -147,10 +152,9 @@ def chartfinder(df):
     return df
 
 
-def Cross_Reference_SPI(df, ls):
+def Cross_Reference_SPI(df):
     f1 = df["SPI"] == True
-    f2 = df["Project_Type"].isin(ls)
-    df["Skill"] = np.where(f1 & ~f2, "CC_Cross_Reference_SPI", df["Skill"])
+    df["Skill"] = np.where(f1, "CC_Cross_Reference_SPI", df["Skill"])
     return df
 
 
@@ -165,90 +169,26 @@ def optum_assigned(df):
     df["Skill"] = np.where(f1, "optum_assigned", df["Skill"])
     return df
 
+def no_call(df):
+    f1 = df["Last_Call"].isna()
+    df["Skill"] = np.where(f1, "CC_ChartFinder", df["Skill"])
+    return df
 
 def complex_skills(df):
-    ls = [
-        "UHC HEDIS",
-        "HEDIS",
-        "ACA-PhysicianCR",
-        "RADV",
-        "Chart Review",
-    ]  # 'Chart Review'
-    # 'Oscar',
-    commerical = [
-        "Centene ACA",
-        "Centene HEDIS",
-        "WellCare HEDIS",
-        "Highmark ACA",
-        "Advantasure ACA",
-        "Anthem ACA",
-        "HealthSpring HEDIS",
-        "OptimaHealth HEDIS",
-        "Med Mutual of Ohio HEDIS",
-        "Inovalon",
-        "BCBS TN ACA",
-        "Cigna HEDIS",
-        "Anthem Hedis",
-        "Anthem Comm HEDIS",
-        "Devoted Health HEDIS",
-        "Aetna HEDIS",
-        "Advantasure_HEDIS_WA",
-        "IBX Hedis",
-        "Molina HEDIS Region 6-FL-SC",
-        "Aetna MEDICAID HEDIS",
-        "Inovalon Hedis",
-        "Advantmed HEDIS",
-        "Excellus CRA",
-        "Oscar HF ACA",
-        "Priority Health ACA",
-        "Molina HEDIS Region 5-IL-MI-WI",
-        "Advantasure_HEDIS_NE",
-        "Aetna Commercial",
-        "Gateway HEDIS",
-        "Molina HEDIS Region 4-NY-OH",
-        "Advantasure_HEDIS_VT",
-        "Arizona BlueCross BlueShield",
-        "Med Mutual of Ohio ACA",
-        "Highmark NY ACA",
-        "Molina HEDIS Region 3-MS-NM-TX",
-        "Advantasure_HEDIS_ND",
-        "Advantasure_HEDIS_OOA_Anthem",
-        "Optima Health Commercial",
-        "Highmark HEDIS",
-        "Centauri",
-        "BCBSTN HEDIS",
-        "Molina HEDIS Supplemental Region 5- IL-MI-WI",
-        "Molina HEDIS Region 2-ID-UT-WA",
-        "Premera",
-        "Humana HEDIS",
-        "Molina HEDIS Supplemental Region 4-NY-OH",
-        "Molina HEDIS Supplemental Region 6-FL-SC",
-        "ABCBS",
-        "Molina HEDIS Region 1-CA",
-        "Reveleer HEDIS",
-        "Centene HEDIS-WI",
-        "Molina HEDIS Supplemental Region 3-MS-NM-TX",
-        "Change Healthcare",
-        "Alliant Health Plans HEDIS",
-        "BCBS TN HEDIS OOA",
-        "Humana",
-    ]
-    commerical = [
-        x for x in commerical if (x.__contains__("ACA")) or (x.__contains__("HEDIS"))
-    ]
-    ls += commerical
+
     f = df
     f = chartfinder(f)
     f = MasterSiteId(f)
     f = adhoc1(f)
 
     f = CC_Genpact_Scheduling(f)
-    f = mv_projects(f, ls)
-    f = rm_schedule(f, ls)
+    f = rm_schedule(f)
     f = escalations(f)
+    # f = Cross_Reference_SPI(f)
+
+    f = no_call(f)
     f = Osprey(f)
-    f = research_pull(f)
-    f = Cross_Reference_SPI(f, ls)
+    f = osprey_research(f)
     f = emr_rm(f)
     f = HIH_rm(f)
     f = Onsite_rm(f)
