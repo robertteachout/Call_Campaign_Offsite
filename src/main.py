@@ -9,7 +9,7 @@ import server.connections
 import server.insert
 import server.queries.call_campaign_insert
 import server.queries.MasterSiteId
-import server.queries.optum_assigned
+import server.queries.fax_date
 import server.queries.reschedule
 from pipeline.etc import Business_Days, daily_piv, time_check, x_Bus_Day_ago
 from pipeline.tables import (compressed_files, contact_counts,
@@ -36,14 +36,6 @@ def main(test="n", msid="n", sample="n"):
     log.df_len("tested", tested)
     time_check(Bus_day.now, f"File Load \t{test}")
 
-    # ## Reschedules
-    # reschedule_sql = server.queries.reschedule.sql()
-    # reSchedule = pd.read_sql(reschedule_sql, dw_engine)
-    # log.df_len('reSchedule', reSchedule)
-
-    # df_full0 = tested.append(reSchedule, ignore_index = True)
-    # log.df_len('df_full', df_full0)
-
     ### Master Site ID
     if msid == "y":
         mastersite_sql = server.queries.MasterSiteId.sql()
@@ -55,6 +47,13 @@ def main(test="n", msid="n", sample="n"):
     mapped.MasterSiteId = mapped.MasterSiteId.fillna(1000838)
     log.df_len("MasterSiteId", mapped)
     time_check(Bus_day.now, "msid map")
+
+    # add fax date
+    fax_sql = server.queries.fax_date.sql()
+    fax = pd.read_sql(fax_sql, dw_engine)
+    fax.to_csv('test.csv')
+    mapped = pd.merge(mapped, fax, how="left", on="OutreachID")
+    mapped.LastFaxDate = pd.to_datetime(mapped.LastFaxDate, format="%Y%m%d").dt.date
 
     ### fix & add columns
     clean = pipeline.clean.clean(mapped, Bus_day.tomorrow_str)
