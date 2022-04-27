@@ -2,70 +2,25 @@ import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
-import numpy as np
 from pandas.tseries.holiday import (AbstractHolidayCalendar, Holiday,
                                     USLaborDay, USMartinLutherKingJr,
                                     USMemorialDay, USPresidentsDay,
                                     USThanksgivingDay, nearest_workday)
 
-startTime_1 = time.time()
-
-
 def time_check(start, comment):
     executionTime_1 = round(time.time() - start, 2)
-    print("-----------------------------------------------")
+    print("-"*25)
     print(comment + "\n" + "Time: " + str(executionTime_1))
-    print("-----------------------------------------------")
-
+    print("-"*25)
 
 def daily_piv(df):
-    def piv(name):
-        print("_-" * 10 + name + "-_" * 10)
-        try:
-            df1 = df[df[str(name)] == 1]
-            print(
-                df1.pivot_table(index="Skill", values="OutreachID", aggfunc=["count"])
-            )
-            work = {
-                "CC_ChartFinder": 12000,
-                "CC_Cross_Reference": 2400,
-                # 'CC_Adhoc2':1000
-            }
-            # get top x in each skill
-            filters = "|".join(
-                [
-                    f"(Skill == '{i}' & Score < {j} & parent == 1)"
-                    for i, j in work.items()
-                ]
-            )
-            table = df.query(filters)  # .PhoneNumber.tolist()
-            # pivot
-            called = table.pivot_table(
-                index=[
-                    "Skill",
-                    "Project_Type"
-                    # ,'no_call'
-                ],
-                values="OutreachID",
-                aggfunc=["count"],
-                margins=True,
-            )  # .sort_values([('count','OutreachID')])
-            called.to_clipboard()
-            print(called)
-        except:
-            print(f"{name}: Null")
-
-    piv("parent")
-
-
-def date_list_split(ls, numSplit):
-    splits = np.array_split(ls, numSplit)
-    return splits
-
-
+    print(df.groupby('Skill')\
+            .agg(   Total=('OutreachID','count'),
+                    Parents=('parent','sum'), 
+                    Phone=('PhoneNumber','nunique'),
+                    MSID=('MasterSiteId','nunique')))
+                    
 ### CIOX Business Calender
-
-
 class CioxHoliday(AbstractHolidayCalendar):
     rules = [
         Holiday("NewYearsDay", month=1, day=1, observance=nearest_workday),
