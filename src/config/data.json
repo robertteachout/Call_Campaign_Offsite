@@ -1,12 +1,13 @@
 [
     {   
-        "skill":"Priority_Work",
+        "skill":"New_Priority_Work",
         "filters":{
+            "Audit_Type":[],
+            "Project_Type":[],
             "Outreach_Status":["Escalated","PNP Released"],
-            "general":["default"],
-            "Project_Type":["default"]
+            "general":[]
         },
-        "new_columns":[""],
+        "new_columns":[],
         "scoring": {
             "meet_target_sla":true,
             "no_call":false, 
@@ -14,13 +15,44 @@
         }
     },
     {
-        "skill":"First_Outreach",
+        "skill":"New_First_Outreach",
         "filters":{
-            "Outreach_Status":["Unscheduled","Scheduled", "Past Due"],
-            "general":["no_call"],
-            "Project_Type":["default"]
+            "Audit_Type":[],
+            "Project_Type":[],
+            "Outreach_Status":[],
+            "general":[
+                "no_call == 1",
+                "no_fax == 1",
+                "| (Outreach_Status == 'Unscheduled' & CallCount == 0)"
+            ]
         },
-        "new_columns":[""],
+        "new_columns":{
+            "mra":{
+                "Project_Type":["Advantasure RADV","Gateway RADV","HealthSpring RADV","PopHealthCare"]
+            },
+            "super_age":{
+                "age":13
+            }
+        },
+        "scoring": {
+            "meet_target_sla":true, 
+            "no_call":false, 
+            "ToGoCharts":false
+        }
+    },
+    {
+        "skill":"New_First_Follow_up",
+        "filters":{
+            "Audit_Type":[],
+            "Project_Type":[],
+            "Outreach_Status":[],
+            "general":[
+                "Outreach_Status in ('Scheduled', 'Past Due')",
+                "(CallCount == 1) | (no_call == 1 & no_fax == 0 )",
+                "| (Outreach_Status == 'Unscheduled' & CallCount >= 1)"
+            ]
+        },
+        "new_columns":[],
         "scoring": {
             "meet_target_sla":true, 
             "no_call":false, 
@@ -28,27 +60,14 @@
         }
     },
     {
-        "skill":"First_Follow_up",
+        "skill":"New_Continued_Follow_up",
         "filters":{
-            "Outreach_Status":["Unscheduled","Scheduled", "Past Due"],
-            "general":["CallCount"],
-            "Project_Type":["default"]
+            "Audit_Type":[],
+            "Project_Type":[],
+            "Outreach_Status":["Scheduled", "Past Due"],
+            "general":[]
         },
-        "new_columns":[""],
-        "scoring": {
-            "meet_target_sla":true, 
-            "no_call":false, 
-            "age":false
-        }
-    },
-    {
-        "skill":"Continued_Follow_up",
-        "filters":{
-            "Outreach_Status":["Unscheduled","Scheduled", "Past Due"],
-            "general":["default"],
-            "Project_Type":["default"]
-        },
-        "new_columns":[""],
+        "new_columns":[],
         "scoring": {
             "meet_target_sla":true, 
             "no_call":false, 
