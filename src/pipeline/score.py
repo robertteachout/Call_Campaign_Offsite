@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from .business_prioirty import ciox_busines_lines, Business_Line
+from .business_prioirty import Business_Line, ciox_busines_lines
 
 business = ciox_busines_lines() 
 
@@ -65,10 +65,9 @@ def skill_score(df, skill, skill_rank:Business_Line):
         return pd.concat([dump, df])\
                     .drop_duplicates(["OutreachID"])\
                     .reset_index(drop=True)
-        
     else:
         print(f"Check Skill: {skill} | validate columns: {set(skill_rank.keys())}")
-        raise SystemExit
+        return df
 
 
 def custom_skills(table, business:list[Business_Line]):
