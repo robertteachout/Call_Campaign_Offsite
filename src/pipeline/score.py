@@ -1,10 +1,10 @@
 import numpy as np
 import pandas as pd
+
 from .business_prioirty import ciox_busines_lines
-from .user_input import load_custom_skills  
+from .user_input import load_custom_skills
 from .utils import join_tables
 
-business = ciox_busines_lines() 
 
 def rank(df=pd.DataFrame, new_col=str, groups=list, rank_cols=dict):
     sort_columns = groups + [*rank_cols.keys()]
@@ -42,7 +42,7 @@ def stack_inventory(df, grouping):
     linked = parent_child_link(full_rank, grouping)
     return linked
 
-def split(df):
+def split_by_grouping(df):
     split = "CC_ChartFinder"
     notmsid = df[df.Skill == split].copy()
     msid = df[df.Skill != split].copy()
@@ -51,10 +51,24 @@ def split(df):
     msid_scored = stack_inventory(msid, "MasterSiteId")
     return join_tables(scored, msid_scored)
 
+def custom_skill_rank(table, skill, custom_ranking):
+    skill = table[table.Skill == skill].copy()
+    scored_skill = rank(skill, "Score", ["Skill", "parent"], custom_ranking)
+    return join_tables(scored_skill, table)
+
 def scored_inventory(df):
     # split regular inventory
-    inventory = split(df)
+    inventory = split_by_grouping(df)
+
+    split = "CC_ChartFinder"
+    custom_inventory = inventory[inventory.Skill == split].copy()
     # if data available in business_lines.json load into scoring logic
+    
+    business = ciox_busines_lines() 
+    business.reverse()
     if isinstance(business, list):
-        inventory = load_custom_skills(inventory, business)
-    return inventory
+        custom_inventory = load_custom_skills(custom_inventory, business)
+        for line in business:
+            custom_inventory = custom_skill_rank(custom_inventory, line.skill, line.scoring)
+    
+    return join_tables(custom_inventory, inventory)
