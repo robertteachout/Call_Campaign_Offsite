@@ -104,6 +104,9 @@ def add_columns(df, tomorrow_str):
     # no call flag
     f1 = df.Last_Call.isna()
     df["no_call"] = np.where(f1, 1, 0)
+
+    f1 = df.LastFaxDate.isna()
+    df["no_fax"] = np.where(f1, 1, 0)
     # core phone number
     f1 = df.MSI_Phone.isna()
     df["MSI_Phone"] = np.where(f1, df.PhoneNumber, df.MSI_Phone)

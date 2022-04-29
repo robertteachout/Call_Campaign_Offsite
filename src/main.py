@@ -4,12 +4,11 @@ import log.log as log
 import pipeline.clean
 import pipeline.score
 import pipeline.skills
-import pipeline.sprint_schedule
 import server.connections
 import server.insert
 import server.queries.call_campaign_insert
 import server.queries.MasterSiteId
-import server.queries.optum_assigned
+import server.queries.fax_date
 import server.queries.reschedule
 from pipeline.utils import Business_Days, daily_piv, time_check, x_Bus_Day_ago
 from pipeline.tables import (compressed_files, contact_counts,
@@ -56,6 +55,12 @@ def main(test="n", msid="n", sample="n"):
     log.df_len("MasterSiteId", mapped)
     time_check(Bus_day.now, "msid map")
 
+    # add fax date
+    fax_sql = server.queries.fax_date.sql()
+    fax = pd.read_sql(fax_sql, dw_engine)
+    mapped = pd.merge(mapped, fax, how="left", on="OutreachID")
+    mapped.LastFaxDate = pd.to_datetime(mapped.LastFaxDate, format="%Y%m%d").dt.date
+
     ### fix & add columns
     clean = pipeline.clean.clean(mapped, Bus_day.tomorrow_str)
     log.df_len("clean", clean)
@@ -67,7 +72,7 @@ def main(test="n", msid="n", sample="n"):
     time_check(Bus_day.now, "skill")
 
     ### score inventory per skill
-    scored = pipeline.score.split(skilled)
+    scored = pipeline.score.scored_inventory(skilled)
     log.df_len("scored", scored)
     time_check(Bus_day.now, "Split, Score, & Parent/Child Relationship")
 
