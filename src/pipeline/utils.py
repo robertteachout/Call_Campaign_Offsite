@@ -31,8 +31,9 @@ def daily_piv(df):
                     Parents=('parent','sum'), 
                     Phone=('PhoneNumber','nunique'),
                     MSID=('MasterSiteId','nunique'),
-                    SPI=('SPI', 'nunique')
-                )
+                    SPI=('SPI', 'nunique'),
+                    Age=('age', 'mean')
+                ).round(1)
         )
 
 ### CIOX Business Calender
