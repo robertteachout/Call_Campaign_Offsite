@@ -1,11 +1,12 @@
 import json
+import os
 from dataclasses import dataclass, field
 from typing import Dict, List
 
 from .tables import CONFIG_PATH
+from .utils import Business_Days
 
-name = 'business_lines.json'
-name = 'data.json'
+bus_day = Business_Days()
 
 @dataclass
 class Business_Line:
@@ -29,12 +30,13 @@ def read_json(name):
             return json.load(json_file)
 
 def write_json(output):
-    with open(CONFIG_PATH / f"test{name}",'w') as file:
+    with open(CONFIG_PATH / f"{bus_day.today_str}.json",'w') as file:
         json.dump(output, file, indent=4)
 
 def ciox_busines_lines() -> list[Business_Line]:
     try:
-        data = read_json(name)
+        custom_skills = os.listdir(CONFIG_PATH / "custom_skills")
+        data = read_json(f"custom_skills/{max(custom_skills)}")
         new_skill = Business_Line()
         bus = [Business_Line(*d.values()) for d in data]
         bus.append(new_skill)
