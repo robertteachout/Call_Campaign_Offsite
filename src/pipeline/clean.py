@@ -104,28 +104,12 @@ def add_columns(df, tomorrow_str):
     # no call flag
     f1 = df.Last_Call.isna()
     df["no_call"] = np.where(f1, 1, 0)
+
+    f1 = df.LastFaxDate.isna()
+    df["no_fax"] = np.where(f1, 1, 0)
     # core phone number
     f1 = df.MSI_Phone.isna()
     df["MSI_Phone"] = np.where(f1, df.PhoneNumber, df.MSI_Phone)
-
-    f1 = df.Project_Type == "Centene HEDIS"
-    df["Centene_HEDIS"] = np.where(f1, 1, 0)
-
-    f1 = df.Project_Type == "Aetna Commercial"
-    df["aetna_comm"] = np.where(f1, 1, 0)
-
-    f1 = df.Project_Type == "WellMed"
-    df["wellmed"] = np.where(f1, 1, 0)
-    
-    f1 = df.Project_Type.isin(["Advantasure RADV","Gateway RADV","HealthSpring RADV","PopHealthCare"])
-    df["four_projects"] = np.where(f1, 1, 0)
-    
-    f1 = df.Audit_Type == "Medicare Risk"
-    f2 = df.Project_Type != "Chart Sync"
-    df["mra"] = np.where(f1 & f2, 1, 0)
-
-    f1 = df.age > 110
-    df['super_age'] = np.where(f1, 1, 0)
 
     df["PhoneNumber"] = df["PhoneNumber"].astype(str)
     return df

@@ -1,5 +1,3 @@
-import os
-import sys
 from datetime import date
 
 import pandas as pd
@@ -7,7 +5,7 @@ import pandas as pd
 import server.queries.project_breakdown
 import server.query
 import server.secret
-from pipeline.etc import (last_business_day, next_business_day)
+from pipeline.utils import (last_business_day, next_business_day)
 
 servername = server.secret.servername
 database = server.secret.database

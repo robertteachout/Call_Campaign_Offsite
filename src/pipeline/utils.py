@@ -2,10 +2,22 @@ import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 
+import pandas as pd
 from pandas.tseries.holiday import (AbstractHolidayCalendar, Holiday,
                                     USLaborDay, USMartinLutherKingJr,
                                     USMemorialDay, USPresidentsDay,
                                     USThanksgivingDay, nearest_workday)
+
+
+def query_df(df, filter_str):
+    df.reset_index(drop=True, inplace=True)
+    get_index = df.query(filter_str).index
+    return df.index.isin(get_index)
+
+def join_tables(new, orginal, dup_index="OutreachID"):
+    return pd.concat([new, orginal])\
+                    .drop_duplicates([dup_index])\
+                    .reset_index(drop=True)
 
 def time_check(start, comment):
     executionTime_1 = round(time.time() - start, 2)
@@ -18,8 +30,11 @@ def daily_piv(df):
             .agg(   Total=('OutreachID','count'),
                     Parents=('parent','sum'), 
                     Phone=('PhoneNumber','nunique'),
-                    MSID=('MasterSiteId','nunique')))
-                    
+                    MSID=('MasterSiteId','nunique'),
+                    SPI=('SPI', 'nunique')
+                )
+        )
+
 ### CIOX Business Calender
 class CioxHoliday(AbstractHolidayCalendar):
     rules = [

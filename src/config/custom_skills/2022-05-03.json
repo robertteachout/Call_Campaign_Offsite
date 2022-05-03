@@ -1,0 +1,105 @@
+[
+    {
+        "skill":"CC_Adhoc6",
+        "filters":{
+            "Audit_Type":[],
+            "Project_Type":["Chart Review","Clinical Review MCaid PhyCR"],
+            "Outreach_Status":[],
+            "general":[]
+        },
+        "new_columns":[],
+        "scoring": {
+            "meet_target_sla":true,
+            "no_call":false, 
+            "age":false
+        }
+    },
+    {   
+        "skill":"CC_1_Priority Work",
+        "filters":{
+            "Audit_Type":[],
+            "Project_Type":[],
+            "Outreach_Status":["Escalated","PNP Released"],
+            "general":[]
+        },
+        "new_columns":[],
+        "scoring": {
+            "meet_target_sla":true,
+            "no_call":false, 
+            "age":false
+        }
+    },
+    {
+        "skill":"CC_2_Initial Outreach",
+        "filters":{
+            "Audit_Type":[],
+            "Project_Type":[],
+            "Outreach_Status":[],
+            "general":[
+                ["no_fax", " == ",1],
+                ["operator", "&"],
+                ["no_call", " == ", 1],
+                ["operator", " | "],
+                [
+                    ["Outreach_Status", " == ", "Unscheduled"],
+                    ["operator", "&"],
+                    ["CallCount", " == ", 0]
+
+                ]
+            ]
+        },
+        "new_columns":{},
+        "scoring": {
+            "meet_target_sla":true, 
+            "no_call":false, 
+            "ToGoCharts":false
+        }
+    },
+    {
+        "skill":"CC_3_First Follow-Up",
+        "filters":{
+            "Audit_Type":[],
+            "Project_Type":[],
+            "Outreach_Status":[],
+            "general":[
+                ["Outreach_Status", ".isin", ["Scheduled", "Past Due"]],
+                ["operator", "&"],
+                [
+                    ["CallCount"," == ", 1],
+                    ["operator", "|"],
+                    [
+                        ["no_call", " == ", 1],
+                        ["operator", "&"],
+                        ["no_fax", " == ", 0]
+
+                    ]
+                ],
+                ["operator", "|"],
+                ["Outreach_Status"," == ", "Unscheduled"]
+            ]
+        },
+        "new_columns":[],
+        "scoring": {
+            "meet_target_sla":true, 
+            "no_call":false, 
+            "age":false
+        }
+    },
+    {
+        "skill":"CC_4_Continued Follow-Up",
+        "filters":{
+            "Audit_Type":[],
+            "Project_Type":[],
+            "Outreach_Status":[],
+            "general":[
+                ["Outreach_Status"," in ", ["Scheduled","Past Due"]]
+            ]
+        },
+        "new_columns":[],
+        "scoring": {
+            "meet_target_sla":true, 
+            "no_call":false, 
+            "age":false
+        }
+    }
+]

@@ -31,7 +31,7 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.csv as csv
 
-from pipeline.etc import last_business_day
+from pipeline.utils import last_business_day
 
 
 def main(batch):

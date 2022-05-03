@@ -1,24 +1,33 @@
+import re
 from pathlib import Path
 from zipfile import ZipFile
 
+import pandas as pd
 import pyarrow as pa
 import pyarrow.csv as csv
 
-from .etc import Business_Days
+from .utils import Business_Days
 
 paths = Path(__file__).parent.absolute().parent.absolute().parent.absolute()
 
-from glob import glob
-
-import pandas as pd
 
 CONFIG_PATH = paths / "src/config"
 
-table_path = paths / "data/table_drop"
-load = paths / "data/load"
+TABLE_PATH = paths / "data/table_drop"
+LOAD_PATH = paths / "data/load"
 
 Bus_day = Business_Days()
 
+
+def save_locally(scored, log_contact='y'):
+    ### save file
+    compressed_files(f"{Bus_day.tomorrow_str}.zip", table=scored)
+    # compressed_files(f"{Bus_day.tomorrow_str}.csv.gz", table=scored)
+    ### get column name & types ~ collect unique phone script
+    tables("push", scored.dtypes.reset_index(), "columns.csv")
+    ### insert into server ###
+    if log_contact == 'y':
+        contact_counts(scored)
 
 def extract_file_name(test):
     extract = Path("data/extract")
@@ -28,7 +37,7 @@ def extract_file_name(test):
         file_search = str(f'Call_Campaign_v4_{Bus_day.today.strftime("%m%d")}*')
 
     file_match = list(extract.glob(file_search))[0]
-    file_name = str(file_match).split("\\")[-1]
+    file_name = re.split(r"\\|\/",str(file_match))[-1]
     return extract, file_name
 
 
@@ -38,7 +47,7 @@ def tables(push_pull, table, name, path=Path("data/table_drop")):
         # return csv.read_csv(paths / path / name)
         return pd.read_csv(paths / path / name, sep=",", on_bad_lines="warn", engine="python")
     else:
-        table.to_csv(table_path / name, sep=",", index=False)
+        table.to_csv(TABLE_PATH / name, sep=",", index=False)
 
 
 def read_compressed(file_path, sep):
@@ -72,7 +81,7 @@ def write_compressed(file_path, table):
 
 
 ### push_pull zip file ###
-def compressed_files(filename, path=Path("data/load"), table="read", sep=","):
+def compressed_files(filename, path=Path(LOAD_PATH), table="read", sep=","):
     extract_path = path / filename
     if isinstance(table, str):
         try:
@@ -126,9 +135,4 @@ def append_column(df, location, index=list(), join="left"):
 
 
 if __name__ == "__main__":
-    # df= pd.DataFrame({'test':[1,2,3,4]})
-    # print(df)
-    # # zipfiles('push', df, 'test')
-    # df = tables('pull','na','../load/2022-03-25.zip')
-    # contact_counts(df)
     extract_file_name("y")

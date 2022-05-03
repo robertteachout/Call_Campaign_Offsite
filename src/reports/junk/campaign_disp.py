@@ -5,7 +5,7 @@ import pandas as pd
 
 import server.queries.call_conversion
 import server.secret
-from pipeline.etc import last_business_day
+from pipeline.utils import last_business_day
 from pipeline.tables import append_column
 from server.query import query
 

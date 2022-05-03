@@ -1,0 +1,33 @@
+{
+    "CC_Genpact_Scheduling": 
+        ["Retrieval_Team"," == ","Genpact Offshore"],
+    "CC_Cross_Reference_SPI": 
+        ["SPI"," == ",true],
+    "Remove_Schedule":[
+        ["Outreach_Status"," == ","Scheduled"],  
+        ["operator","&"],
+        ["age",">", 10]
+    ],
+    "Remove_Research": 
+        ["PhoneNumber"," == ","9999999999"],
+    "CC_Osprey_Outbound": 
+        ["Project_Type"," == ","Osprey"],
+    "Remove_Osprey_research": [
+        ["Project_Type"," == ","Osprey"],
+        ["operator","&"],
+        ["PhoneNumber"," == ","9999999999"]
+    ],
+    "Remove_Osprey_Escalation":[
+        ["Project_Type"," == ","Osprey"],
+        ["operator","&"],
+        ["Outreach_Status",".isin", ["Escalated","PNP Released"]]
+    ],
+    "Remove_EMR_Remote": 
+        ["Retrieval_Group"," == ","EMR Remote"],
+    "Remove_HIH": 
+        ["Retrieval_Group"," == ","HIH - Other"],
+    "Remove_Onsite": 
+        ["Retrieval_Group"," == ","Onsite"],
+    "Remove_Digital_Direct": 
+        ["Retrieval_Group",".str.contains","Digital"]
+}

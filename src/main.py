@@ -4,17 +4,13 @@ import log.log as log
 import pipeline.clean
 import pipeline.score
 import pipeline.skills
-import pipeline.sprint_schedule
 import server.connections
 import server.insert
-import server.queries.call_campaign_insert
-import server.queries.MasterSiteId
 import server.queries.fax_date
-import server.queries.reschedule
-from pipeline.etc import Business_Days, daily_piv, time_check, x_Bus_Day_ago
-from pipeline.tables import (compressed_files, contact_counts,
-                             extract_file_name, tables)
-from server.insert import before_insert, clean_for_insert, sql_insert
+import server.queries.MasterSiteId
+from pipeline.tables import (compressed_files, extract_file_name, save_locally,
+                             tables)
+from pipeline.utils import Business_Days, daily_piv, time_check
 
 Bus_day = Business_Days()
 
@@ -48,10 +44,17 @@ def main(test="n", msid="n", sample="n"):
     log.df_len("MasterSiteId", mapped)
     time_check(Bus_day.now, "msid map")
 
-    # add fax date
-    fax_sql = server.queries.fax_date.sql()
-    fax = pd.read_sql(fax_sql, dw_engine)
-    fax.to_csv('test.csv')
+    # update fax query if needed
+    try:
+        # read if current date
+        fax = pd.read_csv(f"data/fax_data/{Bus_day.today_str}.csv")
+    except:
+        # update & save
+        fax_sql = server.queries.fax_date.sql()
+        fax = pd.read_sql(fax_sql, dw_engine)
+        fax.to_csv(f"data/fax_data/{Bus_day.today_str}.csv", index=False)
+
+    # merge new element 
     mapped = pd.merge(mapped, fax, how="left", on="OutreachID")
     mapped.LastFaxDate = pd.to_datetime(mapped.LastFaxDate, format="%Y%m%d").dt.date
 
@@ -66,40 +69,22 @@ def main(test="n", msid="n", sample="n"):
     time_check(Bus_day.now, "skill")
 
     ### score inventory per skill
-    scored = pipeline.score.split(skilled)
+    scored = pipeline.score.scored_inventory(skilled)
     log.df_len("scored", scored)
     time_check(Bus_day.now, "Split, Score, & Parent/Child Relationship")
-
-    def Save():
-        ### save file
-        compressed_files(f"{Bus_day.tomorrow_str}.zip", table=scored)
-        # compressed_files(f"{Bus_day.tomorrow_str}.csv.gz", table=scored)
-        ### get column name & types ~ collect unique phone script
-        tables("push", scored.dtypes.reset_index(), "columns.csv")
-        ### reporting
-        time_check(Bus_day.now, "Save files")
-        ### insert into server ###
-        load = clean_for_insert(scored)
-        load_date = "".join(scored.Load_Date.unique())
-        remove, lookup = server.queries.call_campaign_insert.sql(
-            x_Bus_Day_ago(10), load_date
-        )
-        before_insert(dw_engine, remove, lookup)
-        sql_insert(load, dw_engine, table)
-
-        contact_counts(scored)
-        time_check(Bus_day.now, "batch_insert")
 
     ### create campaign pivot
     daily_piv(scored)
     time_check(Bus_day.now, "Create Pivot Table")
 
     if sample == "y":
-        compressed_files(f"{Bus_day.tomorrow_str}.zip", table=scored)
+        save_locally(scored, log_contact='n')
 
     if test == "Pass":
-        Save()
-
+        save_locally(scored)
+        time_check(Bus_day.now, "Save files")
+        server.insert.server_insert(scored, table, dw_engine)
+        time_check(Bus_day.now, "batch_insert")
 
 if __name__ == "__main__":
 
