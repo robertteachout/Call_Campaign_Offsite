@@ -3,14 +3,41 @@ import numpy as np
 from .utils import query_df
 
 
+def parse(filters, arg):
+    # add operator
+    if arg[0] == "operator":
+        filters.append(arg[1])
+    else:
+        column, condition, value = arg
+        # if value is string add quotes
+        if isinstance(value, str):
+            value = f"'{value}'"
+        # add parentheses
+        value = f"({value})"
+        # join statement
+        f = " ".join([column, condition, value])
+        filters.append(f" ({f}) ")
+    return filters
+
+def parser(ls):
+    filters = []
+    for i in ls:
+        # if nested list, recursive parse
+        if isinstance(i[0], list):
+            filter = " ".join(parser(i))
+            filters.append(f" ({filter}) ")
+        else:
+            filters = parse(filters, i)
+    return filters
+
 # json parse input filters
 def json_to_str_filters(dict_filter):
     def filter_types(key, value):
         if key == 'general':
-            return " & ".join(value).replace("& |", "|")
+            return "".join(parser(value))
         else:
             return f"{key} in {value}"
-
+ 
     ls_filters = [filter_types(k,v) 
                     for k,v in dict_filter.items() 
                     if v != []]
@@ -23,7 +50,7 @@ def load_custom_skills(df, user_input):
         
         if filters:
             df.Skill = np.where(
-                query_df(df, filters), 
+                query_df(df, filters),
                 custom_skill.skill, 
                 df.Skill)    
     return df
