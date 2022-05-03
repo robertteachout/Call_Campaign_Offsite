@@ -12,7 +12,7 @@ def CC_Genpact_Scheduling(df):
     f1 = df.Project_Type.isin(
         [
             "Oscar",
-            "ACA-HospitalCR",
+            "Aetna Medicare",
         ]
     )
     f2 = df.Retrieval_Team == "Genpact Offshore"
@@ -174,6 +174,12 @@ def no_call(df):
     df["Skill"] = np.where(f1, "CC_ChartFinder", df["Skill"])
     return df
 
+def adhoc3(df):
+    ls = pd.read_csv('data/temp/ls.csv')
+    f1 = df.OutreachID.isin(ls.OutreachID.tolist())
+    df.Skill = np.where(f1, "CC_Adhoc3", df.Skill)
+    return df
+
 def complex_skills(df):
 
     f = df
@@ -185,8 +191,11 @@ def complex_skills(df):
     f = rm_schedule(f)
     f = escalations(f)
     # f = Cross_Reference_SPI(f)
-
+    
     f = no_call(f)
+    
+    f = adhoc3(f)
+
     f = Osprey(f)
     f = osprey_research(f)
     f = emr_rm(f)
