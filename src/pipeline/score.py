@@ -70,5 +70,8 @@ def scored_inventory(df):
         custom_inventory = load_custom_skills(custom_inventory, business)
         for line in business:
             custom_inventory = custom_skill_rank(custom_inventory, line.skill, line.scoring)
-    
-    return join_tables(custom_inventory, inventory)
+
+    post_inventory = join_tables(custom_inventory, inventory)
+    post_inventory.Skill = np.where(post_inventory.Skill == "CC_ChartFinder", "CC_4_Continued Follow-Up", post_inventory.Skill)
+    return post_inventory
+                            
