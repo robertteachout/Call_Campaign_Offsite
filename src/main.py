@@ -1,3 +1,5 @@
+from itertools import dropwhile
+
 import pandas as pd
 
 import log.log as log
@@ -7,12 +9,12 @@ import pipeline.skills
 import server.connections
 import server.insert
 import server.queries.call_campaign_insert
-import server.queries.MasterSiteId
 import server.queries.fax_date
+import server.queries.MasterSiteId
 import server.queries.reschedule
-from pipeline.utils import Business_Days, daily_piv, time_check, x_Bus_Day_ago
 from pipeline.tables import (compressed_files, contact_counts,
                              extract_file_name, tables)
+from pipeline.utils import Business_Days, daily_piv, time_check, x_Bus_Day_ago
 from server.insert import before_insert, clean_for_insert, sql_insert
 
 Bus_day = Business_Days()
@@ -56,8 +58,12 @@ def main(test="n", msid="n", sample="n"):
     time_check(Bus_day.now, "msid map")
 
     # add fax date
-    fax_sql = server.queries.fax_date.sql()
-    fax = pd.read_sql(fax_sql, dw_engine)
+    try:
+        fax = pd.read_csv(f"data/fax_data/{Bus_day.today_str}.csv")
+    except:
+        fax_sql = server.queries.fax_date.sql()
+        fax = pd.read_sql(fax_sql, dw_engine)
+        fax.to_csv(f"data/fax_data/{Bus_day.today_str}.csv", index=False)
     mapped = pd.merge(mapped, fax, how="left", on="OutreachID")
     mapped.LastFaxDate = pd.to_datetime(mapped.LastFaxDate, format="%Y%m%d").dt.date
 
@@ -75,6 +81,8 @@ def main(test="n", msid="n", sample="n"):
     scored = pipeline.score.scored_inventory(skilled)
     log.df_len("scored", scored)
     time_check(Bus_day.now, "Split, Score, & Parent/Child Relationship")
+
+    print(scored[scored.Skill == "CC_ChartFinder"][["OutreachID","Outreach_Status","no_call","CallCount"]])
 
     def Save():
         ### save file
