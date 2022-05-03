@@ -1,77 +1,68 @@
-import functools
+import json
 
 import numpy as np
-import pandas as pd
+
+from .tables import CONFIG_PATH
+from .utils import query_df
 
 
-def combine_filters(operator: str, filters: pd.Series) -> pd.Series:
-    def filter_reducer(filter_one: pd.Series, filter_two: pd.Series) -> pd.Series:
-        # Helper for combining filters based on the operations
-        return f"({filter_one}) {operator} ({filter_two})"
-
-    # Combine all the filters into a single filter
-    return functools.reduce(filter_reducer, filters)
-    
-OPERATOR_SIGNS = {"Or": "|", "And": "&"}
-
-def one_filter(df, new_skill, **kwargs):
-    filters = []
-    for k, v in kwargs.items():
-        condition, value = v[0], v[1]
-        operator = None
-        if k == "operator":
-            operator = v
-        else:
-            if isinstance(value, list):
-                filters.append(f"df.{k}{condition} ({value})")
-            elif isinstance(value, int):
-                filters.append(f"df.{k}{condition} ({value})")
-            else:
-                filters.append(f"df.{k}{condition} ('{value}')")
-
-    if operator:
-        f = pd.eval(combine_filters(operator, filters))
-        df.Skill = np.where(f, new_skill, df.Skill)
+def add_filter(filters:list, arg:list):
+    # add operator
+    if arg[0] == "operator":
+        filters.append(arg[1])
+    # add operator
     else:
-        f = pd.eval(filters[0])
-        df.Skill = np.where(f, new_skill, df.Skill)
+        column, condition, value = arg 
+        # if value is string add quotes
+        if isinstance(value, str):
+            value = f"'{value}'"
+        # add parentheses
+        value = f"({value})"
+        # join statement
+        f = " ".join([column, condition, value])
+        filters.append(f" ({f}) ")
+    return filters
 
+def list_to_string(raw_filters):
+    filters = []
+    # if only one item for filter
+    if isinstance(raw_filters[0], str):
+        return "".join(add_filter(filters, raw_filters))
+
+    # if nested list, recursive parse
+    for filter_ in raw_filters:
+        # nested filters
+        if isinstance(filter_[0], list):
+            filter = " ".join(list_to_string(filter_))
+            filters.append(f" ({filter}) ")
+        # add filter
+        else:
+            filters = add_filter(filters, filter_)
+    return " ".join(filters)
+
+def create_skill(df, new_skill:str, filters:list):
+    clean_filter = list_to_string(filters)
+    df.Skill = np.where(query_df(df, clean_filter), new_skill, df.Skill)
     return df
-
     
 def MasterSiteId(df):
+    f0 = df.SPI == False
     f1 = df["Outreach_Status"] != "Scheduled"
     f2 = df.age > 10
-    msid = df[f1 | f2].sort_values("age", ascending=False).reset_index().MasterSiteId.unique()[:6000]
-    msid = [int(i) for i in list(msid)]
-    msid.remove(1000838)
+    msid = df[f0 & (f1 | f2)].sort_values("age", ascending=False).reset_index().MasterSiteId.unique()[:6001]
+    msid = [int(i) for i in list(msid) if int(i) != 1000838]
+        
 
-    df = one_filter(df, "CC_Cross_Reference", MasterSiteId=[".isin",msid])
+    df = create_skill(df, "CC_Cross_Reference", ["MasterSiteId",".isin", msid])
     return df
 
-def Cross_Reference_SPI(df):
-    df = one_filter(df, "CC_Cross_Reference_SPI", SPI=[" == ",True])
-    return df
+def load_filters():
+    with open(CONFIG_PATH / "default_skills.json") as json_file:
+        return json.load(json_file)
 
 def complex_skills(df):
     df.Skill = "CC_ChartFinder"
+    for name, filters in load_filters().items():
+        df = create_skill(df, name, filters)
     df = MasterSiteId(df)
-
-    df = one_filter(df, 
-                    "Remove_EMR_Remote", 
-                    Project_Type=[".isin",["Oscar","Aetna Medicare"]], 
-                    operator="And", 
-                    Retrieval_Team=[" == ","Genpact Offshore"])
-
-    df = one_filter(df, "Remove_Schedule", Outreach_Status=[" == ",'Scheduled'],  operator="And" ,age=[">", 10] )
-    df = one_filter(df, "Remove_Research", PhoneNumber=[" == ","9999999999"])
-
-    f1 = [" == ","Osprey"]
-    df = one_filter(df, "CC_Osprey_Outbound", Project_Type=f1)
-    df = one_filter(df, "Remove_Osprey_research", Project_Type=f1, operator = "And" , PhoneNumber=[" == ","9999999999"])
-    df = one_filter(df, "Remove_Osprey_Escalation", Project_Type=f1,  operator ="And" ,Outreach_Status=[".isin", ["Escalated","PNP Released"]] )
-    
-    df = one_filter(df, "Remove_EMR_Remote", Retrieval_Group=[" == ","EMR Remote"])
-    df = one_filter(df, "Remove_HIH", Retrieval_Group=[" == ","HIH - Other"])
-    df = one_filter(df, "Remove_Onsite", Retrieval_Group=[" == ","Onsite"])
     return df
