@@ -1,9 +1,12 @@
 import json
+import os
 
 import numpy as np
 
 from .tables import CONFIG_PATH
-from .utils import query_df
+from .utils import Business_Days, query_df
+
+bus_day = Business_Days()
 
 
 def add_filter(filters:list, arg:list):
@@ -57,7 +60,8 @@ def MasterSiteId(df):
     return df
 
 def load_filters():
-    with open(CONFIG_PATH / "default_skills.json") as json_file:
+    default_skills = os.listdir(CONFIG_PATH / "custom_skills")
+    with open(CONFIG_PATH / f"default_skills/{max(default_skills)}") as json_file:
         return json.load(json_file)
 
 def complex_skills(df):
