@@ -7,6 +7,17 @@ import numpy as np
 import pandas as pd
 import sqlalchemy
 
+from .queries.call_campaign_insert import sql as call_campaign_insert_sql
+
+
+def server_insert(scored, table_name, sql_engine):
+    load = clean_for_insert(scored)
+    load_date = "".join(scored.Load_Date.unique())
+    remove, lookup = call_campaign_insert_sql(
+        x_Bus_Day_ago(10), load_date
+    )
+    before_insert(sql_engine, remove, lookup)
+    sql_insert(load, sql_engine, table_name)
 
 def clean_for_insert(load):
     load.rename({"parent": "Unique_Phone"}, axis=1, inplace=True)
@@ -60,6 +71,7 @@ if __name__ == "__main__":
     package_root_directory = file.parents[1]
     sys.path.append(str(package_root_directory))
     from pipeline.utils import Business_Days, x_Bus_Day_ago
+
     from server.connections import MSSQL
     from server.queries.call_campaign_insert import sql
 
