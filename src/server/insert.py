@@ -1,4 +1,3 @@
-import os
 import sys
 import time
 from pathlib import Path
@@ -10,11 +9,11 @@ import sqlalchemy
 from .queries.call_campaign_insert import sql as call_campaign_insert_sql
 
 
-def server_insert(scored, table_name, sql_engine):
+def server_insert(scored, table_name, sql_engine, remove_date):
     load = clean_for_insert(scored)
     load_date = "".join(scored.Load_Date.unique())
     remove, lookup = call_campaign_insert_sql(
-        x_Bus_Day_ago(10), load_date
+        remove_date, load_date
     )
     before_insert(sql_engine, remove, lookup)
     sql_insert(load, sql_engine, table_name)

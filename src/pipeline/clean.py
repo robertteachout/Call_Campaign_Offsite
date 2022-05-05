@@ -101,6 +101,20 @@ def add_columns(df, tomorrow_str):
         df.ToGoCharts, bins=bucket_amount, labels=[x for x in range(bucket_amount)]
     )
     df.togo_bin = df.togo_bin.astype(int)
+    df["project_year_due_date"] = pd.to_datetime(df.Project_Due_Date).dt.year
+ 
+    f1 = df.Project_Type.isin(["Chart Review"
+                                ,"Chart Sync"
+                                ,"Clinical Review MCaid PhyCR"
+                                ,"HCR"
+                                ,"HEDIS"
+                                ,"Medicaid- HospCR"
+                                ,"WellMed"])
+    f2 = df.project_year_due_date == 2022
+    f3 = df.project_year_due_date == 2023
+
+    df['chartsync_filter'] = np.where(f1 & f2, 1, 0)
+    df['chartsync_filter'] = np.where(f1 & f3, 2, 0)
     # no call flag
     f1 = df.Last_Call.isna()
     df["no_call"] = np.where(f1, 1, 0)

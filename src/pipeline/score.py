@@ -43,9 +43,9 @@ def stack_inventory(df, grouping):
     return linked
 
 def split_by_grouping(df):
-    split = "CC_ChartFinder"
-    notmsid = df[df.Skill == split].copy()
-    msid = df[df.Skill != split].copy()
+    split = "CC_Cross_Reference"
+    notmsid = df[df.Skill != split].copy()
+    msid = df[df.Skill == split].copy()
 
     scored = stack_inventory(notmsid, "PhoneNumber")
     msid_scored = stack_inventory(msid, "MasterSiteId")
@@ -64,7 +64,7 @@ def scored_inventory(df):
     custom_inventory = inventory[inventory.Skill == split].copy()
     # if data available in business_lines.json load into scoring logic
     
-    business = ciox_busines_lines() 
+    business = ciox_busines_lines()
     business.reverse()
     if isinstance(business, list):
         custom_inventory = load_custom_skills(custom_inventory, business)

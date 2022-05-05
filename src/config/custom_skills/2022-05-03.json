@@ -71,7 +71,6 @@
                         ["no_call", " == ", 1],
                         ["operator", "&"],
                         ["no_fax", " == ", 0]
-
                     ]
                 ],
                 ["operator", "|"],
@@ -97,7 +96,7 @@
         },
         "new_columns":[],
         "scoring": {
-            "meet_target_sla":true, 
+            "chartsync_filter":true,
             "no_call":false, 
             "age":false
         }

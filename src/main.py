@@ -10,7 +10,7 @@ import server.queries.fax_date
 import server.queries.MasterSiteId
 from pipeline.tables import (compressed_files, extract_file_name, save_locally,
                              tables)
-from pipeline.utils import Business_Days, daily_piv, time_check
+from pipeline.utils import Business_Days, daily_piv, time_check, x_Bus_Day_ago
 
 Bus_day = Business_Days()
 
@@ -83,7 +83,7 @@ def main(test="n", msid="n", sample="n"):
     if test == "Pass":
         save_locally(scored)
         time_check(Bus_day.now, "Save files")
-        server.insert.server_insert(scored, table, dw_engine)
+        server.insert.server_insert(scored, table, dw_engine, x_Bus_Day_ago(10))
         time_check(Bus_day.now, "batch_insert")
 
 if __name__ == "__main__":

@@ -1,6 +1,9 @@
 {
-    "CC_Genpact_Scheduling": 
+    "CC_Genpact_Scheduling": [
         ["Retrieval_Team"," == ","Genpact Offshore"],
+        ["operator","&"],
+        ["project_year_due_date"," == ", 2022]
+        ],
     "CC_Cross_Reference_SPI": 
         ["SPI"," == ",true],
     "Remove_Schedule":[
@@ -24,10 +27,10 @@
     ],
     "Remove_EMR_Remote": 
         ["Retrieval_Group"," == ","EMR Remote"],
-    "Remove_HIH": 
+    "Remove_HIH":
         ["Retrieval_Group"," == ","HIH - Other"],
     "Remove_Onsite": 
         ["Retrieval_Group"," == ","Onsite"],
     "Remove_Digital_Direct": 
-        ["Retrieval_Group",".str.contains","Digital"]
+        ["Project_Type",".str.contains","Digital"]
 }
