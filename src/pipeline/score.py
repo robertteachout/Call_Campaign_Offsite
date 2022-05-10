@@ -26,8 +26,8 @@ def stack_inventory(df, grouping):
     rank_cols = {
         "meet_target_sla": True,
         "no_call": False,
-        "age_sort": False,
-        "ToGoCharts": False,
+        "age": False,
+        "ToGoCharts": False
     }
     # group by phone number or msid & rank highest value org
     find_parent = rank(df, "overall_rank", ["Skill", grouping], rank_cols)
