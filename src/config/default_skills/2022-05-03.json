@@ -1,15 +1,8 @@
 {
-    "CC_Genpact_Scheduling": [
-        ["Retrieval_Team"," == ","Genpact Offshore"],
-        ["operator","&"],
-        ["project_year_due_date"," == ", 2022]
-        ],
-    "CC_Cross_Reference_SPI": 
-        ["SPI"," == ",true],
     "Remove_Schedule":[
         ["Outreach_Status"," == ","Scheduled"],  
         ["operator","&"],
-        ["age",">", 10]
+        ["age","<", 10]
     ],
     "Remove_Research": 
         ["PhoneNumber"," == ","9999999999"],
@@ -32,5 +25,7 @@
     "Remove_Onsite": 
         ["Retrieval_Group"," == ","Onsite"],
     "Remove_Digital_Direct": 
-        ["Project_Type",".str.contains","Digital"]
+        ["Project_Type",".str.contains","Digital"],
+    "Remove_Aetna_Medicare":
+        ["Project_Type"," == ","Aetna Medicare"]
 }
