@@ -63,7 +63,8 @@ def MasterSiteId(df):
     f0 = df.SPI == False
     f1 = df["Outreach_Status"] != "Scheduled"
     f2 = df.age > 10
-    msid = df[f0 & (f1 | f2)].sort_values("ToGoCharts", ascending=True).reset_index().MasterSiteId.unique()[:550]
+    f3 = df.Skill != "Remove_DNC"
+    msid = df[f0 & (f1 | f2) & f3].sort_values("ToGoCharts", ascending=True).reset_index().MasterSiteId.unique()[:550]
     msid = [int(i) for i in list(msid) if int(i) != 1000838]
 
     df = create_skill(df, "CC_Cross_Reference", ["MasterSiteId",".isin", msid])
@@ -72,12 +73,13 @@ def MasterSiteId(df):
 def CC_Genpact_Scheduling(df):
     f1 = df.Retrieval_Team == "Genpact Offshore"
     f2 = df.project_year_due_date == 2022
-    orgs = df[f1 & f2].sort_values("age", ascending=False).reset_index().OutreachID.tolist()[:3500]
+    f3 = df.Skill != "Remove_DNC"
+    orgs = df[f1 & f2 & f3].sort_values("age", ascending=False).reset_index().OutreachID.tolist()[:3500]
     df = create_skill(df, "CC_Genpact_Scheduling", ["OutreachID",".isin", orgs])
     return df
 
 def dnc(df):
-    dnc_list = tables("pull", "na", "DNC.csv").PhoneNumber.astype(float).tolist()
+    dnc_list = tables("pull", "na", "DNC.csv").PhoneNumber.astype(float).astype(str).tolist()
     df = create_skill(df, "Remove_DNC", ["PhoneNumber",".isin", dnc_list])
     return df
 
@@ -88,9 +90,9 @@ def load_filters():
 
 def complex_skills(df):
     df.Skill = "CC_ChartFinder"
+    df = dnc(df)
     df = CC_Genpact_Scheduling(df)
     df = MasterSiteId(df)
     for name, filters in load_filters().items():
         df = create_skill(df, name, filters)
-    df = dnc(df)
     return df
