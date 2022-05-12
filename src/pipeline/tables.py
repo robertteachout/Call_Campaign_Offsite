@@ -18,6 +18,14 @@ LOAD_PATH = paths / "data/load"
 
 Bus_day = Business_Days()
 
+def asm_fall_out(df, file):
+    with ZipFile(Path("data/extract") / file, "r") as zip:
+        file_name = zip.namelist()[0]
+        with zip.open(file_name) as raw_file:
+            all_orgs = set([int(line[:8]) for line in raw_file if line[:8] != b'Outreach'])
+    missing_orgs = list( all_orgs.difference(set(df.OutreachID)) )
+    df_missing = pd.DataFrame(list(missing_orgs), columns=['OutreachID'])
+    tables('push', df_missing, f'missing_orgs.csv')
 
 def save_locally(scored, log_contact='y'):
     ### save file
