@@ -57,7 +57,7 @@ def read_compressed(file_path, sep):
                 file_name = zip.namelist()[0]
                 with zip.open(file_name, "r") as file:
                     return csv.read_csv(
-                        file, parse_options=csv.ParseOptions(delimiter=sep)
+                        file, parse_options=csv.ParseOptions(delimiter=sep, quote_char=False)
                     ).to_pandas()
         case "gz":
             return csv.read_csv(file_path).to_pandas()
@@ -88,7 +88,7 @@ def compressed_files(filename, path=Path(LOAD_PATH), table="read", sep=","):
             return read_compressed(extract_path, sep)
         except:
             print("slow")
-            return pd.read_csv(extract_path, sep=sep, on_bad_lines='skip', engine="python")
+            return pd.read_csv(extract_path, sep=sep, engine="python", quoting=3)
 
     elif isinstance(table, pd.DataFrame):
         try:
