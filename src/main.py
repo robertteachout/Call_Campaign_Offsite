@@ -1,3 +1,6 @@
+import os
+from pathlib import Path
+
 import pandas as pd
 
 import log.log as log
@@ -8,8 +11,8 @@ import server.connections
 import server.insert
 import server.queries.fax_date
 import server.queries.MasterSiteId
-from pipeline.tables import (compressed_files, extract_file_name, save_locally,
-                             tables)
+from pipeline.tables import (asm_fall_out, compressed_files, extract_file_name,
+                             save_locally, tables)
 from pipeline.utils import Business_Days, daily_piv, time_check, x_Bus_Day_ago
 
 Bus_day = Business_Days()
@@ -47,12 +50,14 @@ def main(test="n", msid="n", sample="n"):
     # update fax query if needed
     try:
         # read if current date
-        fax = pd.read_csv(f"data/fax_data/{Bus_day.today_str}.csv")
+        fax = pd.read_csv(f"data/table_drop/fax_data_{Bus_day.today_str}.csv")
     except:
         # update & save
         fax_sql = server.queries.fax_date.sql()
         fax = pd.read_sql(fax_sql, dw_engine)
-        fax.to_csv(f"data/fax_data/{Bus_day.today_str}.csv", index=False)
+        rm_file = list(Path("data/table_drop").glob("fax_data_*"))[0]
+        if os.path.exists(rm_file) : os.remove(rm_file)
+        fax.to_csv(f"data/table_drop/fax_data_{Bus_day.today_str}.csv", index=False)
 
     # merge new element 
     mapped = pd.merge(mapped, fax, how="left", on="OutreachID")
@@ -81,6 +86,7 @@ def main(test="n", msid="n", sample="n"):
         save_locally(scored, log_contact='n')
 
     if test == "Pass":
+        asm_fall_out(load, filename)
         save_locally(scored)
         time_check(Bus_day.now, "Save files")
         server.insert.server_insert(scored, table, dw_engine, x_Bus_Day_ago(10))
