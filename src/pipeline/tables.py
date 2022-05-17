@@ -1,4 +1,5 @@
 import re
+import os
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -18,6 +19,20 @@ LOAD_PATH = paths / "data/load"
 
 Bus_day = Business_Days()
 
+def get_sql_data(local_name, sql, sql_engine) -> pd.DataFrame:
+    # update fax query if needed
+    try:
+        # read if current date
+        fax = tables('pull', 'na', f"{local_name}_{Bus_day.today_str}.csv")
+    except:
+        # update & save
+        fax = pd.read_sql(sql, sql_engine)
+        if rm_files := list( TABLE_PATH.glob(f"{local_name}_*") ):
+            for file in rm_files:
+                os.remove(file)
+        tables('push', fax, f"{local_name}_{Bus_day.today_str}.csv")
+    return fax
+
 def asm_fall_out(df, file):
     with ZipFile(Path("data/extract") / file, "r") as zip:
         file_name = zip.namelist()[0]
@@ -26,6 +41,7 @@ def asm_fall_out(df, file):
     missing_orgs = list( all_orgs.difference(set(df.OutreachID)) )
     df_missing = pd.DataFrame(list(missing_orgs), columns=['OutreachID'])
     tables('push', df_missing, f'missing_orgs.csv')
+    print('-'*10, "Missing OutreachIDs: ",len(df_missing), '-'*10)
 
 def save_locally(scored, log_contact='y'):
     ### save file
