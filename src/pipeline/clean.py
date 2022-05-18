@@ -114,7 +114,7 @@ def add_columns(df, tomorrow_str):
     f3 = df.project_year_due_date == 2023
 
     df['chartsync_filter'] = np.where(f1 & f2, 1, 0)
-    df['chartsync_filter'] = np.where(f1 & f3, 2, 0)
+    df['chartsync_filter'] = np.where(f1 & f3, 2, df.chartsync_filter)
     # no call flag
     f1 = df.Last_Call.isna()
     df["no_call"] = np.where(f1, 1, 0)
