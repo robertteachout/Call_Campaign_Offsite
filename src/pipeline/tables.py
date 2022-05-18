@@ -1,5 +1,5 @@
 import re
-import os
+import os, sys
 from pathlib import Path
 from zipfile import ZipFile
 
@@ -55,12 +55,16 @@ def save_locally(scored, log_contact='y'):
 
 def extract_file_name(test):
     extract = Path("data/extract")
-    if test == "y":
-        file_search = str(f'Call_Campaign_v4_{Bus_day.yesterday.strftime("%m%d")}*')
-    else:
-        file_search = str(f'Call_Campaign_v4_{Bus_day.today.strftime("%m%d")}*')
+    try:
+        if test == "y":
+            file_match = os.listdir(extract)[-1]
+        else:
+            file_search = str(f'Call_Campaign_v4_{Bus_day.today.strftime("%m%d")}*')
+            file_match = list(extract.glob(file_search))[0]
+    except:
+        print('\n\tNo file found: data/extract')
+        sys.exit()
 
-    file_match = list(extract.glob(file_search))[0]
     file_name = re.split(r"\\|\/",str(file_match))[-1]
     return extract, file_name
 
