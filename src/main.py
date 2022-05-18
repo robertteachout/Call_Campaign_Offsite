@@ -1,6 +1,3 @@
-import os
-from pathlib import Path
-
 import pandas as pd
 
 import log.log as log
@@ -12,7 +9,7 @@ import server.insert
 import server.queries.fax_date
 import server.queries.MasterSiteId
 from pipeline.tables import (asm_fall_out, compressed_files, extract_file_name,
-                             save_locally, tables, get_sql_data)
+                             get_sql_data, save_locally, tables)
 from pipeline.utils import Business_Days, daily_piv, time_check, x_Bus_Day_ago
 
 Bus_day = Business_Days()
