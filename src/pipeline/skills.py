@@ -74,7 +74,8 @@ def CC_Genpact_Scheduling(df):
     f1 = df.Retrieval_Team == "Genpact Offshore"
     f2 = df.project_year_due_date == 2022
     f3 = df.Skill != "Remove_DNC"
-    orgs = df[f1 & f2 & f3].sort_values("age", ascending=False).reset_index().OutreachID.tolist()[:3500]
+    f4 = df.no_call == 1
+    orgs = df[f1 & f2 & f3 & f4].sort_values("age", ascending=False).reset_index().OutreachID.tolist()[:3500]
     df = create_skill(df, "CC_Genpact_Scheduling", ["OutreachID",".isin", orgs])
     return df
 
