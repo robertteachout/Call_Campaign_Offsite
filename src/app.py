@@ -2,7 +2,7 @@ import pandas as pd
 import streamlit as st
 
 from front_end import sidebar
-from pipeline.business_prioirty import ciox_busines_lines, write_json
+from pipeline.business_prioirty import company_busines_lines, write_json
 from pipeline.tables import compressed_files, extract_file_name
 from pipeline.utils import Business_Days
 
@@ -11,7 +11,7 @@ Bus_day = Business_Days()
 extract, filename = extract_file_name('y')
 load = compressed_files(filename, path=extract, sep="|").rename(columns=lambda x: x.replace(" ", "_"))
 # saved user input
-inputs = ciox_busines_lines()
+inputs = company_busines_lines()
 # get skills & projects apart of the file
 ls_skill = [line.skill for line in inputs]
 

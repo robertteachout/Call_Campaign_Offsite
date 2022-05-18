@@ -33,7 +33,7 @@ What this file does:
 
 ## Run
 0. Drop ASM zip file into .\data\extract
-1. Log in to CIOX VPN
+1. Log in to company VPN
 2. Open cmd, navigate to the project root & run command:
 ```cmd
 run.bat
@@ -68,7 +68,7 @@ run.bat
 
 ## New_sprints:
 0. Track 10-day sprint
-1. Find next 10 business days, CIOX custom holiday calendar
+1. Find next 10 business days, company custom holiday calendar
 2. Find unique phone #'s from the current campaign 
 3. Sort by project audit type
 4. Create 5 & 10-day sprints based on audit type inventory

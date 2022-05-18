@@ -36,8 +36,8 @@ def daily_piv(df):
                 ).round(1)
         )
 
-### CIOX Business Calender
-class CioxHoliday(AbstractHolidayCalendar):
+### company Business Calender
+class CompanyHoliday(AbstractHolidayCalendar):
     rules = [
         Holiday("NewYearsDay", month=1, day=1, observance=nearest_workday),
         USMartinLutherKingJr,
@@ -50,14 +50,14 @@ class CioxHoliday(AbstractHolidayCalendar):
     ]
 
 
-ciox_holidays = CioxHoliday()
+company_holidays = CompanyHoliday()
 today = date.today()
 ONE_DAY = timedelta(days=1)
 
 
 def next_business_day(start):
     next_day = start + ONE_DAY
-    holidays = ciox_holidays.holidays(today, today + timedelta(days=1 * 365)).values
+    holidays = company_holidays.holidays(today, today + timedelta(days=1 * 365)).values
     while next_day.weekday() >= 5 or next_day in holidays:
         next_day += ONE_DAY
     return next_day
@@ -65,7 +65,7 @@ def next_business_day(start):
 
 def last_business_day(start):
     next_day = start - ONE_DAY
-    holidays = ciox_holidays.holidays(today, today + timedelta(days=1 * 365)).values
+    holidays = company_holidays.holidays(today, today + timedelta(days=1 * 365)).values
     while next_day.weekday() >= 5 or next_day in holidays:
         next_day -= ONE_DAY
     return next_day

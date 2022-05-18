@@ -33,7 +33,7 @@ def write_json(output):
     with open(CONFIG_PATH / f"{bus_day.today_str}.json",'w') as file:
         json.dump(output, file, indent=4)
 
-def ciox_busines_lines() -> list[Business_Line]:
+def company_busines_lines() -> list[Business_Line]:
     try:
         custom_skills = os.listdir(CONFIG_PATH / "custom_skills")
         data = read_json(f"custom_skills/{max(custom_skills)}")

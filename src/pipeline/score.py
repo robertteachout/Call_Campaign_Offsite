@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 
-from .business_prioirty import ciox_busines_lines
+from .business_prioirty import company_busines_lines
 from .user_input import load_custom_skills
 from .utils import join_tables
 
@@ -64,7 +64,7 @@ def scored_inventory(df):
     custom_inventory = inventory[inventory.Skill == split].copy()
     # if data available in business_lines.json load into scoring logic
     
-    business = ciox_busines_lines()
+    business = company_busines_lines()
     business.reverse()
     if isinstance(business, list):
         custom_inventory = load_custom_skills(custom_inventory, business)
