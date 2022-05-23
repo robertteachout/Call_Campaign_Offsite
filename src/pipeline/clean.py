@@ -32,7 +32,7 @@ def clean_num(df):
     return df
 
 
-def Last_Call(df, tomorrow_str):
+def last_call(df, tomorrow_str):
     df.drop("Age", axis=1, inplace=True)
     # create table of unique dates
     lc_df = df[df.Last_Call.notna()].copy()
@@ -53,7 +53,7 @@ def Last_Call(df, tomorrow_str):
 def check_load(df, today):
     df["Last Call"] = pd.to_datetime(df["Last Call"], errors="coerce")  # .dt.date
     test_results = (
-        "Pass" if any(df["Last Call"] == today.strftime("%Y-%m-%d")) else "Fail"
+        "Pass" if any(df["Last Call"] == today) else "Fail"
     )
     return df, test_results
 
@@ -132,7 +132,7 @@ def add_columns(df, tomorrow_str):
 def clean(df, tomorrow_str):
     f = format(df)
     cn = clean_num(f)
-    lc = Last_Call(cn, tomorrow_str).reset_index(drop=True)
+    lc = last_call(cn, tomorrow_str)
 
     new_col = add_columns(lc, tomorrow_str)
     return new_col
