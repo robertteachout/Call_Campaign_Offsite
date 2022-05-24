@@ -47,24 +47,14 @@ def create_skill(df, new_skill:str, filters:list):
     clean_filter = list_to_string(filters)
     df.Skill = np.where(query_df(df, clean_filter), new_skill, df.Skill)
     return df
-    
-def MasterSiteId(df):
-    f0 = df.SPI == False
-    f1 = df["Outreach_Status"] != "Scheduled"
-    f2 = df.age > 10
-    msid = df[f0 & (f1 | f2)].sort_values("ToGoCharts", ascending=True).reset_index().MasterSiteId.unique()[:550]
-    msid = [int(i) for i in list(msid) if int(i) != 1000838]
-        
-
-    df = create_skill(df, "CC_Cross_Reference", ["MasterSiteId",".isin", msid])
-    return df
 
 def MasterSiteId(df):
     f0 = df.SPI == False
     f1 = df["Outreach_Status"] != "Scheduled"
     f2 = df.age > 10
     f3 = df.Skill != "Remove_DNC"
-    msid = df[f0 & (f1 | f2) & f3].sort_values("ToGoCharts", ascending=True).reset_index().MasterSiteId.unique()[:550]
+    f4 = df.Skill != "CC_Cross_Reference"
+    msid = df[f0 & (f1 | f2) & f3 & f4].sort_values("ToGoCharts", ascending=True).reset_index().MasterSiteId.unique()[:550]
     msid = [int(i) for i in list(msid) if int(i) != 1000838]
 
     df = create_skill(df, "CC_Cross_Reference", ["MasterSiteId",".isin", msid])
@@ -74,8 +64,7 @@ def CC_Genpact_Scheduling(df):
     f1 = df.Retrieval_Team == "Genpact Offshore"
     f2 = df.project_year_due_date == 2022
     f3 = df.Skill != "Remove_DNC"
-    f4 = df.no_call == 1
-    orgs = df[f1 & f2 & f3 & f4].sort_values("age", ascending=False).reset_index().OutreachID.tolist()[:3500]
+    orgs = df[f1 & f2 & f3].sort_values("age", ascending=False).reset_index().OutreachID.tolist()[:4000]
     df = create_skill(df, "CC_Genpact_Scheduling", ["OutreachID",".isin", orgs])
     return df
 
