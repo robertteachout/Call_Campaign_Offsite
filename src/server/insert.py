@@ -61,7 +61,7 @@ def sql_insert(load, engine: sqlalchemy.engine, table):
     ### Load file ###
     t0 = time.time()
     ### Add today's file #
-    load.to_sql(table, engine, index=False, if_exists="append")
+    load.to_sql(table, engine, index=False, if_exists="append", schema='dbo')
     print(f"Inserts completed in {time.time() - t0:.2f} seconds.")
 
 
